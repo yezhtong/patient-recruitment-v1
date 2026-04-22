@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#050807" />
+<title>社区审核 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+<style>
+  .review-item {
+    background: #0f1614;
+    border: 1px solid #1a201d;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 14px;
+  }
+  .review-item__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .review-item__author {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: #6e776f;
+  }
+  .review-item__author .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #1a201d;
+    color: #b3bdb6;
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .review-item__author strong { color: #fbf6ec; font-family: var(--font-sans); text-transform: none; letter-spacing: -.01em; font-size: var(--fs-sm); }
+  .review-item__title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    color: #fbf6ec;
+    font-size: 22px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .review-item__excerpt {
+    color: #b3bdb6;
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+  }
+  .review-item__meta {
+    display: flex;
+    gap: 14px;
+    color: #6e776f;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .review-item__actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed #1a201d;
+    flex-wrap: wrap;
+  }
+  .risk-tag {
+    background: rgba(220,38,38,.15);
+    color: #ffaa9a;
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    border: 1px solid rgba(220,38,38,.3);
+  }
+  .risk-tag.--warn { background: rgba(201,122,20,.15); color: #ffc78c; border-color: rgba(201,122,20,.3); }
+</style>
+</head>
+<body class="admin">
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="admin-shell">
+  <aside class="admin-side">
+    <div class="admin-side__brand"><div class="brand__logo">JT</div><span translate="no">临研运营台</span></div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="leads.html"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="community-moderation.html" aria-current="page"><span class="admin-nav__icon">⛨</span>社区审核</a>
+      <div class="admin-nav__group">内容管理</div>
+      <a href="trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="prescreen-form.html"><span class="admin-nav__icon">▤</span>预筛表单</a>
+      <a href="#"><span class="admin-nav__icon">❡</span>FAQ 管理</a>
+      <a href="#"><span class="admin-nav__icon">◐</span>社区分区</a>
+      <div class="admin-nav__group">数据与系统</div>
+      <a href="#"><span class="admin-nav__icon">▥</span>基础统计</a>
+      <a href="#"><span class="admin-nav__icon">⚙</span>系统配置</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb"><a href="dashboard.html">工作台</a> / <strong>社区审核</strong></div>
+      <div class="admin-topbar__right">
+        <div class="admin-search"><input type="search" placeholder="搜索…" /></div>
+        <div class="admin-avatar">Z</div>
+      </div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--lime);text-transform:uppercase;">★ Moderation</span>
+          <h2 style="margin-top:14px;">社区审核</h2>
+          <p class="page-head__sub">待审核 17 条 · 帖子 11 · 评论 6 · 平均处理时长 8 分钟</p>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost">📊 审核数据</button>
+          <button class="btn btn--ghost">⚙ 敏感词配置</button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tabs__item" aria-selected="true">待审核 (17)</div>
+        <div class="tabs__item">已通过 (1,248)</div>
+        <div class="tabs__item">已驳回 (32)</div>
+        <div class="tabs__item">已隐藏 (8)</div>
+        <div class="tabs__item">★ 精选 (24)</div>
+      </div>
+
+      <div class="toolbar">
+        <select class="select"><option>全部内容类型</option><option>仅帖子</option><option>仅评论</option></select>
+        <select class="select"><option>全部社区</option></select>
+        <select class="select"><option>全部风险</option><option>有联系方式</option><option>有售药嫌疑</option></select>
+        <select class="select"><option>提交时间倒序</option></select>
+      </div>
+
+      <div class="alert alert--danger">
+        <span class="alert__icon">🚨</span>
+        <div><strong>2 条高风险内容需优先处理</strong> — 涉及联系方式外露与售药嫌疑，建议立即审核。</div>
+      </div>
+
+      <article class="review-item" style="border-left:3px solid var(--danger-500);">
+        <div class="review-item__head">
+          <div>
+            <div class="review-item__author"><div class="avatar">李</div><span><strong>李女士</strong> · 04-18 13:02 · 帖子</span></div>
+            <div class="review-item__title" style="margin-top:14px;">想买 XX 药，有渠道吗？请加微信 <span class="risk-tag" style="font-size:10px;margin-left:6px;">🚨 联系方式</span> <span class="risk-tag" style="font-size:10px;">🚨 售药</span></div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="tag">乳腺癌</span>
+            <span class="badge badge--plain">提问</span>
+          </div>
+        </div>
+        <div class="review-item__excerpt">最近想买 XX 靶向药但医院断货了，有没有姐妹有渠道？我的微信号是 ████████，麻烦私信我，价格好商量，谢谢…</div>
+        <div class="review-item__meta">
+          <span>📌 乳腺癌患者圈</span>
+          <span>👁 0 浏览（待审核）</span>
+          <span>🛡 风险评分：<strong style="color:#ffaa9a;">高</strong></span>
+        </div>
+        <div class="review-item__actions">
+          <button class="btn btn--danger btn--sm">驳回（违规）</button>
+          <button class="btn btn--ghost btn--sm">隐藏</button>
+          <button class="btn btn--ghost btn--sm">⚠ 警告作者</button>
+          <button class="btn btn--text" style="font-size:11px;margin-left:auto;">查看作者历史 →</button>
+        </div>
+      </article>
+
+      <article class="review-item">
+        <div class="review-item__head">
+          <div>
+            <div class="review-item__author"><div class="avatar">匿</div><span><strong>匿名病友</strong> · 04-18 12:48 · 帖子</span></div>
+            <div class="review-item__title" style="margin-top:14px;">HER2+ 早期乳腺癌患者的真实经验：从确诊到入组试验的 90 天</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="tag">乳腺癌</span>
+            <span class="badge badge--plain">经验分享</span>
+          </div>
+        </div>
+        <div class="review-item__excerpt">3 个月前刚被确诊 HER2 阳性早期乳腺癌，当时整个人都懵了。后来在这个社区看到一个姐妹分享的经验，说她参加了一项靶向药的临床试验，让我对"临床试验"有了新的认知…</div>
+        <div class="review-item__meta">
+          <span>📌 乳腺癌患者圈</span>
+          <span>↗ 关联试验：HER2+ 早期乳腺癌</span>
+          <span>🛡 风险评分：<strong style="color:var(--lime);">无风险</strong></span>
+        </div>
+        <div class="review-item__actions">
+          <button class="btn btn--primary btn--sm">通过</button>
+          <button class="btn btn--ghost btn--sm" style="background:rgba(255,90,31,.15);color:#ffb494;border-color:rgba(255,90,31,.3);">★ 通过并精选</button>
+          <button class="btn btn--ghost btn--sm">驳回</button>
+          <button class="btn btn--ghost btn--sm">隐藏</button>
+          <button class="btn btn--text" style="font-size:11px;margin-left:auto;">查看完整 →</button>
+        </div>
+      </article>
+
+      <article class="review-item">
+        <div class="review-item__head">
+          <div>
+            <div class="review-item__author"><div class="avatar">王</div><span><strong>王女士</strong> · 04-18 11:32 · 评论</span></div>
+            <div class="review-item__title" style="margin-top:14px;">回复《HER2+ 早期乳腺癌患者的真实经验》</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="tag">乳腺癌</span>
+            <span class="badge badge--plain">评论</span>
+          </div>
+        </div>
+        <div class="review-item__excerpt">谢谢分享，我妈妈也是 HER2+，这个帖子帮我看清楚了流程，准备让她也试试预筛。请问医院的报销情况怎么样？</div>
+        <div class="review-item__meta">
+          <span>📌 来源：post #2049</span>
+          <span>🛡 风险评分：<strong style="color:var(--lime);">无风险</strong></span>
+        </div>
+        <div class="review-item__actions">
+          <button class="btn btn--primary btn--sm">通过</button>
+          <button class="btn btn--ghost btn--sm">驳回</button>
+          <button class="btn btn--ghost btn--sm">隐藏</button>
+        </div>
+      </article>
+
+      <article class="review-item" style="border-left:3px solid var(--warning-500);">
+        <div class="review-item__head">
+          <div>
+            <div class="review-item__author"><div class="avatar">赵</div><span><strong>赵xx</strong> · 04-18 10:15 · 帖子 <span class="risk-tag --warn">⚠ 偏离</span></span></div>
+            <div class="review-item__title" style="margin-top:14px;">推荐一个超好用的减肥神器，瘦了 20 斤！</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="tag">糖尿病</span>
+            <span class="badge badge--plain">经验分享</span>
+          </div>
+        </div>
+        <div class="review-item__excerpt">最近发现一个特别好用的瘦身产品，3 个月瘦了 20 斤，糖尿病的姐妹也可以试试，效果惊人…</div>
+        <div class="review-item__meta">
+          <span>📌 糖尿病患者圈</span>
+          <span>🛡 风险评分：<strong style="color:#ffc78c;">中</strong>（与社区主题无关）</span>
+        </div>
+        <div class="review-item__actions">
+          <button class="btn btn--ghost btn--sm">通过</button>
+          <button class="btn btn--danger btn--sm">驳回（招募无关）</button>
+          <button class="btn btn--ghost btn--sm">隐藏</button>
+        </div>
+      </article>
+
+      <article class="review-item">
+        <div class="review-item__head">
+          <div>
+            <div class="review-item__author"><div class="avatar">刘</div><span><strong>刘女士</strong> · 04-18 09:48 · 帖子</span></div>
+            <div class="review-item__title" style="margin-top:14px;">刚做完 PD-L1 试验第一个周期，跟大家分享一下感受</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="tag">乳腺癌</span>
+            <span class="badge badge--plain">经验分享</span>
+          </div>
+        </div>
+        <div class="review-item__excerpt">参加了 PD-L1 联合化疗的试验，第一个周期已经做完。整体感受还可以，副作用主要是疲劳和轻微的食欲下降，护士姐姐们都很专业…</div>
+        <div class="review-item__meta">
+          <span>📌 乳腺癌患者圈</span>
+          <span>↗ 关联试验：PD-L1 联合化疗</span>
+          <span>🛡 风险评分：<strong style="color:var(--lime);">无风险</strong></span>
+        </div>
+        <div class="review-item__actions">
+          <button class="btn btn--primary btn--sm">通过</button>
+          <button class="btn btn--ghost btn--sm" style="background:rgba(255,90,31,.15);color:#ffb494;border-color:rgba(255,90,31,.3);">★ 通过并精选</button>
+          <button class="btn btn--ghost btn--sm">驳回</button>
+        </div>
+      </article>
+
+      <p style="text-align:center;margin-top:32px;font-family:var(--font-mono);font-size:11px;color:#6e776f;letter-spacing:.04em;">已显示 5 条 · 加载更多 (12)</p>
+    </main>
+  </div>
+</div>
+</body>
+</html>

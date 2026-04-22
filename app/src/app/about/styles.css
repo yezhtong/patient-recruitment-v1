@@ -1,0 +1,164 @@
+  /* 局部布局 */
+  .about-hero { padding: 80px 0 48px; border-bottom: var(--border-strong); }
+  .about-hero h1 { font-size: clamp(56px, 8vw, 112px); margin-bottom: 24px; }
+  .about-hero p { color: var(--gray-600); font-size: var(--fs-xl); max-width: 56ch; line-height: 1.5; }
+
+  .toc {
+    position: sticky;
+    top: 100px;
+    padding: 28px 0;
+  }
+  .toc__title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ink-200);
+  }
+  .toc__list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .toc__list a {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    color: var(--gray-700);
+    font-size: var(--fs-sm);
+    border-bottom: 1px solid var(--ink-100);
+  }
+  .toc__list a:hover { color: var(--accent); text-decoration: none; }
+  .toc__list a span:first-child { font-family: var(--font-mono); font-size: 10px; color: var(--gray-400); letter-spacing: .04em; flex-shrink: 0; margin-right: 14px; }
+  .toc__list a strong { font-weight: 500; flex: 1; font-family: var(--font-sans); }
+
+  .about-grid { display: grid; grid-template-columns: 240px 1fr; gap: 96px; align-items: start; padding: 64px 0 96px; }
+  @media (max-width: 960px) { .about-grid { grid-template-columns: 1fr; gap: 48px; } .toc { position: static; } }
+
+  .doc-section { padding-bottom: 80px; margin-bottom: 80px; border-bottom: 1px solid var(--ink-200); }
+  .doc-section:last-child { border-bottom: none; margin-bottom: 0; }
+  .doc-section .num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .12em;
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+  .doc-section h2 {
+    font-size: clamp(36px, 5vw, 64px);
+    margin-bottom: 32px;
+    max-width: 22ch;
+  }
+  .doc-section p { color: var(--gray-700); font-size: var(--fs-lg); line-height: 1.8; margin-bottom: 18px; max-width: 64ch; }
+  .doc-section h3 { font-family: var(--font-serif); font-size: 28px; font-weight: 400; margin: 40px 0 14px; letter-spacing: -.01em; }
+  .doc-section .lead {
+    font-family: var(--font-serif);
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.4;
+    color: var(--ink-900);
+    font-style: italic;
+    margin-bottom: 32px;
+    max-width: 36ch;
+  }
+
+  /* 阶段流程 */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: var(--border-strong);
+    margin-top: 32px;
+  }
+  @media (max-width: 700px) { .phase-grid { grid-template-columns: 1fr 1fr; } }
+  .phase {
+    padding: 28px;
+    border-right: var(--border-strong);
+    border-bottom: var(--border-strong);
+  }
+  .phase:last-child { border-right: none; }
+  .phase__num { font-family: var(--font-serif); font-size: 56px; line-height: 1; color: var(--ink-200); letter-spacing: -.03em; margin-bottom: 12px; }
+  .phase__title { font-family: var(--font-serif); font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+  .phase__sub { color: var(--gray-600); font-size: var(--fs-sm); line-height: 1.6; }
+
+  /* 数字保障 */
+  .safety-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border-top: var(--border-strong);
+    border-left: var(--border-strong);
+  }
+  @media (max-width: 700px) { .safety-grid { grid-template-columns: 1fr; } }
+  .safety {
+    padding: 36px;
+    border-right: var(--border-strong);
+    border-bottom: var(--border-strong);
+  }
+  .safety__id { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: .12em; margin-bottom: 12px; }
+  .safety h4 { font-family: var(--font-serif); font-size: 26px; font-weight: 400; margin-bottom: 12px; letter-spacing: -.01em; }
+  .safety p { color: var(--gray-700); font-size: var(--fs-md); line-height: 1.7; margin: 0; }
+
+  /* FAQ 折叠 */
+  details.q { border-bottom: 1px solid var(--ink-200); padding: 24px 0; }
+  details.q summary { cursor: pointer; font-family: var(--font-serif); font-size: 26px; color: var(--ink-900); list-style: none; display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+  details.q summary::after { content: "+"; font-family: var(--font-mono); color: var(--accent); font-size: 28px; transition: transform .25s var(--ease-out); flex-shrink: 0; line-height: 1.2; }
+  details.q[open] summary::after { transform: rotate(45deg); }
+  details.q summary::-webkit-details-marker { display: none; }
+  details.q .answer { padding: 16px 0 4px; color: var(--gray-700); line-height: 1.8; font-size: var(--fs-md); max-width: 64ch; }
+  details.q .answer p { margin-bottom: 14px; }
+  details.q .answer ul { padding-left: 22px; line-height: 1.9; }
+
+  /* 时间线 */
+  .timeline-block { display: flex; flex-direction: column; gap: 0; margin-top: 32px; }
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    padding: 24px 0;
+    border-top: 1px solid var(--ink-200);
+  }
+  .timeline-row:last-child { border-bottom: 1px solid var(--ink-200); }
+  .timeline-row__year { font-family: var(--font-serif); font-size: 32px; color: var(--accent); line-height: 1; }
+  .timeline-row__title { font-family: var(--font-serif); font-size: 22px; margin-bottom: 6px; }
+  .timeline-row__sub { color: var(--gray-600); font-size: var(--fs-md); line-height: 1.6; }
+
+  .pull-quote {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    padding: 56px 48px;
+    border-radius: var(--r-2xl);
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .pull-quote__deco {
+    position: absolute;
+    top: 12px; left: 28px;
+    font-family: var(--font-serif);
+    font-size: 200px;
+    line-height: 1;
+    color: rgba(200,255,74,.1);
+  }
+  .pull-quote p {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: clamp(28px, 3.5vw, 42px);
+    line-height: 1.3;
+    color: var(--cream-50);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    max-width: 28ch;
+  }
+  .pull-quote cite {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-top: 24px;
+    display: block;
+    position: relative;
+    z-index: 1;
+  }

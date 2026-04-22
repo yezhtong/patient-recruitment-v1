@@ -1,0 +1,315 @@
+// 九泰临研 V1 数据模型 — PostgreSQL 版
+// 切换方式：tsx scripts/switch-db.ts postgresql
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// F2 试验管理：试验主表
+model ClinicalTrial {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  disease         String
+  city            String
+  phase           String?
+  status          String   @default("recruiting")
+  isPublic        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  summary         String
+  description     String?  @db.Text
+  inclusionBrief  String?  @db.Text
+  exclusionBrief  String?  @db.Text
+
+  sponsor          String?
+  intervention     String?
+  studyDesign      String?  @db.Text
+  targetEnrollment Int?
+  siteName         String?
+  siteAddress      String?
+  contactPerson    String?
+  contactPhone     String?
+  benefits         String?  @db.Text
+  followUpPlan     String?  @db.Text
+  adVersion        String?
+  adVersionDate    DateTime?
+  ethicsApproval   String?
+  qrcodeUrl        String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  leads           Lead[]
+  applications    Application[] @relation("TrialApplications")
+  communityPosts  CommunityPost[] @relation("TrialPosts")
+
+  @@index([status, isPublic])
+  @@index([disease])
+}
+
+// F3 线索池：患者提交预筛后生成的线索
+model Lead {
+  id              String   @id @default(cuid())
+  trialId         String
+  trial           ClinicalTrial @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?    @relation("UserLeads", fields: [userId], references: [id])
+
+  name            String
+  phone           String
+  gender          String?
+  age             Int?
+  city            String?
+  condition       String?
+
+  projectAnswers  String?  @db.Text
+
+  agreePrivacy    Boolean  @default(false)
+  agreeReuse      Boolean  @default(false)
+
+  sourcePage      String?
+  sourcePostId    String?
+
+  status          String   @default("new")
+  statusChangedAt DateTime @default(now())
+  statusChangedBy String?
+  note            String?  @db.Text
+
+  application     Application? @relation("LeadApplication")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([trialId, status])
+  @@index([status, createdAt])
+  @@index([phone])
+  @@index([userId, createdAt])
+}
+
+// B01 后台账号：operator / admin 两档，role 字段区分
+model OperatorUser {
+  id              String   @id @default(cuid())
+  username        String   @unique
+  passwordHash    String
+  displayName     String
+  role            String   @default("operator")
+  status          String   @default("active")
+  lastLoginAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// M6 · 统一审计日志：记录后台关键写操作，便于追溯
+model AuditLog {
+  id                  String   @id @default(cuid())
+  operatorId          String?
+  operatorUsername    String?
+  operatorDisplayName String?
+  operatorRole        String?
+  action              String
+  entityType          String
+  entityId            String?
+  summary             String   @db.Text
+  detailJson          String?  @db.Text
+  createdAt           DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([action, createdAt])
+  @@index([entityType, createdAt])
+  @@index([operatorId, createdAt])
+}
+
+// M3 · 患者账号：手机号唯一
+model User {
+  id              String   @id @default(cuid())
+  phone           String   @unique
+  displayName     String?
+  name            String?
+  gender          String?
+  age             Int?
+  city            String?
+  condition       String?
+  agreeReuse      Boolean  @default(false)
+  lastLoginAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  applications    Application[]
+  leads           Lead[]   @relation("UserLeads")
+  posts           CommunityPost[] @relation("UserPosts")
+  comments        CommunityComment[] @relation("UserComments")
+}
+
+// 短信验证码（一次性，10 分钟有效）
+model SmsCode {
+  id              String   @id @default(cuid())
+  phone           String
+  code            String
+  expiresAt       DateTime
+  consumedAt      DateTime?
+  attempts        Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  @@index([phone, createdAt])
+}
+
+// M5 · 患者社区
+
+model CommunityGroup {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  name          String
+  diseaseTag    String?
+  introduction  String?  @db.Text
+  isEnabled     Boolean  @default(true)
+  sortOrder     Int      @default(100)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  posts         CommunityPost[]
+
+  @@index([isEnabled, sortOrder])
+}
+
+model CommunityPost {
+  id              String   @id @default(cuid())
+  groupId         String
+  group           CommunityGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  authorUserId    String?
+  authorUser      User?    @relation("UserPosts", fields: [authorUserId], references: [id])
+  authorRole      String   @default("patient")
+  isAnonymous     Boolean  @default(false)
+
+  title           String
+  content         String   @db.Text
+  postType        String   @default("question")
+  relatedTrialId  String?
+  relatedTrial    ClinicalTrial? @relation("TrialPosts", fields: [relatedTrialId], references: [id])
+
+  reviewStatus    String   @default("approved")
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  rejectReason    String?
+  isFeatured      Boolean  @default(false)
+
+  viewCount       Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  comments        CommunityComment[]
+  sensitiveHits   CommunitySensitiveHit[] @relation("PostSensitive")
+  moderationLogs  CommunityModerationLog[]
+
+  @@index([groupId, reviewStatus, createdAt])
+  @@index([reviewStatus, createdAt])
+  @@index([isFeatured, createdAt])
+}
+
+model CommunityComment {
+  id            String   @id @default(cuid())
+  postId        String
+  post          CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorUserId  String?
+  authorUser    User?    @relation("UserComments", fields: [authorUserId], references: [id])
+  authorRole    String   @default("patient")
+  isAnonymous   Boolean  @default(false)
+  content       String   @db.Text
+
+  reviewStatus  String   @default("approved")
+  reviewedAt    DateTime?
+  reviewedBy    String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  sensitiveHits CommunitySensitiveHit[] @relation("CommentSensitive")
+
+  @@index([postId, createdAt])
+}
+
+model CommunitySensitiveHit {
+  id          String   @id @default(cuid())
+  postId      String?
+  post        CommunityPost? @relation("PostSensitive", fields: [postId], references: [id], onDelete: Cascade)
+  commentId   String?
+  comment     CommunityComment? @relation("CommentSensitive", fields: [commentId], references: [id], onDelete: Cascade)
+  keyword     String
+  riskType    String
+  riskLevel   String
+  snippet     String   @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([postId])
+  @@index([commentId])
+  @@index([riskType])
+}
+
+model CommunityModerationLog {
+  id          String   @id @default(cuid())
+  postId      String?
+  post        CommunityPost? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId   String?
+  action      String
+  operatorId  String?
+  reason      String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([postId])
+}
+
+// M6 · 敏感词词库（后台化管理）
+model SensitiveWord {
+  id         String   @id @default(cuid())
+  keyword    String   @unique
+  riskType   String
+  riskLevel  String
+  isEnabled  Boolean  @default(true)
+  note       String?  @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([isEnabled, riskLevel])
+}
+
+// M4 · FAQ：患者高频问题
+model FaqArticle {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  question    String
+  answer      String   @db.Text
+  category    String   @default("general")
+  tags        String?
+  order       Int      @default(100)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished, category, order])
+}
+
+// M3 · 我的报名
+model Application {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trialId         String
+  trial           ClinicalTrial @relation("TrialApplications", fields: [trialId], references: [id], onDelete: Cascade)
+  leadId          String?  @unique
+  lead            Lead?    @relation("LeadApplication", fields: [leadId], references: [id])
+
+  stage           String   @default("submitted")
+  stageChangedAt  DateTime @default(now())
+  nextAction      String?
+  note            String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId, createdAt])
+  @@index([trialId, stage])
+}

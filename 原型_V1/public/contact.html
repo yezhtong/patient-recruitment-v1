@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>联系我们 — 九泰临研</title>
+<meta name="description" content="任何关于临床试验的问题，都可以联系九泰临研。电话、微信、邮件，工作时间内人工答复。" />
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  .contact-hero { padding: 80px 0 32px; }
+  .contact-hero h1 { font-size: clamp(56px, 8vw, 112px); margin-bottom: 24px; }
+  .contact-hero p { color: var(--gray-600); font-size: var(--fs-xl); max-width: 56ch; line-height: 1.5; }
+
+  /* 联系方式大卡片网格 */
+  .channels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: var(--border-strong);
+    border-left: var(--border-strong);
+    margin-bottom: 80px;
+  }
+  @media (max-width: 960px) { .channels { grid-template-columns: 1fr; } }
+  .channel {
+    padding: 40px 32px;
+    border-right: var(--border-strong);
+    border-bottom: var(--border-strong);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: transparent;
+    transition: background .3s var(--ease-out), color .3s var(--ease-out);
+    text-decoration: none;
+    color: var(--ink-900);
+    min-height: 280px;
+  }
+  .channel:hover { background: var(--ink-900); color: var(--cream-50); text-decoration: none; }
+  .channel:hover .channel__id { color: var(--lime); }
+  .channel:hover .channel__sub { color: rgba(253,250,243,.7); }
+  .channel:hover .channel__action { color: var(--lime); }
+  .channel__id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .channel__title {
+    font-family: var(--font-serif);
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    margin: auto 0;
+  }
+  .channel__sub { color: var(--gray-600); font-size: var(--fs-md); line-height: 1.5; }
+  .channel__main {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    color: inherit;
+    margin-top: 8px;
+    letter-spacing: .02em;
+  }
+  .channel__action {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* 表单 + 信息两栏 */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 80px;
+    padding: 80px 0;
+    align-items: start;
+  }
+  @media (max-width: 960px) { .contact-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+  .form-card {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-2xl);
+    padding: 48px 48px 40px;
+  }
+  .form-card h3 {
+    font-family: var(--font-serif);
+    font-size: 36px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    letter-spacing: -.01em;
+  }
+  .form-card p.lead { color: var(--gray-600); margin-bottom: 32px; font-size: var(--fs-md); }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .field-row { grid-template-columns: 1fr; } }
+
+  /* 右侧信息块 */
+  .info-block {
+    border-top: var(--border-strong);
+    padding: 32px 0;
+  }
+  .info-block:last-child { border-bottom: var(--border-strong); }
+  .info-block h4 {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .info-block p { color: var(--gray-700); font-size: var(--fs-md); line-height: 1.7; }
+  .info-block .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* 工作时间表 */
+  .hours-table {
+    width: 100%;
+    margin-top: 14px;
+  }
+  .hours-table tr {
+    border-top: 1px solid var(--ink-100);
+  }
+  .hours-table tr:last-child { border-bottom: 1px solid var(--ink-100); }
+  .hours-table td {
+    padding: 12px 0;
+    font-size: var(--fs-sm);
+    color: var(--ink-900);
+  }
+  .hours-table td:first-child {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    width: 40%;
+  }
+  .hours-table td:last-child { text-align: right; font-family: var(--font-mono); font-size: 12px; }
+
+  /* 地图占位 */
+  .map-placeholder {
+    aspect-ratio: 16/9;
+    background:
+      linear-gradient(135deg, var(--ink-100), var(--cream-100)),
+      var(--cream-100);
+    border: var(--border);
+    border-radius: var(--r-xl);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    margin-top: 14px;
+  }
+  .map-placeholder::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, var(--ink-200) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--ink-200) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: .4;
+  }
+  .map-placeholder__pin {
+    position: relative;
+    z-index: 1;
+    background: var(--ink-900);
+    color: var(--cream-50);
+    padding: 14px 20px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-md);
+  }
+  .map-placeholder__pin::before {
+    content: "●";
+    color: var(--accent);
+    font-size: 16px;
+  }
+
+  /* 紧急情况提示 */
+  .urgent {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    padding: 56px 48px;
+    border-radius: var(--r-2xl);
+    margin: 80px 0;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 32px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 700px) { .urgent { grid-template-columns: 1fr; } }
+  .urgent__icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--cream-50);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 36px;
+  }
+  .urgent h3 {
+    color: var(--cream-50);
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 28px;
+    margin-bottom: 8px;
+  }
+  .urgent p { color: rgba(253,250,243,.75); font-size: var(--fs-md); line-height: 1.6; max-width: 56ch; }
+
+  /* 快速跳转 */
+  .quick-help {
+    padding: 80px 0;
+    border-top: var(--border-strong);
+  }
+  .quick-help-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 32px;
+  }
+  @media (max-width: 700px) { .quick-help-grid { grid-template-columns: 1fr; } }
+  .quick-link {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px;
+    border: var(--border);
+    border-radius: var(--r-xl);
+    text-decoration: none;
+    color: var(--ink-900);
+    transition: all .3s var(--ease-out);
+  }
+  .quick-link:hover { border-color: var(--ink-900); transform: translateY(-2px); text-decoration: none; }
+  .quick-link__num { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; color: var(--accent); }
+  .quick-link__title { font-family: var(--font-serif); font-size: 22px; font-weight: 400; line-height: 1.3; }
+  .quick-link__desc { color: var(--gray-600); font-size: var(--fs-sm); line-height: 1.5; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰<em style="font-style:italic;color:var(--accent);">临研</em></span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html">找试验</a>
+      <a href="my-applications.html">我的报名</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html" aria-current="page">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="auth.html" style="border:none;font-size:var(--fs-sm);">登录</a>
+      <a class="btn btn--ink btn--sm" href="trials.html">开始找试验 <span class="arrow">→</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="contact-hero">
+    <div class="container">
+      <span class="eyebrow">★ 任何疑问都可以问</span>
+      <h1 style="margin-top:18px;">不用<em>独自</em><br />做这个决定</h1>
+      <p>电话、微信、邮件，三种方式都可以联系到真人。我们工作时间内通常 1-2 小时内回复。</p>
+    </div>
+  </section>
+
+  <section class="section--tight" style="padding-top:32px;">
+    <div class="container">
+      <!-- 三个主联系方式 -->
+      <div class="channels">
+        <a href="tel:4006789000" class="channel">
+          <span class="channel__id">/ 01 客服热线</span>
+          <h3 class="channel__title">打个<br />电话</h3>
+          <div>
+            <div class="channel__sub">最快、最直接的方式。工作时间内有专人接听。</div>
+            <div class="channel__main">400-678-9000</div>
+          </div>
+          <div class="channel__action"><span>立即拨打</span><span>→</span></div>
+        </a>
+
+        <a href="#wechat" class="channel">
+          <span class="channel__id">/ 02 微信</span>
+          <h3 class="channel__title">扫码<br />加微信</h3>
+          <div>
+            <div class="channel__sub">想慢慢说？加我们的客服微信，文字、语音、图片都可以。</div>
+            <div class="channel__main">JiuTai_Care</div>
+          </div>
+          <div class="channel__action"><span>查看二维码</span><span>→</span></div>
+        </a>
+
+        <a href="mailto:hello@jiutai-cro.com" class="channel">
+          <span class="channel__id">/ 03 邮件</span>
+          <h3 class="channel__title">发<br />邮件</h3>
+          <div>
+            <div class="channel__sub">复杂问题、希望书面回复，发邮件最合适。</div>
+            <div class="channel__main">hello@jiutai-cro.com</div>
+          </div>
+          <div class="channel__action"><span>发送邮件</span><span>→</span></div>
+        </a>
+      </div>
+
+      <!-- 表单 + 信息两栏 -->
+      <div class="contact-grid">
+        <!-- 左：留言表单 -->
+        <div class="form-card">
+          <span class="eyebrow">给我们留言</span>
+          <h3 style="margin-top:14px;">说说你的<em style="color:var(--accent);font-style:italic;">疑问</em></h3>
+          <p class="lead">填一下表单，我们会在 24 小时内通过你留下的方式联系你。</p>
+
+          <form data-prototype data-success-msg="留言已提交，24 小时内会回电">
+            <div class="field-row">
+              <div class="form-field">
+                <label class="form-field__label" for="c-name">称呼 <span class="required">*</span></label>
+                <input class="input" id="c-name" type="text" autocomplete="name" placeholder="如：王女士" required />
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="c-phone">手机号 <span class="required">*</span></label>
+                <input class="input" id="c-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="如：13800000000" required />
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="c-topic">想咨询的方向 <span class="required">*</span></label>
+              <select class="select" id="c-topic" required>
+                <option value="">请选一个…</option>
+                <option>想找具体某个病种的项目</option>
+                <option>不确定自己适不适合参加</option>
+                <option>已经报名了，想问进展</option>
+                <option>对临床试验本身有疑问</option>
+                <option>想退出已报名的项目</option>
+                <option>媒体合作 / 其他咨询</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label" for="c-message">详细情况</label>
+              <textarea class="textarea" id="c-message" rows="5" placeholder="多说几句你的情况，方便我们更好地帮你（可选）"></textarea>
+              <p class="form-field__hint">不知道怎么开口？告诉我们你的病种、所在城市、目前的治疗情况就够了。</p>
+            </div>
+
+            <div class="form-field">
+              <label class="form-field__label">希望我们怎么联系你？</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <label class="checkbox checkbox--checked"><input type="checkbox" checked /><span>电话</span></label>
+                <label class="checkbox"><input type="checkbox" /><span>微信</span></label>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;align-items:flex-start;margin:8px 0 24px;font-size:var(--fs-sm);color:var(--gray-600);">
+              <input type="checkbox" id="c-agree" required style="margin-top:4px;accent-color:var(--accent);" />
+              <label for="c-agree">我同意 <a href="#" style="text-decoration:underline;">隐私政策</a>，授权九泰临研团队联系我。</label>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--lg" style="width:100%;">提交留言 <span class="arrow">→</span></button>
+            <p style="margin-top:16px;text-align:center;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-500);">★ 工作时间内 1-2 小时回复 · 非工作时间 24 小时内</p>
+          </form>
+        </div>
+
+        <!-- 右：信息块 -->
+        <div>
+          <div class="info-block">
+            <span class="label">★ 客服工作时间</span>
+            <h4>什么时候找得到人</h4>
+            <table class="hours-table">
+              <tr><td>周一至周五</td><td>09:00 — 21:00</td></tr>
+              <tr><td>周六</td><td>10:00 — 18:00</td></tr>
+              <tr><td>周日 / 国家法定假日</td><td>仅紧急情况</td></tr>
+            </table>
+            <p style="margin-top:14px;color:var(--gray-500);font-size:var(--fs-sm);">非工作时间留言，我们会在工作日上午优先处理。</p>
+          </div>
+
+          <div class="info-block">
+            <span class="label">★ 公司地址</span>
+            <h4>线下办公地点</h4>
+            <p>北京市海淀区<br />中关村大街 27 号 · 中关村大厦 18 层</p>
+            <div class="map-placeholder" aria-label="九泰药械办公地址">
+              <div class="map-placeholder__pin">九泰药械 · Beijing</div>
+            </div>
+            <p style="margin-top:14px;color:var(--gray-500);font-size:var(--fs-sm);font-family:var(--font-mono);letter-spacing:.04em;text-transform:uppercase;">★ 来访请提前预约</p>
+          </div>
+
+          <div class="info-block">
+            <span class="label">★ 媒体 / 商务合作</span>
+            <h4>不是患者，找我们</h4>
+            <p>媒体采访、品牌合作、研究机构对接，请发邮件至：</p>
+            <p style="font-family:var(--font-mono);font-size:var(--fs-md);margin-top:8px;color:var(--ink-900);">business@jiutai-cro.com</p>
+          </div>
+
+          <div class="info-block">
+            <span class="label">★ 投诉与建议</span>
+            <h4>觉得我们做得不够好</h4>
+            <p>对运营人员的服务、对项目的安排有不满意，欢迎直接告诉我们。每条投诉都会被认真对待。</p>
+            <p style="font-family:var(--font-mono);font-size:var(--fs-md);margin-top:8px;color:var(--ink-900);">complaint@jiutai-cro.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 紧急情况 -->
+  <div class="container">
+    <div class="urgent">
+      <div class="urgent__icon">!</div>
+      <div>
+        <h3>如果你正在经历紧急医疗状况</h3>
+        <p>请<strong style="color:var(--lime);">立即拨打 120</strong>或就近前往医院急诊。本平台不能处理紧急医疗事件，请优先寻求专业急救与医疗帮助。</p>
+      </div>
+      <a href="tel:120" class="btn btn--primary btn--lg">立即拨打 120 <span class="arrow">→</span></a>
+    </div>
+  </div>
+
+  <!-- 快速帮助 -->
+  <section class="quick-help">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:14px;">
+        <div>
+          <span class="eyebrow">★ 也许你不需要联系我们</span>
+          <h2 style="margin-top:14px;">这些<em>常见疑问</em>，<br />答案就在这里</h2>
+        </div>
+        <a href="about.html#faq" class="btn btn--ghost">看完整答疑 →</a>
+      </div>
+
+      <div class="quick-help-grid">
+        <a href="about.html#what" class="quick-link">
+          <span class="quick-link__num">/ 01</span>
+          <span class="quick-link__title">什么是临床试验？</span>
+          <span class="quick-link__desc">5 分钟看懂"临床试验"到底是怎么回事，你能从中得到什么。</span>
+        </a>
+        <a href="about.html#safety" class="quick-link">
+          <span class="quick-link__num">/ 02</span>
+          <span class="quick-link__title">参加试验安全吗？</span>
+          <span class="quick-link__desc">国家药监局审批 + 医院伦理审查 + 全程监测。看看我们怎么守住你。</span>
+        </a>
+        <a href="about.html#exit" class="quick-link">
+          <span class="quick-link__num">/ 03</span>
+          <span class="quick-link__title">能中途退出吗？</span>
+          <span class="quick-link__desc">任何时候都可以。退出不会影响你以后在这家医院的就医。</span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__deco" aria-hidden="true">JIUTAI</div>
+  <div class="container">
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
+        <div class="brand" style="color:var(--cream-50);">
+          <div class="brand__logo">JT</div>
+          <span translate="no">九泰临研</span>
+        </div>
+        <p>九泰药械旗下临床试验患者招募平台，帮你找到适合自己的临床试验，全程陪伴。</p>
+      </div>
+      <div>
+        <h5>找试验</h5>
+        <ul>
+          <li><a href="trials.html">看全部项目</a></li>
+          <li><a href="trials.html">按病种查找</a></li>
+          <li><a href="trials.html">按城市查找</a></li>
+          <li><a href="trials.html">医美相关</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>了解更多</h5>
+        <ul>
+          <li><a href="about.html#what">什么是临床试验</a></li>
+          <li><a href="about.html#faq">常见问题</a></li>
+          <li><a href="my-applications.html">我的报名</a></li>
+          <li><a href="about.html#safety">安全保障</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>关于我们</h5>
+        <ul>
+          <li><a href="about.html#who">关于九泰临研</a></li>
+          <li><a href="contact.html">联系方式</a></li>
+          <li><a href="#">隐私政策</a></li>
+          <li><a href="#">用户协议</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span>本平台内容仅作信息提供，不能替代医生的专业建议</span>
+    </div>
+  </div>
+</footer>
+<script src="../assets/prototype.js" defer></script>
+</body>
+</html>

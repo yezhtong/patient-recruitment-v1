@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>我的报名 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  .me-shell { padding: 48px 0 96px; }
+  .me-hero { margin-bottom: 48px; }
+  .me-hero h1 { font-size: clamp(48px, 6vw, 80px); margin-bottom: 14px; }
+  .layout-2 { display: grid; grid-template-columns: 260px 1fr; gap: 64px; align-items: start; }
+  @media (max-width: 880px) { .layout-2 { grid-template-columns: 1fr; } }
+
+  .me-side { position: sticky; top: 100px; }
+  .me-profile {
+    padding: 28px 0;
+    border-top: var(--border-strong);
+    border-bottom: var(--border-strong);
+    margin-bottom: 24px;
+  }
+  .me-profile__avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--ink-900);
+    color: var(--lime);
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .me-profile__name {  font-size: 28px; }
+  .me-profile__phone { color: var(--gray-500); font-size: var(--fs-xs); margin-top: 4px; font-family: var(--font-mono); letter-spacing: .04em; }
+
+  .me-nav { display: flex; flex-direction: column; gap: 0; }
+  .me-nav a {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    color: var(--ink-900);
+    border-top: 1px solid var(--ink-100);
+    font-size: var(--fs-md);
+    font-family: var(--font-sans);
+  }
+  .me-nav a:hover { color: var(--accent); text-decoration: none; }
+  .me-nav a[aria-current="page"] { color: var(--accent); font-weight: 600; }
+  .me-nav a span.count { font-family: var(--font-mono); color: var(--gray-500); font-size: var(--fs-xs); }
+  .me-nav a:last-child { border-bottom: 1px solid var(--ink-100); }
+
+  .filter-row { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+
+  .application {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-2xl);
+    padding: 28px 32px;
+    margin-bottom: 16px;
+  }
+  .application__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .application__title {
+    
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    letter-spacing: -.01em;
+  }
+  .application__title a { color: var(--ink-900); }
+  .application__title a:hover { color: var(--accent); text-decoration: none; }
+  .application__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gray-500);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+
+  .stage-flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--ink-200);
+    gap: 0;
+  }
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    position: relative;
+    padding-right: 14px;
+  }
+  .stage::after {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 30px;
+    right: 0;
+    height: 1px;
+    background: var(--ink-200);
+  }
+  .stage:last-child::after { display: none; }
+  .stage__dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ink-100);
+    display: grid; place-items: center;
+    font-size: 10px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+    z-index: 1;
+    border: 2px solid var(--cream-0);
+    outline: 1px solid var(--ink-200);
+  }
+  .stage--done .stage__dot { background: var(--ink-900); color: var(--lime); outline-color: var(--ink-900); }
+  .stage--done::after { background: var(--ink-900); }
+  .stage--current .stage__dot { background: var(--accent); color: var(--cream-50); outline-color: var(--accent); }
+  .stage__label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-500); }
+  .stage--done .stage__label, .stage--current .stage__label { color: var(--ink-900); font-weight: 600; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰临研</span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html">找试验</a>
+      <a href="community.html">病友社区</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="my-applications.html" aria-current="page" style="border:none;font-size:var(--fs-sm);">小芳，你好</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="me-shell">
+  <div class="container">
+    <div class="me-hero">
+      <span class="eyebrow">个人中心</span>
+      <h1 style="margin-top:14px;">你好，小芳</h1>
+      <p class="muted" style="font-size:var(--fs-lg);max-width:50ch;">这里是你的报名记录、个人资料和社区动态的集合。</p>
+    </div>
+
+    <div class="layout-2">
+      <aside class="me-side">
+        <div class="me-profile">
+          <div class="me-profile__avatar">芳</div>
+          <div class="me-profile__name">张芳</div>
+          <div class="me-profile__phone">138 **** 0000</div>
+        </div>
+        <nav class="me-nav" aria-label="个人中心">
+          <a href="my-applications.html" aria-current="page"><span>我的报名</span><span class="count">3</span></a>
+          <a href="#"><span>基本资料</span></a>
+          <a href="#"><span>我的帖子</span><span class="count">2</span></a>
+          <a href="#"><span>我的评论</span><span class="count">8</span></a>
+          <a href="#"><span>消息中心</span></a>
+          <a href="#"><span>账户设置</span></a>
+        </nav>
+      </aside>
+
+      <section>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;flex-wrap:wrap;gap:14px;">
+          <h2 style="font-size:48px;font-weight:400;letter-spacing:-.02em;">我的报名 / 03</h2>
+        </div>
+        <div class="filter-row">
+          <button class="btn btn--ink btn--sm">全部 (3)</button>
+          <button class="btn btn--ghost btn--sm">跟进中 (2)</button>
+          <button class="btn btn--ghost btn--sm">已关闭 (1)</button>
+        </div>
+
+        <article class="application">
+          <div class="application__head">
+            <div>
+              <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <span class="tag">乳腺癌</span><span class="tag">III 期</span>
+              </div>
+              <div class="application__title"><a href="trial-detail.html">某新型靶向药对 HER2+ 早期乳腺癌的疗效研究</a></div>
+            </div>
+            <span class="badge badge--info">跟进中</span>
+          </div>
+          <div class="application__meta">
+            <span>PS-20260418-1042</span>
+            <span>2026-04-18 提交</span>
+            <span>📍 上海·复旦肿瘤</span>
+            <span>📞 王老师 · 已联系</span>
+          </div>
+          <div class="stage-flow">
+            <div class="stage stage--done"><div class="stage__dot">✓</div><span class="stage__label">已提交</span></div>
+            <div class="stage stage--done"><div class="stage__dot">✓</div><span class="stage__label">已联系</span></div>
+            <div class="stage stage--current"><div class="stage__dot">●</div><span class="stage__label">跟进中</span></div>
+            <div class="stage"><div class="stage__dot">○</div><span class="stage__label">面诊</span></div>
+            <div class="stage"><div class="stage__dot">○</div><span class="stage__label">入组</span></div>
+          </div>
+        </article>
+
+        <article class="application">
+          <div class="application__head">
+            <div>
+              <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <span class="tag">乳腺癌</span><span class="tag">支持治疗</span>
+              </div>
+              <div class="application__title"><a href="trial-detail.html">化疗相关骨髓抑制患者升白方案优化研究</a></div>
+            </div>
+            <span class="badge badge--success">已联系</span>
+          </div>
+          <div class="application__meta">
+            <span>PS-20260415-0823</span>
+            <span>2026-04-15 提交</span>
+            <span>📍 上海</span>
+          </div>
+          <div class="stage-flow">
+            <div class="stage stage--done"><div class="stage__dot">✓</div><span class="stage__label">已提交</span></div>
+            <div class="stage stage--current"><div class="stage__dot">●</div><span class="stage__label">已联系</span></div>
+            <div class="stage"><div class="stage__dot">○</div><span class="stage__label">跟进中</span></div>
+            <div class="stage"><div class="stage__dot">○</div><span class="stage__label">面诊</span></div>
+            <div class="stage"><div class="stage__dot">○</div><span class="stage__label">入组</span></div>
+          </div>
+        </article>
+
+        <article class="application">
+          <div class="application__head">
+            <div>
+              <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <span class="tag">乳腺癌</span>
+              </div>
+              <div class="application__title"><a href="trial-detail.html">CDK4/6 抑制剂对 HR+ 早期乳腺癌的辅助治疗研究</a></div>
+            </div>
+            <span class="badge badge--plain">当前不符合</span>
+          </div>
+          <div class="application__meta">
+            <span>PS-20260320-0312</span>
+            <span>2026-03-20 提交</span>
+            <span>📍 上海</span>
+          </div>
+          <div style="margin-top:18px;padding:14px 16px;background:var(--cream-100);border-radius:10px;font-size:var(--fs-sm);color:var(--gray-700);font-family:var(--font-sans);">
+            ℹ️ 该项目已暂停招募，运营会在状态恢复后通知你重新提交。
+          </div>
+        </article>
+
+        <p class="muted small text-center mt-8" style="font-family:var(--font-mono);letter-spacing:.04em;text-transform:uppercase;">已显示全部 3 条记录</p>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span><a href="home.html">返回首页</a> · <a href="../index.html">原型导览</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

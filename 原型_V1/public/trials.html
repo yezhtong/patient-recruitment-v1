@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>找试验 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  .list-hero {
+    padding: 40px 0 32px;
+    border-bottom: var(--border-strong);
+  }
+  .list-hero h1 {
+    font-size: clamp(40px, 5.5vw, 72px);
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+  .list-hero p {
+    color: var(--gray-700);
+    font-size: var(--fs-xl);
+    max-width: 42ch;
+  }
+  .layout-2 { display: grid; grid-template-columns: 280px 1fr; gap: 48px; align-items: start; padding: 48px 0 96px; }
+  @media (max-width: 960px) { .layout-2 { grid-template-columns: 1fr; } }
+
+  .filter-panel { position: sticky; top: 100px; }
+  .filter-group { margin-bottom: 36px; }
+  .filter-group__title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    color: var(--ink-900);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+  .filter-options { display: flex; flex-direction: column; gap: 4px; }
+  .filter-options label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    cursor: pointer;
+    font-size: var(--fs-md);
+    color: var(--ink-900);
+    border-bottom: 1px solid var(--ink-100);
+  }
+  .filter-options label:hover { color: var(--accent); }
+  .filter-options label input { accent-color: var(--accent); }
+  .filter-options .count { font-family: var(--font-mono); color: var(--gray-400); font-size: var(--fs-xs); }
+
+  .results-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--ink-200);
+    font-size: var(--fs-sm);
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .results-count {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    line-height: 1;
+  }
+  .results-count em { color: var(--accent); font-style: normal; }
+
+  .applied-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .applied-tag {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    padding: 6px 14px;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-xs);
+    font-family: var(--font-mono);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .applied-tag button { background: none; border: none; color: var(--lime); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
+
+  .results-list { display: flex; flex-direction: column; gap: 16px; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰<em style="font-style:italic;color:var(--accent);">临研</em></span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html" aria-current="page">找试验</a>
+      <a href="my-applications.html">我的报名</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="auth.html" style="border:none;font-size:var(--fs-sm);">登录</a>
+      <a class="btn btn--ink btn--sm" href="trials.html">开始找试验 <span class="arrow">→</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="list-hero">
+    <div class="container">
+      <span class="eyebrow">全部招募中项目</span>
+      <h1 style="margin-top:14px;" class="text-balance">找到适合你的<em>临床试验</em></h1>
+      <p>按病种 / 适应症、城市、招募状态筛选，找到适合你的项目。</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="layout-2">
+      <!-- 左侧筛选 -->
+      <aside class="filter-panel" aria-label="筛选条件">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:32px;">
+          <span class="eyebrow" style="margin:0;">筛选</span>
+          <a href="trials.html" class="btn btn--text" style="font-size:var(--fs-xs);">全部清除</a>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group__title">关键字</div>
+          <input class="input" type="search" placeholder="搜索试验名称…" aria-label="关键字搜索" />
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group__title">病种 / 适应症</div>
+          <div class="filter-options">
+            <label><span><input type="checkbox" checked /> 乳腺癌</span><span class="count">8</span></label>
+            <label><span><input type="checkbox" /> 肺癌</span><span class="count">12</span></label>
+            <label><span><input type="checkbox" /> 糖尿病</span><span class="count">15</span></label>
+            <label><span><input type="checkbox" /> 银屑病</span><span class="count">5</span></label>
+            <label><span><input type="checkbox" /> 罕见病</span><span class="count">9</span></label>
+            <label><span><input type="checkbox" /> 法令纹</span><span class="count">4</span></label>
+            <label><span><input type="checkbox" /> 黄褐斑</span><span class="count">3</span></label>
+          </div>
+          <a href="#" class="btn btn--text mt-3" style="font-size:var(--fs-xs);">+ 展开全部 30 个</a>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group__title">城市</div>
+          <div class="filter-options">
+            <label><span><input type="checkbox" checked /> 上海</span><span class="count">28</span></label>
+            <label><span><input type="checkbox" /> 北京</span><span class="count">24</span></label>
+            <label><span><input type="checkbox" /> 广州</span><span class="count">18</span></label>
+            <label><span><input type="checkbox" /> 杭州</span><span class="count">14</span></label>
+            <label><span><input type="checkbox" /> 成都</span><span class="count">12</span></label>
+          </div>
+          <a href="#" class="btn btn--text mt-3" style="font-size:var(--fs-xs);">+ 展开全部 80+</a>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group__title">招募状态</div>
+          <div class="filter-options">
+            <label><span><input type="radio" name="rs" checked /> 全部</span></label>
+            <label><span><input type="radio" name="rs" /> 招募中</span><span class="count">62</span></label>
+            <label><span><input type="radio" name="rs" /> 暂停招募</span><span class="count">5</span></label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 右侧结果 -->
+      <section aria-label="试验结果">
+        <div class="results-bar">
+          <div>
+            <span class="results-count">找到 <em class="tabular">8</em> 项试验</span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-500);">排序</span>
+            <select class="select" style="min-height:36px;padding:6px 28px 6px 12px;font-size:var(--fs-sm);width:auto;">
+              <option>最新发布</option>
+              <option>本周报名最多</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="applied-tags">
+          <span class="applied-tag">乳腺癌 <button aria-label="移除">×</button></span>
+          <span class="applied-tag">上海 <button aria-label="移除">×</button></span>
+        </div>
+
+        <div class="results-list">
+
+          <article class="trial-card">
+            <div class="trial-card__head">
+              <div class="trial-card__tags">
+                <span class="tag">乳腺癌</span><span class="tag">III 期</span>
+              </div>
+              <span class="badge badge--success">招募中</span>
+            </div>
+            <h3 class="trial-card__title"><a href="trial-detail.html">某新型靶向药对 HER2+ 早期乳腺癌的疗效研究</a></h3>
+            <p class="trial-card__sum">面向已确诊 HER2 阳性、年龄 18-70 岁的早期乳腺癌患者，提供完整治疗方案与随访。</p>
+            <div class="trial-card__meta">
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> 上海·北京·广州</span>
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg> 18-70 岁</span>
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 2 MIN</span>
+            </div>
+            <div class="trial-card__cta">
+              <span style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--accent);letter-spacing:.04em;">本周已 23 人报名</span>
+              <a href="trial-detail.html" class="btn btn--ink btn--sm">查看详情 <span class="arrow">→</span></a>
+            </div>
+          </article>
+
+          <article class="trial-card">
+            <div class="trial-card__head">
+              <div class="trial-card__tags">
+                <span class="tag">乳腺癌</span><span class="tag">II 期</span>
+              </div>
+              <span class="badge badge--success">招募中</span>
+            </div>
+            <h3 class="trial-card__title"><a href="trial-detail.html">PD-L1 联合化疗用于晚期三阴性乳腺癌</a></h3>
+            <p class="trial-card__sum">招募确诊晚期三阴性乳腺癌、ECOG 评分 0-1 的患者，免费提供研究用药与检查。</p>
+            <div class="trial-card__meta">
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> 上海·杭州</span>
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg> 18+ 岁</span>
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 3 MIN</span>
+            </div>
+            <div class="trial-card__cta">
+              <span style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--accent);letter-spacing:.04em;">本周已 11 人报名</span>
+              <a href="trial-detail.html" class="btn btn--ink btn--sm">查看详情 <span class="arrow">→</span></a>
+            </div>
+          </article>
+
+          <article class="trial-card">
+            <div class="trial-card__head">
+              <div class="trial-card__tags">
+                <span class="tag">乳腺癌</span><span class="tag">辅助治疗</span>
+              </div>
+              <span class="badge badge--warning">暂停招募</span>
+            </div>
+            <h3 class="trial-card__title"><a href="trial-detail.html">CDK4/6 抑制剂对 HR+ 早期乳腺癌的辅助治疗研究</a></h3>
+            <p class="trial-card__sum">该项目暂停招募，预计 2026 年 5 月恢复。可在详情页订阅状态变更通知。</p>
+            <div class="trial-card__meta">
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> 上海·南京</span>
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg> 18-75 岁女性</span>
+            </div>
+            <div class="trial-card__cta">
+              <span style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--gray-500);letter-spacing:.04em;">已收 87 份</span>
+              <a href="trial-detail.html" class="btn btn--ghost btn--sm">查看详情 <span class="arrow">→</span></a>
+            </div>
+          </article>
+
+          <article class="trial-card">
+            <div class="trial-card__head">
+              <div class="trial-card__tags">
+                <span class="tag">乳腺癌</span><span class="tag">支持治疗</span>
+              </div>
+              <span class="badge badge--success">招募中</span>
+            </div>
+            <h3 class="trial-card__title"><a href="trial-detail.html">化疗相关骨髓抑制患者升白方案优化研究</a></h3>
+            <p class="trial-card__sum">招募正在接受化疗、出现 II 度以上骨髓抑制的乳腺癌患者，对比新升白方案。</p>
+            <div class="trial-card__meta">
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> 上海</span>
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg> 18-70 岁</span>
+              <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 2 MIN</span>
+            </div>
+            <div class="trial-card__cta">
+              <span style="font-family:var(--font-mono);font-size:var(--fs-xs);color:var(--accent);letter-spacing:.04em;">本周已 9 人报名</span>
+              <a href="trial-detail.html" class="btn btn--ink btn--sm">查看详情 <span class="arrow">→</span></a>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- 分页 -->
+        <div style="display:flex;justify-content:center;gap:6px;margin-top:48px;">
+          <button class="btn btn--ghost btn--sm" disabled>← 上一页</button>
+          <button class="btn btn--ink btn--sm" style="min-width:44px;padding:0;">1</button>
+          <button class="btn btn--ghost btn--sm" style="min-width:44px;padding:0;">2</button>
+          <button class="btn btn--ghost btn--sm">下一页 →</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span><a href="home.html">返回首页</a> · <a href="../index.html">原型导览</a></span>
+    </div>
+  </div>
+</footer>
+<script src="../assets/prototype.js" defer></script>
+</body>
+</html>

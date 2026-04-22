@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#050807" />
+<title>线索池 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+<style>
+  .row-new { background: rgba(200,255,74,.04); }
+  .row-warn { background: rgba(220,38,38,.06); }
+  .lead-name { font-weight: 600; color: #fbf6ec; }
+  .lead-meta { font-family: var(--font-mono); font-size: 10px; color: #6e776f; letter-spacing: .04em; margin-top: 4px; }
+  .status-cell select {
+    background: #050807;
+    border: 1px solid #1a201d;
+    color: #e8ece9;
+    padding: 4px 24px 4px 10px;
+    font-size: 11px;
+    min-height: 30px;
+    font-family: var(--font-mono);
+    letter-spacing: .04em;
+    border-radius: 6px;
+    width: auto;
+  }
+  .status-cell.status-warn select { color: #ffc78c; border-color: rgba(201,122,20,.4); }
+  .status-cell.status-success select { color: var(--lime); border-color: rgba(200,255,74,.3); }
+  .status-cell.status-info select { color: #8cc8ff; border-color: rgba(14,107,156,.4); }
+</style>
+</head>
+<body class="admin">
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="admin-shell">
+  <aside class="admin-side">
+    <div class="admin-side__brand"><div class="brand__logo">JT</div><span translate="no">临研运营台</span></div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="leads.html" aria-current="page"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="community-moderation.html"><span class="admin-nav__icon">⛨</span>社区审核</a>
+      <div class="admin-nav__group">内容管理</div>
+      <a href="trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="prescreen-form.html"><span class="admin-nav__icon">▤</span>预筛表单</a>
+      <a href="#"><span class="admin-nav__icon">❡</span>FAQ 管理</a>
+      <a href="#"><span class="admin-nav__icon">◐</span>社区分区</a>
+      <div class="admin-nav__group">数据与系统</div>
+      <a href="#"><span class="admin-nav__icon">▥</span>基础统计</a>
+      <a href="#"><span class="admin-nav__icon">⚙</span>系统配置</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb"><a href="dashboard.html">工作台</a> / <strong>线索池</strong></div>
+      <div class="admin-topbar__right">
+        <div class="admin-search"><input type="search" placeholder="搜索患者、试验、ID…" /></div>
+        <div class="admin-avatar">Z</div>
+      </div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--lime);text-transform:uppercase;">★ Leads</span>
+          <h2 style="margin-top:14px;">线索池</h2>
+          <p class="page-head__sub">共 312 条 · 今日新增 12 · 待联系 28（其中 5 条 ⚠ 超 24h）</p>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost">📤 导出 CSV</button>
+          <button class="btn btn--ghost">⚙ 列管理</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="btn btn--primary btn--sm">全部 (312)</button>
+        <button class="btn btn--ghost btn--sm">新线索 (12)</button>
+        <button class="btn btn--ghost btn--sm" style="background:rgba(220,38,38,.1);color:#ffaa9a;border-color:rgba(220,38,38,.3);">⚠ 超 24h (5)</button>
+        <button class="btn btn--ghost btn--sm">待联系 (28)</button>
+        <button class="btn btn--ghost btn--sm">已联系 (87)</button>
+        <button class="btn btn--ghost btn--sm">跟进中 (134)</button>
+        <button class="btn btn--ghost btn--sm">关闭 (46)</button>
+      </div>
+
+      <div class="toolbar">
+        <select class="select"><option>全部试验</option></select>
+        <select class="select"><option>全部病种</option></select>
+        <select class="select"><option>全部城市</option></select>
+        <select class="select"><option>全部来源</option></select>
+        <select class="select"><option>全部负责人</option></select>
+        <input type="date" class="input" style="width:auto;" />
+        <button class="btn btn--ghost btn--sm">重置</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" aria-label="全选" /></th>
+              <th>患者</th>
+              <th>试验</th>
+              <th>来源</th>
+              <th>提交</th>
+              <th>状态</th>
+              <th>负责人</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row-new">
+              <td><input type="checkbox" /></td>
+              <td>
+                <a href="lead-detail.html" class="lead-name">张芳</a>
+                <div class="lead-meta">138 **** 0000 · 女 · 42 岁</div>
+              </td>
+              <td>
+                <span style="color:#fbf6ec;">HER2+ 早期乳腺癌靶向药</span>
+                <div class="lead-meta">乳腺癌 · 上海</div>
+              </td>
+              <td>
+                <span class="badge badge--info">💬 社区帖</span>
+                <div class="lead-meta">post #2049</div>
+              </td>
+              <td class="num" style="color:#fbf6ec;">12:42<br /><span style="color:#6e776f;">2026-04-18</span></td>
+              <td class="status-cell status-success"><select><option>新线索</option><option>待联系</option></select></td>
+              <td style="color:#6e776f;">未指派 <a href="#" class="btn btn--text" style="font-size:10px;margin-left:4px;">指派</a></td>
+              <td><a href="lead-detail.html" class="btn btn--text" style="font-size:11px;">查看 →</a></td>
+            </tr>
+
+            <tr class="row-warn">
+              <td><input type="checkbox" /></td>
+              <td>
+                <a href="lead-detail.html" class="lead-name">李华</a>
+                <div class="lead-meta">139 **** 8765 · 男 · 56 岁</div>
+              </td>
+              <td>
+                <span style="color:#fbf6ec;">EGFR 阳性肺癌靶向药</span>
+                <div class="lead-meta">肺癌 · 北京</div>
+              </td>
+              <td><span class="badge badge--ink">📄 详情页</span></td>
+              <td class="num" style="color:#ffaa9a;"><strong>⚠ 26h 前</strong><br /><span style="color:#6e776f;">2026-04-17</span></td>
+              <td class="status-cell status-warn"><select><option>待联系</option><option>已联系</option></select></td>
+              <td style="color:#fbf6ec;">张运营</td>
+              <td><a href="lead-detail.html" class="btn btn--text" style="font-size:11px;color:#ffaa9a;">立即处理 →</a></td>
+            </tr>
+
+            <tr>
+              <td><input type="checkbox" /></td>
+              <td>
+                <span class="lead-name">王敏</span>
+                <div class="lead-meta">137 **** 4321 · 女 · 35 岁</div>
+              </td>
+              <td>
+                <span style="color:#fbf6ec;">注射类填充材料法令纹</span>
+                <div class="lead-meta">医美 · 杭州</div>
+              </td>
+              <td><span class="badge badge--ink">📄 详情页</span></td>
+              <td class="num" style="color:#fbf6ec;">10:15<br /><span style="color:#6e776f;">2026-04-18</span></td>
+              <td class="status-cell status-success"><select><option>已联系</option></select></td>
+              <td style="color:#fbf6ec;">王老师</td>
+              <td><a href="lead-detail.html" class="btn btn--text" style="font-size:11px;">查看 →</a></td>
+            </tr>
+
+            <tr>
+              <td><input type="checkbox" /></td>
+              <td>
+                <span class="lead-name">陈先生</span>
+                <div class="lead-meta">186 **** 6789 · 男 · 48 岁</div>
+              </td>
+              <td>
+                <span style="color:#fbf6ec;">糖尿病 GLP-1</span>
+                <div class="lead-meta">糖尿病 · 上海</div>
+              </td>
+              <td><span class="badge badge--info">💬 社区帖</span></td>
+              <td class="num" style="color:#fbf6ec;">09:30<br /><span style="color:#6e776f;">2026-04-18</span></td>
+              <td class="status-cell status-info"><select><option>跟进中</option></select></td>
+              <td style="color:#fbf6ec;">张运营</td>
+              <td><a href="lead-detail.html" class="btn btn--text" style="font-size:11px;">查看 →</a></td>
+            </tr>
+
+            <tr>
+              <td><input type="checkbox" /></td>
+              <td>
+                <span class="lead-name">刘女士</span>
+                <div class="lead-meta">135 **** 2222 · 女 · 51 岁</div>
+              </td>
+              <td>
+                <span style="color:#fbf6ec;">PD-L1 联合化疗三阴乳腺癌</span>
+                <div class="lead-meta">乳腺癌 · 上海</div>
+              </td>
+              <td><span class="badge badge--ink">📄 详情页</span></td>
+              <td class="num" style="color:#fbf6ec;">昨日 16:45<br /><span style="color:#6e776f;">2026-04-17</span></td>
+              <td class="status-cell status-info"><select><option>跟进中</option></select></td>
+              <td style="color:#fbf6ec;">王老师</td>
+              <td><a href="lead-detail.html" class="btn btn--text" style="font-size:11px;">查看 →</a></td>
+            </tr>
+
+            <tr>
+              <td><input type="checkbox" /></td>
+              <td>
+                <span class="lead-name">赵先生</span>
+                <div class="lead-meta">133 **** 9999 · 男 · 62 岁</div>
+              </td>
+              <td>
+                <span style="color:#fbf6ec;">EGFR 阳性肺癌靶向药</span>
+                <div class="lead-meta">肺癌 · 北京</div>
+              </td>
+              <td><span class="badge badge--plain">📚 FAQ</span></td>
+              <td class="num" style="color:#6e776f;">04-15</td>
+              <td class="status-cell"><select><option>关闭·不符合</option></select></td>
+              <td style="color:#fbf6ec;">张运营</td>
+              <td><a href="lead-detail.html" class="btn btn--text" style="font-size:11px;">查看 →</a></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span>1-6 / 共 312</span>
+          <div class="pages">
+            <button>‹</button><button aria-current="true">1</button><button>2</button><button>3</button><button>…</button><button>52</button><button>›</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

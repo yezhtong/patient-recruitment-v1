@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>九泰临研 — 让你找到适合自己的临床试验</title>
+<meta name="description" content="九泰临研患者招募平台，帮你找到适合自己的临床试验项目。专业团队主动联系，免费用药与检查，信息严格保密，随时可以退出。" />
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  /* ============================================================
+     Hero Visual v2: 真实病友/医生照片 + 飘浮信息卡
+     ============================================================ */
+  .hero-photo {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--r-2xl);
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--accent-soft), var(--ink-100));
+    box-shadow: var(--shadow-md);
+  }
+  .hero-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-photo__overlay {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 28px 28px 24px;
+    color: var(--cream-50);
+    background: linear-gradient(to top, rgba(10,20,17,.78) 0%, rgba(10,20,17,.35) 60%, transparent 100%);
+  }
+  .hero-photo__overlay-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .hero-photo__overlay-label::before {
+    content: "";
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--lime);
+    box-shadow: 0 0 0 4px rgba(200, 255, 74, .25);
+    animation: dot-pulse 2.4s infinite var(--ease-out);
+  }
+  .hero-photo__overlay-text {
+    font-family: var(--font-serif);
+    font-size: 20px;
+    line-height: 1.4;
+    color: var(--cream-50);
+  }
+  @keyframes dot-pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(200, 255, 74, .25); }
+    50%      { box-shadow: 0 0 0 8px rgba(200, 255, 74, .05); }
+  }
+
+  /* 飘浮数据卡 */
+  .hero-pill {
+    position: absolute;
+    left: -24px;
+    top: 36px;
+    background: var(--cream-0);
+    padding: 14px 18px;
+    border-radius: var(--r-lg);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    box-shadow: var(--shadow-md);
+    z-index: 2;
+    border: 1px solid var(--ink-100);
+  }
+  .hero-pill__num {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .hero-pill__lbl {
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--ink-900);
+    max-width: 12ch;
+  }
+
+  /* Hero 左侧承诺栏：取代 3 个分散徽章 */
+  .hero-promises {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--ink-200);
+    border-bottom: 1px solid var(--ink-200);
+    padding: 20px 0;
+    margin-top: 32px;
+    max-width: 520px;
+  }
+  .hero-promise {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 0 16px;
+    border-right: 1px solid var(--ink-200);
+  }
+  .hero-promise:first-child { padding-left: 0; }
+  .hero-promise:last-child { border-right: none; padding-right: 0; }
+  .hero-promise__k {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    line-height: 1;
+    color: var(--ink-900);
+  }
+  .hero-promise__k em { color: var(--accent); font-style: normal; }
+  .hero-promise__v {
+    font-size: 13px;
+    color: var(--gray-600);
+    line-height: 1.3;
+  }
+
+  @media (max-width: 720px) {
+    .hero-pill { left: 12px; top: 12px; }
+    .hero-photo__overlay-text { font-size: 17px; }
+    .hero-promises { grid-template-columns: repeat(3, 1fr); }
+    .hero-promise { padding: 0 10px; }
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰<em style="font-style:italic;color:var(--accent);">临研</em></span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html" aria-current="page">首页</a>
+      <a href="trials.html">找试验</a>
+      <a href="my-applications.html">我的报名</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="auth.html" style="border:none;font-size:var(--fs-sm);">登录</a>
+      <a class="btn btn--ink btn--sm" href="trials.html">开始找试验 <span class="arrow">→</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO：患者视角的承诺 -->
+  <section class="hero">
+    <svg class="hero__deco" viewBox="0 0 1280 600" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <pattern id="dotgrid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1.2" fill="#cfdfd9" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#dotgrid)" />
+    </svg>
+
+    <div class="container hero__grid">
+      <div>
+        <span class="eyebrow">给正在求医路上的你</span>
+        <h1 style="margin-top:18px;" class="text-balance no-wrap-break">
+          也许有一种新治疗，<em>正在等你</em>
+        </h1>
+        <p class="hero__lead">
+          确诊之后，你不必只能等。临床试验也许能让你更早用上新药，全程由专业医生陪同，研究用药与检查都免费。
+        </p>
+        <div class="hero__cta">
+          <a href="trials.html" class="btn btn--ink btn--lg">看看适合我的项目 <span class="arrow">→</span></a>
+          <a href="about.html" class="btn btn--text">什么是临床试验？</a>
+        </div>
+
+        <!-- 关键承诺（整合原分散徽章 + meta 卡片） -->
+        <div class="hero-promises">
+          <div class="hero-promise">
+            <div class="hero-promise__k"><em>免费</em></div>
+            <div class="hero-promise__v">研究用药 + 相关检查</div>
+          </div>
+          <div class="hero-promise">
+            <div class="hero-promise__k">2 <small style="font-family:var(--font-mono);font-size:14px;color:var(--gray-500);">min</small></div>
+            <div class="hero-promise__v">填完一份资料</div>
+          </div>
+          <div class="hero-promise">
+            <div class="hero-promise__k">24 <small style="font-family:var(--font-mono);font-size:14px;color:var(--gray-500);">hrs</small></div>
+            <div class="hero-promise__v">专人主动联系</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧：真实照片位（生产环境替换为授权的病友 / 医生 / 医院温暖场景） -->
+      <div style="position:relative;">
+        <!-- 飘浮数据卡（移到照片左上角，不再与其他元素重叠） -->
+        <div class="hero-pill" aria-live="polite" aria-atomic="true">
+          <span class="hero-pill__num">23</span>
+          <span class="hero-pill__lbl">位病友本周已开始预筛</span>
+        </div>
+
+        <!-- 真实照片位 —— 生产环境请替换为授权匿名的病友 / 医生 / 医院环境照 -->
+        <figure class="hero-photo">
+          <img
+            src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=900&h=1100&fit=crop&auto=format&q=80"
+            alt="医生与患者温暖交流的场景"
+            loading="eager" width="900" height="1100"
+            onerror="this.onerror=null;this.src='https://picsum.photos/seed/jiutai-hero/900/1100';"
+          />
+          <div class="hero-photo__overlay">
+            <div class="hero-photo__overlay-label">真实研究中心</div>
+            <div class="hero-photo__overlay-text">北京协和医院 · 乳腺肿瘤门诊</div>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 患者痛点 + 我们的回应（取代旧"我们做了什么"） -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-head__row">
+          <div>
+            <span class="eyebrow">你想问的，我们都想到了</span>
+            <h2 style="margin-top:16px;" class="text-balance">那些让你犹豫的事</h2>
+          </div>
+          <p class="section-head__sub">报名一个临床试验，你心里多少会有顾虑。这是我们最常被问到的几件事。</p>
+        </div>
+      </div>
+
+      <div class="grid grid--3">
+        <div class="card">
+          <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--accent);margin-bottom:24px;">Q 01</div>
+          <h3 style="font-family:var(--font-serif);font-size:26px;font-weight:400;margin-bottom:14px;line-height:1.25;" class="text-balance">我会不会被当成小白鼠？</h3>
+          <p class="muted" style="line-height:1.7;">不会。所有项目都通过国家药监局审批和医院伦理委员会监督，研究中心会全程监测你的健康指标，发现任何风险都会立即处理。</p>
+        </div>
+        <div class="card">
+          <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--accent);margin-bottom:24px;">Q 02</div>
+          <h3 style="font-family:var(--font-serif);font-size:26px;font-weight:400;margin-bottom:14px;line-height:1.25;" class="text-balance">会不会要花很多钱？</h3>
+          <p class="muted" style="line-height:1.7;">不会。研究用药和研究相关的检查都是<strong style="color:var(--ink-900);">免费</strong>的，部分项目还会给你补贴交通费。</p>
+        </div>
+        <div class="card card--ink" style="position:relative;overflow:hidden;">
+          <div style="font-family:var(--font-mono);font-size:12px;letter-spacing:.12em;color:var(--lime);margin-bottom:24px;">Q 03</div>
+          <h3 style="font-family:var(--font-serif);font-size:26px;font-weight:400;margin-bottom:14px;color:var(--cream-50);line-height:1.25;" class="text-balance">如果我后悔了，<em style="color:var(--lime);font-style:italic;">还能退出吗？</em></h3>
+          <p style="color:rgba(253,250,243,.7);line-height:1.7;">任何时候都可以。退出不会影响你后续在这家医院的就医，更不会被追究任何责任。这是你的合法权利。</p>
+          <svg style="position:absolute;right:-30px;bottom:-30px;width:160px;height:160px;opacity:.15;" viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="48" fill="none" stroke="var(--lime)" stroke-width="1" />
+            <circle cx="50" cy="50" r="36" fill="none" stroke="var(--lime)" stroke-width="1" />
+            <circle cx="50" cy="50" r="24" fill="none" stroke="var(--lime)" stroke-width="1" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 病种入口（保留，但 caption 改成患者视角） -->
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-head__row">
+          <div>
+            <span class="eyebrow">找到属于你的方向</span>
+            <h2 style="margin-top:16px;" class="text-balance">你最关心的是哪一种？</h2>
+          </div>
+          <a href="trials.html" class="btn btn--text">看看更多病种 →</a>
+        </div>
+      </div>
+
+      <div class="disease-grid">
+        <a href="trials.html?d=breast" class="disease-chip">
+          <span class="disease-chip__num">/ 01</span>
+          <span class="disease-chip__label">乳腺癌</span>
+          <span class="disease-chip__count"><span>8 个项目在招</span><span class="arrow">→</span></span>
+        </a>
+        <a href="trials.html?d=lung" class="disease-chip">
+          <span class="disease-chip__num">/ 02</span>
+          <span class="disease-chip__label">肺癌</span>
+          <span class="disease-chip__count"><span>12 个项目在招</span><span class="arrow">→</span></span>
+        </a>
+        <a href="trials.html?d=diabetes" class="disease-chip">
+          <span class="disease-chip__num">/ 03</span>
+          <span class="disease-chip__label">糖尿病</span>
+          <span class="disease-chip__count"><span>15 个项目在招</span><span class="arrow">→</span></span>
+        </a>
+        <a href="trials.html?d=psoriasis" class="disease-chip">
+          <span class="disease-chip__num">/ 04</span>
+          <span class="disease-chip__label">银屑病</span>
+          <span class="disease-chip__count"><span>5 个项目在招</span><span class="arrow">→</span></span>
+        </a>
+        <a href="trials.html?d=eczema" class="disease-chip">
+          <span class="disease-chip__num">/ 05</span>
+          <span class="disease-chip__label">特应性皮炎</span>
+          <span class="disease-chip__count"><span>6 个项目在招</span><span class="arrow">→</span></span>
+        </a>
+        <a href="trials.html?d=rare" class="disease-chip">
+          <span class="disease-chip__num">/ 06</span>
+          <span class="disease-chip__label">罕见病</span>
+          <span class="disease-chip__count"><span>9 个项目在招</span><span class="arrow">→</span></span>
+        </a>
+        <a href="trials.html?d=wrinkle" class="disease-chip">
+          <span class="disease-chip__num">/ 07</span>
+          <span class="disease-chip__label">法令纹改善</span>
+          <span class="disease-chip__count"><span>4 个项目在招</span><span class="arrow">→</span></span>
+        </a>
+        <a href="trials.html?d=melasma" class="disease-chip">
+          <span class="disease-chip__num">/ 08</span>
+          <span class="disease-chip__label">黄褐斑</span>
+          <span class="disease-chip__count"><span>3 个项目在招</span><span class="arrow">→</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 试验推荐（caption 完全改为患者口吻） -->
+  <section class="section" style="background:var(--cream-100);">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-head__row">
+          <div>
+            <span class="eyebrow">也许这些适合你</span>
+            <h2 style="margin-top:16px;" class="text-balance">最近<em>正在招募</em>的项目</h2>
+          </div>
+          <a href="trials.html" class="btn btn--ghost">看更多项目 →</a>
+        </div>
+      </div>
+
+      <div class="grid grid--3">
+
+        <article class="trial-card">
+          <div class="trial-card__head">
+            <div class="trial-card__tags">
+              <span class="tag">乳腺癌</span>
+              <span class="tag">III 期</span>
+            </div>
+            <span class="badge badge--success">招募中</span>
+          </div>
+          <h3 class="trial-card__title"><a href="trial-detail.html">某新型靶向药对 HER2+ 早期乳腺癌的疗效研究</a></h3>
+          <p class="trial-card__sum">如果你是 18-70 岁、刚确诊 HER2 阳性早期乳腺癌的女性，可能适合参加这个项目。</p>
+          <div class="trial-card__meta">
+            <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> 上海·北京·广州</span>
+            <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg> 18-70 岁女性</span>
+          </div>
+          <div class="trial-card__cta">
+            <span style="font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:.04em;">本周已 23 位姐妹报名</span>
+            <a href="trial-detail.html" class="btn btn--text">看看详情 →</a>
+          </div>
+        </article>
+
+        <article class="trial-card">
+          <div class="trial-card__head">
+            <div class="trial-card__tags">
+              <span class="tag">糖尿病</span>
+              <span class="tag">II 期</span>
+            </div>
+            <span class="badge badge--success">招募中</span>
+          </div>
+          <h3 class="trial-card__title"><a href="trial-detail.html">新型 GLP-1 受体激动剂对 2 型糖尿病的血糖控制研究</a></h3>
+          <p class="trial-card__sum">如果你确诊 2 型糖尿病、HbA1c 7.0%-10.0%、还没用过 GLP-1 类药物，可以了解一下。</p>
+          <div class="trial-card__meta">
+            <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> 全国 12 个城市</span>
+            <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg> 30-70 岁</span>
+          </div>
+          <div class="trial-card__cta">
+            <span style="font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:.04em;">本周已 41 位病友报名</span>
+            <a href="trial-detail.html" class="btn btn--text">看看详情 →</a>
+          </div>
+        </article>
+
+        <article class="trial-card">
+          <div class="trial-card__head">
+            <div class="trial-card__tags">
+              <span class="tag tag--accent">医美</span>
+              <span class="tag">法令纹</span>
+            </div>
+            <span class="badge badge--success">招募中</span>
+          </div>
+          <h3 class="trial-card__title"><a href="trial-detail.html">注射类填充材料用于中重度法令纹改善的临床研究</a></h3>
+          <p class="trial-card__sum">如果你近 6 个月没做过相关医美项目，且有中重度法令纹困扰，可以了解一下。</p>
+          <div class="trial-card__meta">
+            <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12z"/><circle cx="12" cy="10" r="2.5"/></svg> 上海·杭州·成都</span>
+            <span><svg class="icon icon--sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7"/></svg> 25-60 岁女性</span>
+          </div>
+          <div class="trial-card__cta">
+            <span style="font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:.04em;">本周已 12 位姐妹报名</span>
+            <a href="trial-detail.html" class="btn btn--text">看看详情 →</a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 流程：每步加一张场景照片 -->
+  <section class="section" id="how">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-head__row">
+          <div>
+            <span class="eyebrow">接下来会发生什么</span>
+            <h2 style="margin-top:16px;" class="text-balance">从填资料到<em>有人联系你</em></h2>
+          </div>
+          <p class="section-head__sub">不会让你来回填表、反复跑腿。整个过程我们都会主动告诉你下一步。</p>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div style="aspect-ratio:4/3;border-radius:var(--r-lg);overflow:hidden;margin-bottom:20px;background:var(--gray-100);">
+            <!-- 生产环境替换为"在手机上填资料"真实场景照 -->
+            <img src="https://images.unsplash.com/photo-1580281657527-47f249e8f4df?w=600&h=450&fit=crop&auto=format&q=80"
+                 alt="在手机上填写资料" loading="lazy" style="width:100%;height:100%;object-fit:cover;"
+                 onerror="this.onerror=null;this.src='https://picsum.photos/seed/step01/600/450';" />
+          </div>
+          <div class="step__num">01</div>
+          <h4>你在网上填一份资料</h4>
+          <p>选一个项目，回答几个简单的问题。已登录用户基础资料会自动带入，大概 2 分钟。</p>
+        </div>
+        <div class="step">
+          <div style="aspect-ratio:4/3;border-radius:var(--r-lg);overflow:hidden;margin-bottom:20px;background:var(--gray-100);">
+            <!-- 生产环境替换为"客服打电话/微信沟通"场景照 -->
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=450&fit=crop&auto=format&q=80"
+                 alt="专人主动联系沟通" loading="lazy" style="width:100%;height:100%;object-fit:cover;"
+                 onerror="this.onerror=null;this.src='https://picsum.photos/seed/step02/600/450';" />
+          </div>
+          <div class="step__num">02</div>
+          <h4>我们的同事会联系你</h4>
+          <p>24 小时内会有专人通过电话或微信联系你，和你确认情况，回答你的疑问。</p>
+        </div>
+        <div class="step">
+          <div style="aspect-ratio:4/3;border-radius:var(--r-lg);overflow:hidden;margin-bottom:20px;background:var(--gray-100);">
+            <!-- 生产环境替换为"医院门诊医生与患者"场景照 -->
+            <img src="https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&h=450&fit=crop&auto=format&q=80"
+                 alt="医生门诊评估" loading="lazy" style="width:100%;height:100%;object-fit:cover;"
+                 onerror="this.onerror=null;this.src='https://picsum.photos/seed/step03/600/450';" />
+          </div>
+          <div class="step__num">03</div>
+          <h4>你去医院见医生</h4>
+          <p>合适的话，我们会帮你预约离你最近的研究中心。医生会做更详细的评估。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 真实病友故事 — 加头像 + 姓名 + 年龄/病种，提升可信度 -->
+  <section class="numbers">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:24px;margin-bottom:56px;">
+        <div>
+          <span class="eyebrow eyebrow--light">真实病友的故事</span>
+          <h2 style="color:var(--cream-50);margin-top:14px;" class="text-balance">他们和你<em style="color:var(--lime);">一样曾经犹豫</em></h2>
+        </div>
+        <p style="color:rgba(253,250,243,.7);max-width:36ch;font-size:var(--fs-lg);line-height:1.5;">这些都是匿名的真实分享。点开看看他们的故事。</p>
+      </div>
+    </div>
+
+    <div class="container container--wide" style="padding:0;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.08);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);">
+
+        <div class="story-card">
+          <div class="story-card__head">
+            <!-- 生产环境替换为授权匿名头像（可使用插画 / 剪影代表） -->
+            <div class="avatar avatar--lg">
+              <img src="https://i.pravatar.cc/150?img=47" alt="张女士头像"
+                   onerror="this.onerror=null;this.parentNode.textContent='张';" />
+            </div>
+            <div class="story-card__who">
+              <span class="story-card__name">张女士 · 42 岁</span>
+              <span class="story-card__meta">乳腺癌 · 上海</span>
+            </div>
+          </div>
+          <p class="story-card__quote">"我以为'临床试验'就是当小白鼠，后来发现完全不是这样。"</p>
+        </div>
+
+        <div class="story-card">
+          <div class="story-card__head">
+            <div class="avatar avatar--lg">
+              <img src="https://i.pravatar.cc/150?img=60" alt="李先生头像"
+                   onerror="this.onerror=null;this.parentNode.textContent='李';" />
+            </div>
+            <div class="story-card__who">
+              <span class="story-card__name">李先生 · 56 岁</span>
+              <span class="story-card__meta">2 型糖尿病 · 北京</span>
+            </div>
+          </div>
+          <p class="story-card__quote">"医生主动给我打电话，把每一步都讲得很清楚，没有催我。"</p>
+        </div>
+
+        <div class="story-card">
+          <div class="story-card__head">
+            <div class="avatar avatar--lg">
+              <img src="https://i.pravatar.cc/150?img=44" alt="王女士头像"
+                   onerror="this.onerror=null;this.parentNode.textContent='王';" />
+            </div>
+            <div class="story-card__who">
+              <span class="story-card__name">王女士 · 35 岁</span>
+              <span class="story-card__meta">医美 / 法令纹 · 杭州</span>
+            </div>
+          </div>
+          <p class="story-card__quote">"全程没花过一分钱，效果出乎我的预期。后来推荐了我妈妈也来。"</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 安全保障 -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-head__row">
+          <div>
+            <span class="eyebrow">你为什么可以放心</span>
+            <h2 style="margin-top:16px;" class="text-balance">这些事，我们替你<em>守住了</em></h2>
+          </div>
+          <p class="section-head__sub">把你能想到的、想不到的都做好，是我们最基本的工作。</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:var(--border-strong);border-left:var(--border-strong);">
+        <div style="padding:36px;border-right:var(--border-strong);border-bottom:var(--border-strong);">
+          <span style="font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--accent);font-weight:500;">/ 01 合规</span>
+          <h4 style="font-family:var(--font-serif);font-size:28px;font-weight:400;margin:14px 0;letter-spacing:-.01em;">国家药监局审批 + 医院伦理委员会监督</h4>
+          <p class="muted" style="line-height:1.7;">所有上线项目都经过国家药品监督管理局批准，并通过研究医院伦理委员会的独立审查。</p>
+        </div>
+        <div style="padding:36px;border-right:var(--border-strong);border-bottom:var(--border-strong);">
+          <span style="font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--accent);font-weight:500;">/ 02 隐私</span>
+          <h4 style="font-family:var(--font-serif);font-size:28px;font-weight:400;margin:14px 0;letter-spacing:-.01em;">个人信息严格脱敏与加密</h4>
+          <p class="muted" style="line-height:1.7;">你的手机号、姓名、病历不会出现在任何公开页面。仅授权的运营人员与医生可见。</p>
+        </div>
+        <div style="padding:36px;border-right:var(--border-strong);border-bottom:var(--border-strong);">
+          <span style="font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--accent);font-weight:500;">/ 03 退出权</span>
+          <h4 style="font-family:var(--font-serif);font-size:28px;font-weight:400;margin:14px 0;letter-spacing:-.01em;">任何阶段都可以申请退出</h4>
+          <p class="muted" style="line-height:1.7;">从填资料到入组之后，你随时可以叫停。退出不会影响你以后在这家医院的就医。</p>
+        </div>
+        <div style="padding:36px;border-right:var(--border-strong);border-bottom:var(--border-strong);">
+          <span style="font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--accent);font-weight:500;">/ 04 全程陪伴</span>
+          <h4 style="font-family:var(--font-serif);font-size:28px;font-weight:400;margin:14px 0;letter-spacing:-.01em;">研究中心团队全程监测你的健康</h4>
+          <p class="muted" style="line-height:1.7;">入组后，研究中心的医生护士会定期评估你的身体反应。任何不适都有专人对接。</p>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:48px;">
+        <a href="about.html" class="btn btn--ghost">了解更多关于我们的保障 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ + 社区（社区段改为"找到与你相似的人"） -->
+  <section class="section" style="background:var(--cream-100);">
+    <div class="container">
+      <div class="grid grid--2" style="gap:48px;">
+        <div>
+          <span class="eyebrow">你可能还想知道</span>
+          <h2 style="margin-top:16px;" class="text-balance">关于临床试验，<em>常见问题</em></h2>
+
+          <div class="faq-list" style="margin:32px 0 0;border-top:1px solid var(--ink-900);border-bottom:1px solid var(--ink-900);">
+            <details class="q">
+              <summary>参加临床试验，到底安全吗？</summary>
+              <div class="answer">所有临床试验必须经国家药品监督管理局批准，并由研究医院的伦理委员会独立审查后才能招募。试验期间，研究中心会定期监测你的健康指标，任何异常都会立即处理。整个流程受 GCP（药物临床试验质量管理规范）严格约束。</div>
+            </details>
+            <details class="q">
+              <summary>参加试验需要花钱吗？</summary>
+              <div class="answer">研究用药和研究相关的检查都是<strong style="color:var(--ink-900);">免费</strong>的，部分项目还会补贴你的交通费或提供误工补偿。试验过程中你不会为方案要求的任何检查、药物、随访支付费用。</div>
+            </details>
+            <details class="q">
+              <summary>我报名后多久会有人联系我？</summary>
+              <div class="answer">通常在 24 小时内，运营同事会通过电话或微信主动联系你，核对信息并回答你的疑问。工作日（9:00–18:00）内基本可以当天联系到，周末会在下一个工作日上午优先处理。</div>
+            </details>
+            <details class="q" style="border-bottom:none;">
+              <summary>如果中途想退出，会有麻烦吗？</summary>
+              <div class="answer">不会。从填资料到正式入组之后，你都可以在任何阶段申请退出，不需要解释理由。退出后你在这家医院的后续就医不会受到任何影响，这是法律赋予你的合法权利。</div>
+            </details>
+          </div>
+          <a href="about.html" class="btn btn--text mt-6">看完整答疑 →</a>
+        </div>
+
+        <div style="background:var(--ink-900);color:var(--cream-50);padding:48px;border-radius:var(--r-2xl);position:relative;overflow:hidden;">
+          <span class="eyebrow eyebrow--light">还想多聊几句？</span>
+          <h2 style="color:var(--cream-50);margin-top:16px;" class="text-balance">直接跟我们<em style="color:var(--lime);">打个电话</em></h2>
+          <p style="color:rgba(253,250,243,.75);margin-top:24px;line-height:1.7;font-size:var(--fs-lg);max-width:38ch;">
+            不知道自己合不合适？不确定这个项目怎么参加？专人接听，工作日 9:00–18:00，周末有值班。
+          </p>
+
+          <div style="display:grid;grid-template-columns:1fr;gap:14px;margin:32px 0;">
+            <div style="padding:20px 22px;background:rgba(253,250,243,.05);border:1px solid rgba(253,250,243,.1);border-radius:14px;">
+              <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(253,250,243,.6);margin-bottom:6px;">患者咨询专线</div>
+              <div style="font-family:var(--font-serif);font-size:30px;color:var(--lime);letter-spacing:0;">400-888-1688</div>
+            </div>
+            <div style="padding:20px 22px;background:rgba(253,250,243,.05);border:1px solid rgba(253,250,243,.1);border-radius:14px;">
+              <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(253,250,243,.6);margin-bottom:6px;">微信咨询（扫码添加）</div>
+              <div style="font-family:var(--font-sans);font-size:17px;color:var(--cream-50);">官方顾问 · 回复 24h 内</div>
+            </div>
+          </div>
+
+          <a href="contact.html" class="btn btn--primary">填留言，等回电 <span class="arrow">→</span></a>
+
+          <div style="position:absolute;right:-60px;top:-60px;width:200px;height:200px;border-radius:50%;background:linear-gradient(135deg, var(--accent) 0%, transparent 70%);opacity:.4;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 最终 CTA：从"准备好了吗"改为更暖的患者邀请 -->
+  <section style="background:var(--accent);padding:120px 0;position:relative;overflow:hidden;">
+    <svg style="position:absolute;right:-100px;bottom:-100px;width:500px;opacity:.15;" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="48" fill="none" stroke="var(--ink-900)" stroke-width=".5" />
+      <circle cx="50" cy="50" r="36" fill="none" stroke="var(--ink-900)" stroke-width=".5" />
+      <circle cx="50" cy="50" r="24" fill="none" stroke="var(--ink-900)" stroke-width=".5" />
+      <circle cx="50" cy="50" r="12" fill="var(--ink-900)" />
+    </svg>
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center;">
+        <div>
+          <span class="eyebrow" style="color:var(--ink-900);">给自己一个机会</span>
+          <h2 style="color:var(--ink-900);margin-top:16px;" class="text-balance">现在就花 <em style="font-style:italic;color:var(--ink-900);text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:8px;">2 分钟</em>，看看适合你的项目</h2>
+        </div>
+        <div>
+          <p style="color:var(--ink-900);font-size:var(--fs-lg);line-height:1.6;margin-bottom:32px;">
+            填完后，专人会在 24 小时内主动联系你。中途随时可退出，不影响你后续就医。
+          </p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <a href="trials.html" class="btn btn--ink btn--lg">看看适合我的项目 <span class="arrow">→</span></a>
+            <a href="contact.html" class="btn btn--ghost btn--lg">先问问看</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__deco" aria-hidden="true">JIUTAI</div>
+  <div class="container">
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
+        <div class="brand" style="color:var(--cream-50);">
+          <div class="brand__logo">JT</div>
+          <span translate="no">九泰临研</span>
+        </div>
+        <p>九泰药械旗下临床试验患者招募平台，帮你找到适合自己的临床试验，全程陪伴。</p>
+      </div>
+      <div>
+        <h5>找试验</h5>
+        <ul>
+          <li><a href="trials.html">看全部项目</a></li>
+          <li><a href="trials.html">按病种查找</a></li>
+          <li><a href="trials.html">按城市查找</a></li>
+          <li><a href="trials.html">医美相关</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>了解更多</h5>
+        <ul>
+          <li><a href="about.html">什么是临床试验</a></li>
+          <li><a href="about.html#faq">常见问题</a></li>
+          <li><a href="about.html#safety">安全保障</a></li>
+          <li><a href="my-applications.html">我的报名</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>关于我们</h5>
+        <ul>
+          <li><a href="about.html">关于九泰临研</a></li>
+          <li><a href="contact.html">联系方式</a></li>
+          <li><a href="#">隐私政策</a></li>
+          <li><a href="#">用户协议</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span>本平台内容仅作信息提供，不能替代医生的专业建议</span>
+    </div>
+  </div>
+</footer>
+<script src="../assets/prototype.js" defer></script>
+</body>
+</html>

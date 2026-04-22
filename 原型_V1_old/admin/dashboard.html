@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#050807" />
+<title>工作台 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+</head>
+<body class="admin">
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="admin-shell">
+  <aside class="admin-side" aria-label="后台主导航">
+    <div class="admin-side__brand">
+      <div class="brand__logo">JT</div>
+      <span translate="no">临研运营台</span>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="dashboard.html" aria-current="page"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="leads.html"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="community-moderation.html"><span class="admin-nav__icon">⛨</span>社区审核</a>
+
+      <div class="admin-nav__group">内容管理</div>
+      <a href="trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="prescreen-form.html"><span class="admin-nav__icon">▤</span>预筛表单</a>
+      <a href="#"><span class="admin-nav__icon">❡</span>FAQ 管理</a>
+      <a href="#"><span class="admin-nav__icon">◐</span>社区分区</a>
+
+      <div class="admin-nav__group">数据与系统</div>
+      <a href="#"><span class="admin-nav__icon">▥</span>基础统计</a>
+      <a href="#"><span class="admin-nav__icon">⚙</span>系统配置</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb">
+        <strong>工作台</strong>
+      </div>
+      <div class="admin-topbar__right">
+        <div class="admin-search">
+          <input type="search" placeholder="搜索试验、线索、患者…" aria-label="全局搜索" />
+        </div>
+        <button class="btn btn--ghost btn--sm">🔔 3</button>
+        <div class="admin-avatar" title="张运营 · operator">Z</div>
+      </div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--lime);text-transform:uppercase;">★ Good morning</span>
+          <h2 style="margin-top:14px;">早上好，<em style="color:var(--lime);font-style:italic;">张运营</em></h2>
+          <p class="page-head__sub">2026-04-18 · 你有 12 条新线索待处理</p>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost">导出今日数据</button>
+          <button class="btn btn--primary">+ 新建试验</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi__label">☎ 今日新线索</div>
+          <div class="kpi__num tabular">12</div>
+          <div class="kpi__sub --up">↑ 33% vs 昨日</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">⏳ 待联系</div>
+          <div class="kpi__num tabular">28</div>
+          <div class="kpi__sub --down">⚠ 5 条超 24h</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">⛨ 待审核</div>
+          <div class="kpi__num tabular">17</div>
+          <div class="kpi__sub">帖子 11 · 评论 6</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi__label">⚛ 招募中试验</div>
+          <div class="kpi__num tabular">62<em>+</em></div>
+          <div class="kpi__sub --up">↑ 本周新增 4</div>
+        </div>
+      </div>
+
+      <div class="detail-grid" style="grid-template-columns: 1.4fr 1fr;">
+        <div class="panel">
+          <div class="panel__head">
+            <h3>📈 最近 7 日预筛漏斗</h3>
+            <select class="select" style="min-height:34px;padding:4px 28px 4px 10px;font-size:var(--fs-sm);width:auto;">
+              <option>最近 7 日</option><option>最近 30 日</option>
+            </select>
+          </div>
+          <div class="panel__body">
+            <div style="display:flex;flex-direction:column;gap:18px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);margin-bottom:6px;">
+                  <span style="color:#b3bdb6;">试验详情浏览</span>
+                  <strong class="tabular" style="color:var(--cream-50);">2,486</strong>
+                </div>
+                <div class="bar-mini"><div class="bar-mini__fill" style="width:100%;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);margin-bottom:6px;">
+                  <span style="color:#b3bdb6;">预筛表单打开</span>
+                  <strong class="tabular" style="color:var(--cream-50);">624 <span style="color:#5a655e;font-family:var(--font-mono);font-size:11px;">25.1%</span></strong>
+                </div>
+                <div class="bar-mini"><div class="bar-mini__fill" style="width:25%;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);margin-bottom:6px;">
+                  <span style="color:#b3bdb6;">预筛提交成功</span>
+                  <strong class="tabular" style="color:var(--cream-50);">312 <span style="color:#5a655e;font-family:var(--font-mono);font-size:11px;">50.0%</span></strong>
+                </div>
+                <div class="bar-mini"><div class="bar-mini__fill" style="width:12.5%;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);margin-bottom:6px;">
+                  <span style="color:#b3bdb6;">24h 内首次跟进</span>
+                  <strong class="tabular" style="color:var(--lime);">281 <span style="color:#5a655e;font-family:var(--font-mono);font-size:11px;">90.1%</span></strong>
+                </div>
+                <div class="bar-mini"><div class="bar-mini__fill" style="width:11.3%;background:linear-gradient(90deg, var(--lime), #ffffff);"></div></div>
+              </div>
+            </div>
+
+            <div class="alert alert--success" style="margin-top:32px;">
+              <span class="alert__icon">★</span>
+              <div>本周转化率 <strong>12.5%</strong>，相比上周提升 <strong>1.2pp</strong>。其中乳腺癌项目贡献了 32% 的提交。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__head">
+            <h3>⚡ 快捷入口</h3>
+          </div>
+          <div class="panel__body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <a href="trials.html" class="btn btn--ghost" style="flex-direction:column;height:auto;padding:18px 14px;gap:8px;text-align:center;">
+                <span style="font-size:22px;color:var(--lime);">⚛</span>
+                <span class="small">新建试验</span>
+              </a>
+              <a href="leads.html" class="btn btn--ghost" style="flex-direction:column;height:auto;padding:18px 14px;gap:8px;text-align:center;">
+                <span style="font-size:22px;color:var(--lime);">☎</span>
+                <span class="small">查看新线索</span>
+              </a>
+              <a href="community-moderation.html" class="btn btn--ghost" style="flex-direction:column;height:auto;padding:18px 14px;gap:8px;text-align:center;">
+                <span style="font-size:22px;color:var(--lime);">⛨</span>
+                <span class="small">审核队列</span>
+              </a>
+              <a href="#" class="btn btn--ghost" style="flex-direction:column;height:auto;padding:18px 14px;gap:8px;text-align:center;">
+                <span style="font-size:22px;color:var(--lime);">❡</span>
+                <span class="small">新建 FAQ</span>
+              </a>
+            </div>
+
+            <h4 style="margin-top:28px;margin-bottom:12px;font-family:var(--font-mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#6e776f;font-weight:500;">本周待办</h4>
+            <ul style="list-style:none;padding:0;font-size:var(--fs-sm);margin:0;">
+              <li style="padding:14px 0;border-top:1px solid #1a201d;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <span style="color:#fbf6ec;display:flex;gap:10px;align-items:center;"><span class="status-dot status-dot--danger"></span> 5 条线索超 24h 未联系</span>
+                <a href="leads.html" class="btn btn--text" style="font-size:11px;">处理 →</a>
+              </li>
+              <li style="padding:14px 0;border-top:1px solid #1a201d;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <span style="color:#fbf6ec;display:flex;gap:10px;align-items:center;"><span class="status-dot status-dot--warning"></span> 肺癌项目表单待发布</span>
+                <a href="prescreen-form.html" class="btn btn--text" style="font-size:11px;">查看 →</a>
+              </li>
+              <li style="padding:14px 0;border-top:1px solid #1a201d;border-bottom:1px solid #1a201d;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <span style="color:#fbf6ec;display:flex;gap:10px;align-items:center;"><span class="status-dot status-dot--info"></span> 11 个新帖子待审核</span>
+                <a href="community-moderation.html" class="btn btn--text" style="font-size:11px;">审核 →</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:48px;text-align:center;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:#5a655e;">
+        ★ <a href="../index.html" style="color:#5a655e;">返回原型导览</a> · operator 角色 · 数据更新于 2 分钟前
+      </p>
+    </main>
+  </div>
+</div>
+</body>
+</html>

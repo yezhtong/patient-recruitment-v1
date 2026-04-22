@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* design-system.css 已在 layout 中引入，它负责全局字体、颜色、排版 token */
+/* 本文件保留给未来 Tailwind 自定义扩展使用 */

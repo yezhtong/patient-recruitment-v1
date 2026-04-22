@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#050807" />
+<title>线索详情 — 张芳</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+</head>
+<body class="admin">
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="admin-shell">
+  <aside class="admin-side">
+    <div class="admin-side__brand"><div class="brand__logo">JT</div><span translate="no">临研运营台</span></div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="leads.html" aria-current="page"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="community-moderation.html"><span class="admin-nav__icon">⛨</span>社区审核</a>
+      <div class="admin-nav__group">内容管理</div>
+      <a href="trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="prescreen-form.html"><span class="admin-nav__icon">▤</span>预筛表单</a>
+      <a href="#"><span class="admin-nav__icon">❡</span>FAQ 管理</a>
+      <a href="#"><span class="admin-nav__icon">◐</span>社区分区</a>
+      <div class="admin-nav__group">数据与系统</div>
+      <a href="#"><span class="admin-nav__icon">▥</span>基础统计</a>
+      <a href="#"><span class="admin-nav__icon">⚙</span>系统配置</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb">
+        <a href="dashboard.html">工作台</a> / <a href="leads.html">线索池</a> / <strong>张芳 · PS-20260418-1042</strong>
+      </div>
+      <div class="admin-topbar__right">
+        <button class="btn btn--ghost btn--sm">← 上一条</button>
+        <button class="btn btn--ghost btn--sm">下一条 →</button>
+        <div class="admin-avatar">Z</div>
+      </div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--lime);text-transform:uppercase;">★ Lead Detail</span>
+          <h2 style="margin-top:14px;">张芳 <span class="badge badge--info" style="font-size:13px;vertical-align:middle;margin-left:12px;">跟进中</span></h2>
+          <p class="page-head__sub">PS-20260418-1042 · HER2+ 早期乳腺癌靶向药 · 提交于 2026-04-18 12:42</p>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost">📞 拨打电话</button>
+          <button class="btn btn--ghost">💬 复制微信</button>
+          <button class="btn btn--primary">+ 新增跟进</button>
+        </div>
+      </div>
+
+      <div class="alert alert--info">
+        <span class="alert__icon">★</span>
+        <div style="flex:1;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>当前状态：<strong>跟进中</strong> · 由 张运营 于 04-18 14:30 修改</div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn--ghost btn--sm">改为：待联系</button>
+            <button class="btn btn--ghost btn--sm">改为：已联系</button>
+            <button class="btn btn--danger btn--sm">关闭线索</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div>
+          <div class="panel">
+            <div class="panel__head">
+              <h3>👤 患者基础资料</h3>
+              <button class="btn btn--text" style="font-size:11px;">🔓 查看完整手机号</button>
+            </div>
+            <div class="panel__body">
+              <dl class="def-list">
+                <dt>姓名</dt><dd>张芳</dd>
+                <dt>性别 / 年龄</dt><dd>女 · 42 岁</dd>
+                <dt>手机号</dt><dd>138 **** 0000 <span class="badge badge--plain" style="font-size:10px;margin-left:6px;">脱敏</span></dd>
+                <dt>所在城市</dt><dd>上海</dd>
+                <dt>主要病种</dt><dd>乳腺癌</dd>
+                <dt>账户 ID</dt><dd>U-2026-0042</dd>
+                <dt>注册时间</dt><dd>2026-03-22</dd>
+                <dt>历史报名</dt><dd>3 个项目（2 跟进中 · 1 已关闭）</dd>
+              </dl>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:18px;">
+            <div class="panel__head">
+              <h3>📝 项目预筛答案</h3>
+              <span style="font-family:var(--font-mono);font-size:11px;color:#6e776f;">表单 v3 · 2 分钟</span>
+            </div>
+            <div class="panel__body">
+              <dl class="def-list">
+                <dt>是否确诊 HER2+</dt><dd style="color:var(--lime);">是的，已经确诊</dd>
+                <dt>确诊距今</dt><dd>3 个月内</dd>
+                <dt>已接受治疗</dt><dd>暂未治疗</dd>
+                <dt>体重</dt><dd>55 kg</dd>
+                <dt>药物过敏</dt><dd style="color:#6e776f;">未填写</dd>
+                <dt>期望就诊中心</dt><dd>上海·复旦肿瘤</dd>
+              </dl>
+
+              <div class="alert alert--success" style="margin-top:18px;margin-bottom:0;">
+                <span class="alert__icon">✓</span>
+                <div>初步符合入排标准 · 建议优先安排面诊</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:18px;">
+            <div class="panel__head">
+              <h3>🕐 跟进时间线</h3>
+              <button class="btn btn--primary btn--sm">+ 新增跟进</button>
+            </div>
+            <div class="panel__body">
+              <div class="timeline">
+                <div class="timeline-item">
+                  <div class="timeline-item__dot">📞</div>
+                  <div class="timeline-item__content">
+                    <div class="timeline-item__meta"><span><strong>电话沟通</strong></span><span>04-18 14:30 · 张运营</span></div>
+                    <div class="timeline-item__note">
+                      已电话联系患者，确认基本情况和就诊意向。患者表示可以本周五到复旦肿瘤面诊。已加微信，下一步发送面诊须知。
+                      <div style="font-family:var(--font-mono);font-size:11px;color:#6e776f;margin-top:10px;letter-spacing:.04em;text-transform:uppercase;">📅 下次跟进：04-21 上午（确认面诊时间）</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-item__dot">💬</div>
+                  <div class="timeline-item__content">
+                    <div class="timeline-item__meta"><span><strong>微信沟通</strong></span><span>04-18 13:10 · 张运营</span></div>
+                    <div class="timeline-item__note">患者通过微信咨询了知情同意书相关问题，已发送 FAQ 链接。</div>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <div class="timeline-item__dot">✦</div>
+                  <div class="timeline-item__content">
+                    <div class="timeline-item__meta"><span><strong>系统通知</strong></span><span>04-18 12:42 · 系统</span></div>
+                    <div class="timeline-item__note">患者通过病友社区精选帖子链接进入预筛表单并提交，来源 post #2049。系统已自动指派给 张运营。</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside>
+          <div class="panel">
+            <div class="panel__head"><h3>🔗 来源与归因</h3></div>
+            <div class="panel__body">
+              <dl class="def-list">
+                <dt>来源页面</dt><dd><span class="badge badge--info">💬 社区帖</span></dd>
+                <dt>来源 ID</dt><dd>post-2049</dd>
+                <dt>UTM source</dt><dd>community</dd>
+                <dt>首次访问</dt><dd>2026-03-22</dd>
+                <dt>注册路径</dt><dd>社区帖子 → 注册</dd>
+              </dl>
+              <a href="../public/post-detail.html" class="btn btn--text mt-4" style="font-size:11px;">↗ 查看来源帖子</a>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:18px;">
+            <div class="panel__head">
+              <h3>🏥 研究中心协同</h3>
+              <button class="btn btn--text" style="font-size:11px;">编辑</button>
+            </div>
+            <div class="panel__body">
+              <dl class="def-list">
+                <dt>推荐中心</dt><dd>复旦肿瘤医院</dd>
+                <dt>中心联系人</dt><dd>陈主任</dd>
+                <dt>中心反馈</dt><dd><span class="badge badge--success">已接收</span></dd>
+                <dt>反馈备注</dt><dd>已安排周五上午面诊，需患者自带 PR 报告</dd>
+              </dl>
+            </div>
+          </div>
+
+          <div class="panel" style="margin-top:18px;">
+            <div class="panel__head"><h3>📚 该患者历史报名</h3></div>
+            <div class="panel__body">
+              <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:10px;font-size:var(--fs-sm);">
+                <li style="padding:14px;background:#131b18;border-radius:10px;border:1px solid #1a201d;">
+                  <strong style="color:#fbf6ec;display:block;margin-bottom:4px;">HER2+ 早期乳腺癌靶向药</strong>
+                  <div style="font-family:var(--font-mono);font-size:10px;color:#6e776f;letter-spacing:.04em;">04-18 提交 · 跟进中 · 当前</div>
+                </li>
+                <li style="padding:14px;background:#131b18;border-radius:10px;border:1px solid #1a201d;">
+                  <strong style="color:#fbf6ec;display:block;margin-bottom:4px;">升白方案优化研究</strong>
+                  <div style="font-family:var(--font-mono);font-size:10px;color:#6e776f;letter-spacing:.04em;">04-15 · 已联系</div>
+                </li>
+                <li style="padding:14px;background:#131b18;border-radius:10px;border:1px solid #1a201d;">
+                  <strong style="color:#fbf6ec;display:block;margin-bottom:4px;">CDK4/6 辅助治疗</strong>
+                  <div style="font-family:var(--font-mono);font-size:10px;color:#6e776f;letter-spacing:.04em;">03-20 · 关闭 · 不符合</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

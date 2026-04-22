@@ -1,0 +1,229 @@
+  body { background: var(--cream-50); }
+  .auth-shell { display: grid; grid-template-columns: 1.05fr 1fr; min-height: 100vh; }
+  @media (max-width: 880px) {
+    .auth-shell { grid-template-columns: 1fr; }
+    .auth-side { padding: 40px 24px; min-height: auto; }
+    .auth-side__body { margin: 32px 0; }
+  }
+
+  /* ============================================================
+     左侧品牌侧：深色科技感 + 柔和橙色光晕
+     ============================================================ */
+  .auth-side {
+    background:
+      radial-gradient(ellipse 80% 60% at 85% 100%, rgba(255, 107, 53, .28), transparent 65%),
+      radial-gradient(ellipse 60% 50% at 0% 0%, rgba(255, 107, 53, .12), transparent 60%),
+      var(--ink-900);
+    color: var(--cream-50);
+    padding: 40px 56px 40px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* 背景装饰：细网格 */
+  .auth-side::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .05;
+    background-image:
+      linear-gradient(to right, var(--cream-50) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--cream-50) 1px, transparent 1px);
+    background-size: 64px 64px;
+    z-index: 0;
+  }
+
+  /* 背景装饰：右上装饰编号 */
+  .auth-side::after {
+    content: "/ 2026";
+    position: absolute;
+    top: 40px;
+    right: 56px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .18em;
+    color: rgba(253, 250, 243, .35);
+    z-index: 1;
+  }
+
+  .auth-side__deco { display: none; }
+  .auth-side__decoLines { display: none; }
+  .auth-side > * { position: relative; z-index: 2; }
+
+  /* 品牌 logo */
+  .auth-side__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--cream-50);
+  }
+  .auth-side .brand { color: var(--cream-50); }
+  .auth-side .brand__logo {
+    background: var(--lime);
+    color: var(--ink-900);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: -.02em;
+  }
+
+  /* 正文区（居中垂直）*/
+  .auth-side__body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 480px;
+    margin: auto 0;
+  }
+  .auth-side .eyebrow {
+    color: var(--lime);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .auth-side h2 {
+    color: var(--cream-50);
+    font-family: var(--font-serif);
+    font-size: clamp(44px, 5vw, 68px);
+    margin: 0;
+    line-height: 1.02;
+    letter-spacing: -.025em;
+    font-weight: 400;
+  }
+  .auth-side h2 em {
+    color: var(--lime);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .auth-side__lead {
+    color: rgba(253, 250, 243, .72);
+    font-size: var(--fs-lg);
+    line-height: 1.55;
+    max-width: 40ch;
+    margin: 0;
+  }
+
+  /* 优势列表：卡片式编号 */
+  .auth-side__benefits {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 28px;
+  }
+  .auth-side__benefit {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 18px;
+    align-items: center;
+    padding: 16px 18px;
+    color: var(--cream-50);
+    font-size: var(--fs-md);
+    background: rgba(253, 250, 243, .04);
+    border: 1px solid rgba(253, 250, 243, .08);
+    border-radius: 12px;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .auth-side__benefit:hover {
+    background: rgba(253, 250, 243, .07);
+    border-color: rgba(196, 255, 102, .3);
+    transform: translateX(2px);
+  }
+  .auth-side__benefit:last-child { border-bottom: 1px solid rgba(253, 250, 243, .08); }
+  .auth-side__benefit__num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--lime);
+    padding: 4px 8px;
+    border: 1px solid rgba(196, 255, 102, .3);
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .auth-side__foot {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(253, 250, 243, .08);
+    color: rgba(253, 250, 243, .45);
+    font-size: var(--fs-xs);
+    font-family: var(--font-mono);
+    letter-spacing: .06em;
+  }
+
+  .auth-main { display: grid; align-items: start; justify-items: center; padding: 72px 32px 56px; }
+  .auth-form { width: 100%; max-width: 460px; }
+  .auth-form h1 {
+    font-family: var(--font-serif);
+    font-size: 64px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    line-height: 1;
+    letter-spacing: -.02em;
+  }
+  .auth-form > p.sub { margin-bottom: 36px; color: var(--gray-600); font-size: var(--fs-lg); }
+
+  .tab-switch {
+    display: flex;
+    background: transparent;
+    border: 1px solid var(--ink-200);
+    padding: 4px;
+    border-radius: var(--r-pill);
+    margin-bottom: 32px;
+  }
+  .tab-switch button {
+    flex: 1;
+    padding: 11px 16px;
+    border: none;
+    background: transparent;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--gray-500);
+    cursor: pointer;
+    font-family: var(--font-sans);
+  }
+  .tab-switch button[aria-selected="true"] {
+    background: var(--ink-900);
+    color: var(--cream-50);
+  }
+
+  .otp-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+  .otp-input { letter-spacing: .4em; }
+
+  .agreement { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 28px; font-size: var(--fs-sm); color: var(--gray-600); }
+  .agreement input { margin-top: 4px; accent-color: var(--accent); }
+
+  .auth-alert { padding: 10px 14px; border-radius: 10px; font-size: 14px; margin-bottom: 12px; }
+  .auth-alert--error { background: var(--danger-50); color: var(--danger-700); border: 1px solid var(--danger-500); }
+  .auth-alert--info { background: var(--lime-soft); color: var(--ink-900); border: 1px solid var(--lime); font-family: var(--font-mono); font-size: 13px; }
+
+  .divider {
+    text-align: center; margin: 28px 0;
+    color: var(--gray-400);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .divider::before, .divider::after {
+    content: ""; display: inline-block; width: 30%; height: 1px;
+    background: var(--ink-200); vertical-align: middle; margin: 0 12px;
+  }

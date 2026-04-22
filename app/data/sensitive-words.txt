@@ -1,0 +1,53 @@
+# 九泰临研社区敏感词库（V1 dev 默认，待运营审定）
+# 格式：每行一条 `<risk_level>|<risk_type>|<keyword>`
+# risk_level: high / medium
+# risk_type: contact / drug-sale / enroll-promise / quackery / ad
+# 运营可直接编辑本文件，或通过后台"系统配置 / 敏感词"管理
+#
+# 高风险 high：直接拦截发布
+# 中风险 medium：允许提交但转人工审核（reviewStatus = pending）
+
+# --- 联系方式外露 contact（high）---
+high|contact|微信:
+high|contact|微信：
+high|contact|加我微信
+high|contact|v信
+high|contact|vx
+high|contact|QQ群
+high|contact|qq群
+high|contact|qq：
+high|contact|QQ：
+high|contact|电话:
+high|contact|电话：
+
+# --- 售药 / 代购 drug-sale（high）---
+high|drug-sale|出售
+high|drug-sale|代购
+high|drug-sale|低价
+high|drug-sale|私信购买
+high|drug-sale|长期出
+high|drug-sale|现货
+
+# --- 包入组 / 代办 enroll-promise（high）---
+high|enroll-promise|包入组
+high|enroll-promise|代办入组
+high|enroll-promise|保证入组
+high|enroll-promise|100%入组
+high|enroll-promise|保证通过
+high|enroll-promise|保证有效
+
+# --- 偏方 / 夸大疗效 quackery（medium）---
+medium|quackery|偏方
+medium|quackery|祖传秘方
+medium|quackery|彻底治愈
+medium|quackery|根治
+medium|quackery|神药
+medium|quackery|包治
+
+# --- 引流广告 ad（medium）---
+medium|ad|添加下方二维码
+medium|ad|扫码添加
+medium|ad|扫码领取
+medium|ad|关注公众号
+
+# --- 其他：手机号 / 邮箱会由正则规则单独处理 ---

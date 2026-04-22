@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>提交成功 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  .success-shell { padding: 80px 0 96px; }
+  .success-card {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    border-radius: var(--r-3xl);
+    padding: 80px 64px;
+    text-align: center;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .success-card__deco {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .12;
+    background-image:
+      radial-gradient(circle at 20% 30%, var(--lime), transparent 40%),
+      radial-gradient(circle at 80% 70%, var(--accent), transparent 40%);
+  }
+  .success-card > * { position: relative; z-index: 1; }
+  .success-icon {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: var(--lime);
+    color: var(--ink-900);
+    display: grid; place-items: center;
+    margin: 0 auto 32px;
+    font-size: 56px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    box-shadow: 0 0 0 12px rgba(200,255,74,.15);
+  }
+  .success-card h1 {
+    color: var(--cream-50);
+    font-size: clamp(48px, 6vw, 80px);
+    margin-bottom: 16px;
+  }
+  .success-card h1 em { color: var(--lime); font-style: italic; }
+  .success-card p.lead { color: rgba(253,250,243,.85); font-size: var(--fs-xl); margin-bottom: 32px; max-width: 50ch; margin-left: auto; margin-right: auto; line-height: 1.5; }
+  .success-id {
+    display: inline-flex;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 24px;
+    background: rgba(253,250,243,.08);
+    border: 1px solid rgba(253,250,243,.2);
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    color: rgba(253,250,243,.7);
+    letter-spacing: .04em;
+  }
+  .success-id strong { color: var(--lime); }
+
+  .next-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    text-align: left;
+    margin: 56px auto 40px;
+    max-width: 800px;
+    border-top: 1px solid rgba(253,250,243,.15);
+    border-left: 1px solid rgba(253,250,243,.15);
+  }
+  @media (max-width: 700px) { .next-steps { grid-template-columns: 1fr; } }
+  .next-step {
+    padding: 24px;
+    border-right: 1px solid rgba(253,250,243,.15);
+    border-bottom: 1px solid rgba(253,250,243,.15);
+  }
+  .next-step__num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--lime);
+    letter-spacing: .12em;
+    margin-bottom: 14px;
+  }
+  .next-step h4 { color: var(--cream-50); font-family: var(--font-serif); font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+  .next-step p { color: rgba(253,250,243,.7); font-size: var(--fs-sm); margin: 0; line-height: 1.5; }
+
+  .recommend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 700px) { .recommend-grid { grid-template-columns: 1fr; } }
+  .recommend-card {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-xl);
+    padding: 32px;
+    transition: all .3s var(--ease-out);
+  }
+  .recommend-card:hover { border-color: var(--ink-900); transform: translateY(-2px); }
+  .recommend-card h4 { font-family: var(--font-serif); font-size: 26px; font-weight: 400; margin-bottom: 8px; }
+  .recommend-card p { color: var(--gray-600); font-size: var(--fs-md); margin-bottom: 20px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰<em style="font-style:italic;color:var(--accent);">临研</em></span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html">找试验</a>
+      <a href="my-applications.html">我的报名</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="my-applications.html" style="border:none;font-size:var(--fs-sm);">小芳，你好</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="success-shell">
+  <div class="container" style="max-width: 1000px;">
+    <div class="success-card" role="status" aria-live="polite">
+      <div class="success-card__deco" aria-hidden="true"></div>
+      <div class="success-icon">✓</div>
+      <span class="eyebrow eyebrow--center" style="color:var(--lime);justify-content:center;">★ 预筛已提交</span>
+      <h1 style="margin-top:18px;">就这样，<br /><em>已经成功了</em></h1>
+      <p class="lead">运营团队会在 24 小时内通过电话或微信联系你，确认后续安排。</p>
+      <div class="success-id">提交编号 <strong class="tabular">PS-20260418-1042</strong></div>
+
+      <div class="next-steps" aria-label="后续步骤">
+        <div class="next-step">
+          <div class="next-step__num">/ 01 等待</div>
+          <h4>电话联系</h4>
+          <p>注意 021 / 138 开头的电话与微信好友请求。</p>
+        </div>
+        <div class="next-step">
+          <div class="next-step__num">/ 02 沟通</div>
+          <h4>确认信息</h4>
+          <p>运营会与你确认基础信息和就诊安排。</p>
+        </div>
+        <div class="next-step">
+          <div class="next-step__num">/ 03 入组</div>
+          <h4>面诊面诊</h4>
+          <p>符合条件后将安排你到研究中心面诊。</p>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="my-applications.html" class="btn btn--primary btn--lg">查看我的报名 <span class="arrow">→</span></a>
+        <a href="trials.html" class="btn btn--ghost btn--lg" style="border-color:rgba(253,250,243,.3);color:var(--cream-50);">浏览其他项目</a>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-bottom:32px;">
+      <span class="eyebrow eyebrow--center" style="justify-content:center;">★ 在等待联系的时候</span>
+      <h3 style="margin-top:14px;font-family:var(--font-serif);font-size:36px;font-weight:400;letter-spacing:-.01em;">你也可以<em style="color:var(--accent);font-style:italic;"> 这样做</em></h3>
+    </div>
+
+    <div class="recommend-grid">
+      <div class="recommend-card">
+        <span class="eyebrow">有疑问</span>
+        <h4 style="margin-top:14px;">直接<em style="color:var(--accent);font-style:italic;">给我们打电话</em></h4>
+        <p>在等待联系的时候，任何疑问都可以拨打 <strong>400-888-1688</strong>，工作日 9:00–18:00。</p>
+        <a href="contact.html" class="btn btn--ink">联系我们 <span class="arrow">→</span></a>
+      </div>
+      <div class="recommend-card">
+        <span class="eyebrow">学习指南</span>
+        <h4 style="margin-top:14px;">看懂<em style="color:var(--accent);font-style:italic;">临床试验</em></h4>
+        <p>"知情同意书"要签什么？"III 期"是什么意思？常见问题这里有答案。</p>
+        <a href="about.html" class="btn btn--ink">查看 FAQ <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" style="margin-top:80px;">
+  <div class="container">
+    <div class="site-footer__bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span><a href="home.html">返回首页</a> · <a href="../index.html">原型导览</a></span>
+    </div>
+  </div>
+</footer>
+<script src="../assets/prototype.js" defer></script>
+</body>
+</html>

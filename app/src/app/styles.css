@@ -1,0 +1,117 @@
+/* ============================================================
+   Hero Visual v2: 真实病友/医生照片 + 飘浮信息卡
+   ============================================================ */
+.hero-photo {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-2xl);
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--accent-soft), var(--ink-100));
+  box-shadow: var(--shadow-md);
+}
+.hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hero-photo__overlay {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 28px 28px 24px;
+  color: var(--cream-50);
+  background: linear-gradient(to top, rgba(10,20,17,.78) 0%, rgba(10,20,17,.35) 60%, transparent 100%);
+}
+.hero-photo__overlay-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--lime);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.hero-photo__overlay-label::before {
+  content: "";
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--lime);
+  box-shadow: 0 0 0 4px rgba(200, 255, 74, .25);
+  animation: dot-pulse 2.4s infinite var(--ease-out);
+}
+.hero-photo__overlay-text {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  line-height: 1.4;
+  color: var(--cream-50);
+}
+@keyframes dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(200, 255, 74, .25); }
+  50%      { box-shadow: 0 0 0 8px rgba(200, 255, 74, .05); }
+}
+
+/* 飘浮数据卡 */
+.hero-pill {
+  position: absolute;
+  left: -24px;
+  top: 36px;
+  background: var(--cream-0);
+  padding: 14px 18px;
+  border-radius: var(--r-lg);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: var(--shadow-md);
+  z-index: 2;
+  border: 1px solid var(--ink-100);
+}
+.hero-pill__num {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--accent);
+}
+.hero-pill__lbl {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--ink-900);
+  max-width: 12ch;
+}
+
+/* Hero 左侧承诺栏：取代 3 个分散徽章 */
+.hero-promises {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--ink-200);
+  border-bottom: 1px solid var(--ink-200);
+  padding: 20px 0;
+  margin-top: 32px;
+  max-width: 520px;
+}
+.hero-promise {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 0 16px;
+  border-right: 1px solid var(--ink-200);
+}
+.hero-promise:first-child { padding-left: 0; }
+.hero-promise:last-child { border-right: none; padding-right: 0; }
+.hero-promise__k {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink-900);
+}
+.hero-promise__k em { color: var(--accent); font-style: normal; }
+.hero-promise__v {
+  font-size: 13px;
+  color: var(--gray-600);
+  line-height: 1.3;
+}
+
+@media (max-width: 720px) {
+  .hero-pill { left: 12px; top: 12px; }
+  .hero-photo__overlay-text { font-size: 17px; }
+  .hero-promises { grid-template-columns: repeat(3, 1fr); }
+  .hero-promise { padding: 0 10px; }
+}

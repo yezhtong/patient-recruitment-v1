@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>HER2+ 早期乳腺癌患者真实经验分享 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  .breadcrumb { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--gray-500); text-transform: uppercase; letter-spacing: .12em; display: flex; gap: 8px; margin: 32px 0 24px; }
+  .breadcrumb a { color: var(--gray-500); }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb strong { color: var(--ink-900); }
+
+  .layout-2 { display: grid; grid-template-columns: 1fr 360px; gap: 64px; align-items: start; padding-bottom: 96px; }
+  @media (max-width: 960px) { .layout-2 { grid-template-columns: 1fr; } }
+
+  .post-hero { padding: 32px 0 48px; border-bottom: 1px solid var(--ink-200); margin-bottom: 48px; }
+  .post-hero h1 { font-size: clamp(36px, 5vw, 64px); margin: 24px 0; line-height: 1.15; }
+  .post-author {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .post-author__left { display: flex; gap: 14px; align-items: center; }
+  .post-author__avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--ink-900);
+    color: var(--cream-50);
+    display: grid; place-items: center;
+    font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .post-author__info strong { display: block; color: var(--ink-900); font-size: var(--fs-md); }
+  .post-author__info small { color: var(--gray-500); font-size: var(--fs-xs); font-family: var(--font-mono); letter-spacing: .04em; text-transform: uppercase; margin-top: 4px; display: block; }
+
+  .post-content { color: var(--ink-800); line-height: 1.85; font-size: var(--fs-lg); max-width: 68ch; }
+  .post-content p { margin-bottom: 24px; }
+  .post-content h3 {  font-size: 32px; font-weight: 400; margin: 48px 0 16px; letter-spacing: -.01em; }
+
+  .related-trial {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    border-radius: var(--r-2xl);
+    padding: 28px 32px;
+    margin: 32px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: relative;
+    overflow: hidden;
+  }
+  .related-trial h4 { color: var(--cream-50); margin-bottom: 6px;  font-weight: 400; font-size: 24px; }
+  .related-trial .muted { color: rgba(253,250,243,.7); font-size: var(--fs-sm); font-family: var(--font-mono); letter-spacing: .04em; text-transform: uppercase; }
+
+  .comments-section { padding-top: 48px; border-top: var(--border-strong); margin-top: 48px; }
+  .comments-section h3 {  font-size: 36px; font-weight: 400; margin-bottom: 28px; }
+
+  .comment {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 14px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--ink-100);
+  }
+  .comment:last-child { border-bottom: none; }
+  .comment__avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--ink-100);
+    color: var(--ink-700);
+    display: grid; place-items: center;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+  }
+  .comment__head {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    margin-bottom: 8px;
+    font-size: var(--fs-sm);
+    flex-wrap: wrap;
+  }
+  .comment__head strong { color: var(--ink-900); font-size: var(--fs-md); }
+  .comment__head small { color: var(--gray-500); font-family: var(--font-mono); font-size: var(--fs-xs); letter-spacing: .04em; text-transform: uppercase; }
+  .comment__head .author-tag {
+    background: var(--lime);
+    color: var(--ink-900);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .comment__content { color: var(--ink-800); font-size: var(--fs-md); line-height: 1.7; }
+  .comment__actions { display: flex; gap: 18px; margin-top: 12px; font-size: var(--fs-xs); color: var(--gray-500); font-family: var(--font-mono); letter-spacing: .04em; text-transform: uppercase; }
+  .comment__actions button { background: none; border: none; color: inherit; cursor: pointer; padding: 0; font-family: inherit; font-size: inherit; }
+  .comment__actions button:hover { color: var(--accent); }
+
+  .reply-form { margin-bottom: 28px; padding: 24px; background: var(--cream-100); border-radius: var(--r-xl); }
+
+  .side-block { border: var(--border); border-radius: var(--r-xl); padding: 28px; margin-bottom: 18px; }
+  .side-block h4 {  font-size: 22px; font-weight: 400; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰临研</span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html">找试验</a>
+      <a href="community.html" aria-current="page">病友社区</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="my-applications.html" style="border:none;font-size:var(--fs-sm);">小芳，你好</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="container">
+    <div class="breadcrumb"><a href="community.html">病友社区</a><span>/</span><a href="#">乳腺癌患者圈</a><span>/</span><strong>当前帖子</strong></div>
+
+    <div class="layout-2">
+      <article>
+        <header class="post-hero">
+          <div style="display:flex;gap:6px;margin-bottom:18px;">
+            <span class="tag tag--accent">精选</span>
+            <span class="tag">乳腺癌</span>
+            <span class="tag">经验分享</span>
+          </div>
+          <h1>HER2+ 早期乳腺癌患者的真实经验：从确诊到入组试验的 90 天</h1>
+
+          <div class="post-author">
+            <div class="post-author__left">
+              <div class="post-author__avatar">匿</div>
+              <div class="post-author__info">
+                <strong>匿名病友</strong>
+                <small>2026-04-18 · 上海 · 浏览 1,238</small>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn--ghost btn--sm">↗ 分享</button>
+              <button class="btn btn--ghost btn--sm">⚠ 举报</button>
+            </div>
+          </div>
+        </header>
+
+        <div class="post-content">
+          <p>3 个月前刚被确诊 HER2 阳性早期乳腺癌，当时整个人都懵了。在等待手术的那段时间里，我经常上网搜索各种资料，想知道未来的治疗会是怎样的。</p>
+
+          <h3>第 1 步：确诊后的迷茫</h3>
+          <p>说实话，"HER2 阳性"这四个字第一次听到的时候，根本不知道是什么意思，回家上网一查，发现网上的信息又复杂又吓人。后来在这个社区看到一个姐妹分享的经验，说她参加了一项靶向药的临床试验，让我对"临床试验"有了新的认知。</p>
+
+          <h3>第 2 步：在这里找到了项目</h3>
+          <p>通过这个社区的"相关试验"入口，我找到了一项 HER2 阳性早期乳腺癌的 III 期试验。说实话，最打动我的是项目页里那段"适合参加的人"和"不适合的人"的说明，写得很清楚，不像有些临床试验登记网站全是看不懂的术语。</p>
+
+          <div class="related-trial">
+            <div>
+              <h4>📌 我参加的就是这个项目</h4>
+              <p class="muted">某新型靶向药对 HER2+ 早期乳腺癌的疗效研究</p>
+            </div>
+            <a href="trial-detail.html" class="btn btn--primary" style="position:relative;z-index:1;">立即预筛 <span class="arrow">→</span></a>
+          </div>
+
+          <h3>第 3 步：预筛 + 面诊 + 入组</h3>
+          <p>在线预筛真的只用了 2 分钟，因为基础资料是平台自动带入的。第二天上午，运营老师就打来电话，确认了我的情况，还耐心解释了我担心的几个问题。一周后我去复旦肿瘤医院面诊，又过了两周就正式入组了。</p>
+
+          <h3>给同样情况的姐妹们的建议</h3>
+          <p>1. 不要被网上的负面信息吓到，临床试验是有严格监管的。<br />2. 如果不确定项目是否适合，可以先在病友圈问问，大家都很热心。<br />3. 一定要认真读"知情同意书"，不懂的地方可以问研究中心的医生。<br />4. 入组之后保持心态平和，定期随访很重要。</p>
+
+          <p>祝所有姐妹早日康复 ❤️</p>
+        </div>
+
+        <section class="comments-section">
+          <h3>评论 / 32 条</h3>
+
+          <div class="reply-form">
+            <textarea class="textarea" placeholder="说点什么吧…" rows="3"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:10px;">
+              <label style="display:flex;gap:8px;align-items:center;font-size:var(--fs-sm);color:var(--gray-600);">
+                <input type="checkbox" /> 匿名发布
+              </label>
+              <button class="btn btn--ink btn--sm">发表评论 →</button>
+            </div>
+          </div>
+
+          <div class="comment">
+            <div class="comment__avatar">王</div>
+            <div>
+              <div class="comment__head">
+                <strong>王女士</strong> <small>2 小时前</small>
+              </div>
+              <div class="comment__content">谢谢分享，我妈妈也是 HER2+，这个帖子帮我看清楚了流程，准备让她也试试预筛。</div>
+              <div class="comment__actions"><button>12</button><button>↩ 回复</button></div>
+            </div>
+          </div>
+
+          <div class="comment">
+            <div class="comment__avatar">李</div>
+            <div>
+              <div class="comment__head">
+                <strong>李芳</strong> <small>5 小时前</small>
+              </div>
+              <div class="comment__content">想问下楼主，入组之后随访是不是要经常请假？工作怎么协调的？</div>
+              <div class="comment__actions"><button>5</button><button>↩ 回复</button></div>
+            </div>
+          </div>
+
+          <div class="comment">
+            <div class="comment__avatar">匿</div>
+            <div>
+              <div class="comment__head">
+                <strong>匿名病友</strong>
+                <span class="author-tag">作者</span>
+                <small>3 小时前</small>
+              </div>
+              <div class="comment__content">回复李芳：每 3 周一次随访，每次半天左右。我跟老板说了情况，单位还挺支持的。</div>
+              <div class="comment__actions"><button>8</button><button>↩ 回复</button></div>
+            </div>
+          </div>
+
+          <div class="comment">
+            <div class="comment__avatar">张</div>
+            <div>
+              <div class="comment__head">
+                <strong>张老师</strong>
+                <span class="author-tag" style="background:var(--accent);color:var(--cream-50);">官方</span>
+                <small>1 小时前</small>
+              </div>
+              <div class="comment__content">感谢分享真实经历！如果还有姐妹有疑问，可以在乳腺癌患者圈发帖讨论，我们也会定期答疑。</div>
+              <div class="comment__actions"><button>15</button><button>↩ 回复</button></div>
+            </div>
+          </div>
+
+          <div class="text-center mt-12">
+            <button class="btn btn--ghost">加载更多评论 (28)</button>
+          </div>
+        </section>
+      </article>
+
+      <aside style="position:sticky;top:100px;">
+        <div class="side-block" style="background:var(--ink-900);color:var(--cream-50);border-color:var(--ink-900);">
+          <span class="eyebrow" style="color:var(--lime);">帖子相关试验</span>
+          <h4 style="margin-top:14px;color:var(--cream-50);">符合条件可立即提交预筛</h4>
+          <a href="trial-detail.html" style="display:block;margin-top:18px;padding:18px;background:rgba(253,250,243,.05);border-radius:14px;color:var(--cream-50);text-decoration:none;border:1px solid rgba(253,250,243,.1);">
+            <strong style="font-size:20px;font-weight:400;display:block;margin-bottom:8px;">HER2+ 早期乳腺癌靶向药</strong>
+            <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(253,250,243,.6);">📍 上海·北京·广州 · 18-70 岁女性</div>
+          </a>
+          <a href="prescreen.html" class="btn btn--primary mt-4" style="width:100%;">立即预筛 <span class="arrow">→</span></a>
+        </div>
+
+        <div class="side-block">
+          <span class="eyebrow">同社区热门</span>
+          <h4 style="margin-top:14px;">乳腺癌讨论</h4>
+          <ol style="list-style:none;padding:0;margin-top:14px;">
+            <li style="padding:14px 0;border-top:1px solid var(--ink-100);"><a href="#" style="color:var(--ink-900);font-size:var(--fs-sm);line-height:1.5;">第一次面诊带什么资料？</a></li>
+            <li style="padding:14px 0;border-top:1px solid var(--ink-100);"><a href="#" style="color:var(--ink-900);font-size:var(--fs-sm);line-height:1.5;">化疗期间饮食建议</a></li>
+            <li style="padding:14px 0;border-top:1px solid var(--ink-100);"><a href="#" style="color:var(--ink-900);font-size:var(--fs-sm);line-height:1.5;">CDK4/6 抑制剂副作用经验</a></li>
+            <li style="padding:14px 0;border-top:1px solid var(--ink-100);"><a href="#" style="color:var(--ink-900);font-size:var(--fs-sm);line-height:1.5;">心理调节小技巧分享</a></li>
+          </ol>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span><a href="home.html">返回首页</a> · <a href="../index.html">原型导览</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

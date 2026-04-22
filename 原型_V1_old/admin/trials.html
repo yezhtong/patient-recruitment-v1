@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#050807" />
+<title>试验管理 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+<style>
+  .admin .table .status-cell select {
+    background: rgba(200,255,74,.08);
+    color: var(--lime);
+    border: 1px solid rgba(200,255,74,.2);
+    padding: 4px 24px 4px 10px;
+    font-size: 11px;
+    min-height: 28px;
+    font-family: var(--font-mono);
+    letter-spacing: .04em;
+    border-radius: 6px;
+    width: auto;
+  }
+  .row-warn { background: rgba(201, 122, 20, .06); }
+</style>
+</head>
+<body class="admin">
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="admin-shell">
+  <aside class="admin-side">
+    <div class="admin-side__brand"><div class="brand__logo">JT</div><span translate="no">临研运营台</span></div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="leads.html"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="community-moderation.html"><span class="admin-nav__icon">⛨</span>社区审核</a>
+      <div class="admin-nav__group">内容管理</div>
+      <a href="trials.html" aria-current="page"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="prescreen-form.html"><span class="admin-nav__icon">▤</span>预筛表单</a>
+      <a href="#"><span class="admin-nav__icon">❡</span>FAQ 管理</a>
+      <a href="#"><span class="admin-nav__icon">◐</span>社区分区</a>
+      <div class="admin-nav__group">数据与系统</div>
+      <a href="#"><span class="admin-nav__icon">▥</span>基础统计</a>
+      <a href="#"><span class="admin-nav__icon">⚙</span>系统配置</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb"><a href="dashboard.html">工作台</a> / <strong>试验管理</strong></div>
+      <div class="admin-topbar__right">
+        <div class="admin-search"><input type="search" placeholder="搜索…" aria-label="搜索" /></div>
+        <div class="admin-avatar">Z</div>
+      </div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--lime);text-transform:uppercase;">★ Trials</span>
+          <h2 style="margin-top:14px;">试验管理</h2>
+          <p class="page-head__sub">共 84 个 · 招募中 62 · 暂停 5 · 已关闭 17</p>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost">📋 复制已有试验</button>
+          <button class="btn btn--primary">+ 新建试验</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <input type="search" placeholder="试验名称…" />
+        <select class="select"><option>全部病种</option><option>乳腺癌</option><option>糖尿病</option><option>肺癌</option></select>
+        <select class="select"><option>全部城市</option><option>上海</option><option>北京</option></select>
+        <select class="select"><option>全部招募状态</option><option>招募中</option><option>暂停</option></select>
+        <select class="select"><option>全部公开状态</option><option>已发布</option><option>未发布</option></select>
+        <button class="btn btn--ghost btn--sm">重置</button>
+        <span style="margin-left:auto;font-family:var(--font-mono);font-size:11px;color:#6e776f;letter-spacing:.04em;">显示 1-20 / 共 84</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>试验名称</th>
+              <th>病种</th>
+              <th>城市</th>
+              <th>招募</th>
+              <th>公开</th>
+              <th>表单</th>
+              <th class="num">本周提交</th>
+              <th>更新</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a href="#" style="font-family:var(--font-serif);font-size:18px;">某新型靶向药对 HER2+ 早期乳腺癌的疗效研究</a>
+                <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6e776f;margin-top:4px;">TR-2026-001 · III 期</div>
+              </td>
+              <td><span class="tag">乳腺癌</span></td>
+              <td>上海·北京·广州</td>
+              <td><span class="badge badge--success">招募中</span></td>
+              <td><span class="badge badge--ink">已发布</span></td>
+              <td><span class="badge badge--success">v3</span></td>
+              <td class="num"><strong style="color:var(--lime);">23</strong></td>
+              <td class="num" style="color:#6e776f;">04-18</td>
+              <td>
+                <a href="#" class="btn btn--text" style="font-size:11px;">编辑</a>
+                <a href="prescreen-form.html" class="btn btn--text" style="font-size:11px;">表单</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="#" style="font-family:var(--font-serif);font-size:18px;">PD-L1 联合化疗用于晚期三阴性乳腺癌</a>
+                <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6e776f;margin-top:4px;">TR-2026-002 · II 期</div>
+              </td>
+              <td><span class="tag">乳腺癌</span></td>
+              <td>上海·杭州</td>
+              <td><span class="badge badge--success">招募中</span></td>
+              <td><span class="badge badge--ink">已发布</span></td>
+              <td><span class="badge badge--success">v2</span></td>
+              <td class="num"><strong style="color:var(--lime);">11</strong></td>
+              <td class="num" style="color:#6e776f;">04-17</td>
+              <td>
+                <a href="#" class="btn btn--text" style="font-size:11px;">编辑</a>
+                <a href="prescreen-form.html" class="btn btn--text" style="font-size:11px;">表单</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="#" style="font-family:var(--font-serif);font-size:18px;">新型 GLP-1 受体激动剂对 2 型糖尿病研究</a>
+                <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6e776f;margin-top:4px;">TR-2026-003 · II 期</div>
+              </td>
+              <td><span class="tag">糖尿病</span></td>
+              <td>全国 12 城</td>
+              <td><span class="badge badge--success">招募中</span></td>
+              <td><span class="badge badge--ink">已发布</span></td>
+              <td><span class="badge badge--success">v1</span></td>
+              <td class="num"><strong style="color:var(--lime);">41</strong></td>
+              <td class="num" style="color:#6e776f;">04-17</td>
+              <td>
+                <a href="#" class="btn btn--text" style="font-size:11px;">编辑</a>
+                <a href="prescreen-form.html" class="btn btn--text" style="font-size:11px;">表单</a>
+              </td>
+            </tr>
+            <tr class="row-warn">
+              <td>
+                <a href="#" style="font-family:var(--font-serif);font-size:18px;">EGFR 阳性晚期非小细胞肺癌靶向药研究</a>
+                <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6e776f;margin-top:4px;">TR-2026-008 · III 期</div>
+              </td>
+              <td><span class="tag">肺癌</span></td>
+              <td>上海·北京</td>
+              <td><span class="badge badge--success">招募中</span></td>
+              <td><span class="badge badge--plain">未发布</span></td>
+              <td><span class="badge badge--warning">⚠ 表单未发布</span></td>
+              <td class="num">—</td>
+              <td class="num" style="color:#6e776f;">04-17</td>
+              <td>
+                <a href="#" class="btn btn--text" style="font-size:11px;">编辑</a>
+                <a href="prescreen-form.html" class="btn btn--text" style="font-size:11px;color:var(--accent);">配置 →</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="#" style="font-family:var(--font-serif);font-size:18px;">注射类填充材料用于法令纹改善的临床研究</a>
+                <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6e776f;margin-top:4px;">TR-2026-012 · 医美</div>
+              </td>
+              <td><span class="tag">法令纹</span></td>
+              <td>上海·杭州·成都</td>
+              <td><span class="badge badge--success">招募中</span></td>
+              <td><span class="badge badge--ink">已发布</span></td>
+              <td><span class="badge badge--success">v1</span></td>
+              <td class="num"><strong style="color:var(--lime);">12</strong></td>
+              <td class="num" style="color:#6e776f;">04-16</td>
+              <td>
+                <a href="#" class="btn btn--text" style="font-size:11px;">编辑</a>
+                <a href="prescreen-form.html" class="btn btn--text" style="font-size:11px;">表单</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="#" style="font-family:var(--font-serif);font-size:18px;">CDK4/6 抑制剂对 HR+ 早期乳腺癌的辅助治疗研究</a>
+                <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6e776f;margin-top:4px;">TR-2026-005 · III 期</div>
+              </td>
+              <td><span class="tag">乳腺癌</span></td>
+              <td>上海·南京</td>
+              <td><span class="badge badge--warning">暂停</span></td>
+              <td><span class="badge badge--ink">已发布</span></td>
+              <td><span class="badge badge--plain">v2</span></td>
+              <td class="num">—</td>
+              <td class="num" style="color:#6e776f;">04-15</td>
+              <td>
+                <a href="#" class="btn btn--text" style="font-size:11px;">编辑</a>
+                <a href="prescreen-form.html" class="btn btn--text" style="font-size:11px;">表单</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="#" style="font-family:var(--font-serif);font-size:18px;">化疗相关骨髓抑制患者升白方案优化研究</a>
+                <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:#6e776f;margin-top:4px;">TR-2026-009 · 支持治疗</div>
+              </td>
+              <td><span class="tag">乳腺癌</span></td>
+              <td>上海</td>
+              <td><span class="badge badge--success">招募中</span></td>
+              <td><span class="badge badge--ink">已发布</span></td>
+              <td><span class="badge badge--success">v1</span></td>
+              <td class="num"><strong style="color:var(--lime);">9</strong></td>
+              <td class="num" style="color:#6e776f;">04-14</td>
+              <td>
+                <a href="#" class="btn btn--text" style="font-size:11px;">编辑</a>
+                <a href="prescreen-form.html" class="btn btn--text" style="font-size:11px;">表单</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span>1-7 / 共 84 · 每页 <select class="select" style="min-height:24px;padding:0 22px 0 8px;font-size:11px;width:auto;"><option>20</option><option>50</option></select></span>
+          <div class="pages">
+            <button>‹</button>
+            <button aria-current="true">1</button>
+            <button>2</button><button>3</button><button>4</button><button>5</button>
+            <button>›</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>

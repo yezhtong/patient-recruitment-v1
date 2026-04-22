@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>九泰临研 V1 — 原型导览</title>
+<link rel="stylesheet" href="assets/design-system.css" />
+<style>
+  body { background: var(--cream-50); }
+  .nav-shell { padding: 64px 0 96px; position: relative; overflow: hidden; }
+  .nav-shell__deco {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .35;
+    background-image: radial-gradient(circle, var(--ink-200) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .nav-shell .container { position: relative; z-index: 1; }
+
+  .nav-head { margin-bottom: 64px; max-width: 56ch; }
+  .nav-head h1 { font-size: clamp(48px, 7vw, 96px); margin: 18px 0; }
+  .nav-head p { color: var(--gray-600); font-size: var(--fs-xl); line-height: 1.5; }
+  .badge-row { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; }
+
+  .info-banner {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    border-radius: var(--r-2xl);
+    padding: 36px 40px;
+    margin-bottom: 48px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 24px;
+    align-items: flex-start;
+    position: relative;
+    overflow: hidden;
+  }
+  .info-banner__deco {
+    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent), transparent 70%);
+    opacity: .35;
+    pointer-events: none;
+  }
+  .info-banner__icon {
+    width: 56px;
+    height: 56px;
+    background: var(--lime);
+    color: var(--ink-900);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 18px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .info-banner__content { position: relative; z-index: 1; }
+  .info-banner h3 { color: var(--cream-50);  font-weight: 400; font-size: 28px; margin-bottom: 14px; }
+  .info-banner p { color: rgba(253,250,243,.85); font-size: var(--fs-md); line-height: 1.7; }
+  .info-banner code { font-family: var(--font-mono); background: rgba(253,250,243,.1); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+
+  .group {
+    margin-bottom: 64px;
+  }
+  .group__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: var(--border-strong);
+  }
+  .group__title-block {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .group__icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .group__icon.--public { background: var(--accent); color: var(--cream-50); }
+  .group__icon.--admin  { background: var(--ink-900); color: var(--lime); }
+  .group__title h2 {
+    
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1;
+    letter-spacing: -.02em;
+  }
+  .group__title h2 em { color: var(--accent); font-style: italic; }
+  .group__sub { color: var(--gray-500); font-size: var(--fs-sm); margin-top: 8px; font-family: var(--font-mono); letter-spacing: .04em; text-transform: uppercase; }
+
+  .pages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: var(--border-strong);
+    border-left: var(--border-strong);
+  }
+  @media (max-width: 960px) { .pages-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .pages-grid { grid-template-columns: 1fr; } }
+
+  .page-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 28px;
+    background: transparent;
+    border-right: var(--border-strong);
+    border-bottom: var(--border-strong);
+    text-decoration: none;
+    color: var(--ink-900);
+    min-height: 200px;
+    transition: background .3s var(--ease-out), color .3s var(--ease-out);
+    position: relative;
+  }
+  .page-card:hover {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    text-decoration: none;
+  }
+  .page-card:hover .page-card__id { color: var(--lime); }
+  .page-card:hover .page-card__desc { color: rgba(253,250,243,.7); }
+  .page-card:hover .page-card__arrow { color: var(--lime); transform: translateX(6px); }
+  .page-card__id {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .12em;
+    font-weight: 500;
+  }
+  .page-card__title {
+    
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -.01em;
+    margin-top: 8px;
+  }
+  .page-card__desc {
+    font-size: var(--fs-sm);
+    color: var(--gray-500);
+    line-height: 1.5;
+  }
+  .page-card__foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .page-card__arrow {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    transition: transform .3s var(--ease-out);
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <div class="brand">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰临研</span>
+    </div>
+    <div class="site-header__cta">
+      <span class="tag tag--filled">原型 v2 · 2026-04-18</span>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="nav-shell">
+  <div class="nav-shell__deco" aria-hidden="true"></div>
+  <div class="container">
+    <div class="nav-head">
+      <span class="eyebrow">Patient Recruitment Platform</span>
+      <h1>九泰临研<br />V1 原型</h1>
+      <p>参考 <strong style="color:var(--ink-900);">SubjectWell</strong> 的编辑感设计语言，覆盖公开网站与统一运营后台的核心页面原型。点击任一卡片预览高保真页面。</p>
+      <div class="badge-row">
+        <span class="tag tag--filled">Editorial × Tech</span>
+        <span class="tag">遵循 PRD F1-F13</span>
+        <span class="tag">移动端响应式</span>
+      </div>
+    </div>
+
+    <div class="info-banner">
+      <div class="info-banner__deco" aria-hidden="true"></div>
+      <div class="info-banner__icon">▤</div>
+      <div class="info-banner__content">
+        <h3>设计语言一览</h3>
+        <p>
+          <strong style="color:var(--lime);">患者侧（公开）</strong>：暖米画布 × 墨绿主色 × 暖橙强调，Serif 与 Sans 混排，留白克制装饰，圆角柔和。<br />
+          <strong style="color:var(--lime);">后台侧（运营）</strong>：深空背景 × 电青高光，高密度信息，KPI 看板与表格主导，关键动作一屏完成。<br />
+          <strong style="color:var(--lime);">设计令牌</strong>：统一在 <code>assets/design-system.css</code>，含字体、色板、间距、组件 tokens。
+        </p>
+      </div>
+    </div>
+
+    <!-- 公开网站 -->
+    <section class="group">
+      <div class="group__head">
+        <div class="group__title-block">
+          <div class="group__icon --public">A</div>
+          <div class="group__title">
+            <h2>公开网站<br />/ 患者侧</h2>
+            <div class="group__sub">主链路：首页 → 列表 → 详情 → 预筛 → 提交</div>
+          </div>
+        </div>
+      </div>
+      <div class="pages-grid">
+        <a class="page-card" href="public/home.html">
+          <div>
+            <span class="page-card__id">P01 / index</span>
+            <div class="page-card__title">首页</div>
+          </div>
+          <div class="page-card__desc">Hero × 病种入口 × 重点试验 × 流程 × 数据墙 × 信任层</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/trials.html">
+          <div>
+            <span class="page-card__id">P02 / trials</span>
+            <div class="page-card__title">试验列表</div>
+          </div>
+          <div class="page-card__desc">病种 / 城市 / 招募状态筛选，URL 反映筛选状态</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/trial-detail.html">
+          <div>
+            <span class="page-card__id">P03 / detail</span>
+            <div class="page-card__title">试验详情</div>
+          </div>
+          <div class="page-card__desc">患者友好说明、入排标准、流程、社区入口、立即预筛</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/prescreen.html">
+          <div>
+            <span class="page-card__id">P05 / prescreen</span>
+            <div class="page-card__title">项目级预筛表单</div>
+          </div>
+          <div class="page-card__desc">基础资料自动预填 + 项目特有字段，含校验与提交</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/prescreen-success.html">
+          <div>
+            <span class="page-card__id">P06 / success</span>
+            <div class="page-card__title">提交成功</div>
+          </div>
+          <div class="page-card__desc">成功反馈 × aria-live × FAQ / 社区导流</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/auth.html">
+          <div>
+            <span class="page-card__id">P04 / auth</span>
+            <div class="page-card__title">登录 / 注册</div>
+          </div>
+          <div class="page-card__desc">手机号 + 短信验证码，左侧品牌叙事</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/community.html">
+          <div>
+            <span class="page-card__id">P09 / community</span>
+            <div class="page-card__title">社区首页</div>
+          </div>
+          <div class="page-card__desc">病种社区入口 × 精选帖子 × 官方 FAQ × 推荐试验</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/post-detail.html">
+          <div>
+            <span class="page-card__id">P11 / post</span>
+            <div class="page-card__title">帖子详情</div>
+          </div>
+          <div class="page-card__desc">正文 × 评论 × 相关试验 × 立即预筛 CTA</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/my-applications.html">
+          <div>
+            <span class="page-card__id">P14 / me</span>
+            <div class="page-card__title">我的报名</div>
+          </div>
+          <div class="page-card__desc">报名记录 + 阶段流程图 + 患者端友好状态</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/about.html">
+          <div>
+            <span class="page-card__id">P17 / about</span>
+            <div class="page-card__title">了解更多</div>
+          </div>
+          <div class="page-card__desc">什么是临床试验 × 试验分期 × 知情同意 × 安全保障 × FAQ</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="public/contact.html">
+          <div>
+            <span class="page-card__id">P16 / contact</span>
+            <div class="page-card__title">联系我们</div>
+          </div>
+          <div class="page-card__desc">客服电话 / 微信 / 邮件 + 留言表单 + 工作时间 + 紧急情况</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 后台 -->
+    <section class="group">
+      <div class="group__head">
+        <div class="group__title-block">
+          <div class="group__icon --admin">B</div>
+          <div class="group__title">
+            <h2>统一运营后台<br />/ Admin</h2>
+            <div class="group__sub">operator / admin 双角色 · 暗色科技</div>
+          </div>
+        </div>
+      </div>
+      <div class="pages-grid">
+        <a class="page-card" href="admin/dashboard.html">
+          <div>
+            <span class="page-card__id">B02 / dashboard</span>
+            <div class="page-card__title">工作台</div>
+          </div>
+          <div class="page-card__desc">KPI × 7 日漏斗 × 待办 × 快捷入口</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="admin/trials.html">
+          <div>
+            <span class="page-card__id">B03 / trials</span>
+            <div class="page-card__title">试验管理</div>
+          </div>
+          <div class="page-card__desc">筛选 + 招募/公开/表单状态 + 复制试验</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="admin/prescreen-form.html">
+          <div>
+            <span class="page-card__id">B05 / form</span>
+            <div class="page-card__title">预筛表单配置</div>
+          </div>
+          <div class="page-card__desc">固定组件库配置字段，预览，发布</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="admin/leads.html">
+          <div>
+            <span class="page-card__id">B06 / leads</span>
+            <div class="page-card__title">线索池</div>
+          </div>
+          <div class="page-card__desc">脱敏列表 + 状态快改 + 超 24h 风险提示</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="admin/lead-detail.html">
+          <div>
+            <span class="page-card__id">B07 / lead</span>
+            <div class="page-card__title">线索详情</div>
+          </div>
+          <div class="page-card__desc">资料 + 答案 + 来源 + 跟进时间线 + 中心协同</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+        <a class="page-card" href="admin/community-moderation.html">
+          <div>
+            <span class="page-card__id">B10 / mod</span>
+            <div class="page-card__title">社区审核</div>
+          </div>
+          <div class="page-card__desc">敏感词风险 × 审核动作 × 精选挂载</div>
+          <div class="page-card__foot"><span></span><span class="page-card__arrow">→</span></div>
+        </a>
+      </div>
+    </section>
+
+    <p style="text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--gray-500);letter-spacing:.08em;text-transform:uppercase;">
+      © 2026 九泰药械 · 临床试验患者招募网站 V1 · Editorial × Tech 设计
+    </p>
+  </div>
+</main>
+</body>
+</html>

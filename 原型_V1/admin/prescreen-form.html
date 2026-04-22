@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#fdfaf3" />
+<title>预筛表单配置 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+</head>
+<body class="admin">
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="admin-shell">
+  <aside class="admin-side">
+    <div class="admin-side__brand"><div class="brand__logo">JT</div><span translate="no">临研运营台</span></div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="leads.html"><span class="admin-nav__icon">☎</span>线索池</a>
+      <div class="admin-nav__group">内容管理</div>
+      <a href="trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="prescreen-form.html" aria-current="page"><span class="admin-nav__icon">▤</span>预筛表单</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb">
+        <a href="trials.html">试验管理</a> / <a href="#">HER2+ 早期乳腺癌</a> / <strong>预筛表单</strong>
+      </div>
+      <div class="admin-topbar__right">
+        <div class="admin-search"><input type="search" placeholder="搜索…" /></div>
+        <div class="admin-avatar">Z</div>
+      </div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--ink-700);text-transform:uppercase;">★ Form Builder</span>
+          <h2 style="margin-top:14px;">预筛表单配置</h2>
+          <p class="page-head__sub">HER2+ 早期乳腺癌靶向药研究 · 当前 v3 · 上次发布 2026-04-12</p>
+        </div>
+        <div class="page-head__actions">
+          <button class="btn btn--ghost">📜 历史版本</button>
+          <button class="btn btn--ghost">👁 预览</button>
+          <button class="btn btn--primary">发布 v4 →</button>
+        </div>
+      </div>
+
+      <div class="alert alert--warning">
+        <span class="alert__icon">⚠</span>
+        <div><strong>当前有未发布的修改</strong> — 你已新增 1 个字段、修改 2 个字段。点击"发布 v4"将这些修改推送给患者端。</div>
+      </div>
+
+      <div class="tabs">
+        <div class="tabs__item" aria-selected="true">字段配置</div>
+        <div class="tabs__item">分段说明</div>
+        <div class="tabs__item">字段逻辑</div>
+        <div class="tabs__item">提交后行为</div>
+      </div>
+
+      <div class="detail-grid" style="grid-template-columns: 1fr 380px;">
+        <div>
+          <div class="panel">
+            <div class="panel__head">
+              <h3>📋 字段顺序</h3>
+              <button class="btn btn--ghost btn--sm">+ 添加字段</button>
+            </div>
+            <div class="panel__body">
+              <h4 style="font-family:var(--font-mono);font-size:10px;color:var(--gray-500);margin-bottom:12px;text-transform:uppercase;letter-spacing:.15em;font-weight:500;">基础资料字段（自动预填）</h4>
+              <div class="field-list">
+                <div class="field-list__item">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>姓名</strong>
+                    <span>name · 单行文本 · 必填</span>
+                  </div>
+                  <span class="badge" style="background:var(--lime-soft);color:var(--ink-700);">复用资料</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+                <div class="field-list__item">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>手机号</strong>
+                    <span>phone · 电话 · 必填</span>
+                  </div>
+                  <span class="badge" style="background:var(--lime-soft);color:var(--ink-700);">复用资料</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+                <div class="field-list__item">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>性别 / 年龄 / 城市</strong>
+                    <span>性别（单选）+ 年龄（数字 18-80）+ 城市（下拉）</span>
+                  </div>
+                  <span class="badge" style="background:var(--lime-soft);color:var(--ink-700);">复用资料</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+              </div>
+
+              <h4 style="font-family:var(--font-mono);font-size:10px;color:var(--gray-500);margin:24px 0 12px;text-transform:uppercase;letter-spacing:.15em;font-weight:500;">项目特有字段（共 6 个）</h4>
+              <div class="field-list">
+                <div class="field-list__item">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>是否已确诊 HER2 阳性？</strong>
+                    <span>diagnosis_her2 · 单选（3 项）· 必填</span>
+                  </div>
+                  <span class="badge badge--plain">项目字段</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+                <div class="field-list__item">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>确诊距今的时间</strong>
+                    <span>diagnosis_time · 单选（4 项）· 必填</span>
+                  </div>
+                  <span class="badge badge--plain">项目字段</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+                <div class="field-list__item" style="background:var(--accent-soft);border-color:var(--accent);">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>已接受治疗 <span class="badge" style="background:var(--accent);color:var(--cream-0);font-size:10px;margin-left:6px;">新增</span></strong>
+                    <span>treatment_received · 多选（6 项）</span>
+                  </div>
+                  <span class="badge badge--plain">项目字段</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+                <div class="field-list__item">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>体重（kg）</strong>
+                    <span>weight · 数字（30-200）· 必填</span>
+                  </div>
+                  <span class="badge badge--plain">项目字段</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+                <div class="field-list__item">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>药物过敏史</strong>
+                    <span>allergy · 多行文本</span>
+                  </div>
+                  <span class="badge badge--plain">项目字段</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+                <div class="field-list__item">
+                  <span class="field-list__handle">⋮⋮</span>
+                  <div class="field-list__main">
+                    <strong>期望就诊中心</strong>
+                    <span>preferred_site · 单选（3 项）· 必填</span>
+                  </div>
+                  <span class="badge badge--plain">项目字段</span>
+                  <button class="btn btn--text" style="font-size:11px;">编辑</button>
+                  <button class="btn btn--text" style="font-size:11px;color:var(--danger-500);">删除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside>
+          <div class="panel">
+            <div class="panel__head">
+              <h3>✏️ 编辑字段</h3>
+              <span class="badge" style="background:var(--lime-soft);color:var(--ink-700);">已接受治疗</span>
+            </div>
+            <div class="panel__body">
+              <div class="form-field">
+                <label class="form-field__label" for="f-key">字段编码 <span class="required">*</span></label>
+                <input class="input" id="f-key" value="treatment_received" />
+                <p class="form-field__hint">用于数据接口，发布后不可修改</p>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="f-label">字段标题（患者可见） <span class="required">*</span></label>
+                <input class="input" id="f-label" value="是否已经接受过以下治疗？" />
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="f-help">辅助说明</label>
+                <textarea class="textarea" id="f-help" rows="2">可多选，没有可选"暂未治疗"</textarea>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label" for="f-type">字段类型</label>
+                <select class="select" id="f-type">
+                  <option>多选</option><option>单选</option><option>单行文本</option>
+                  <option>多行文本</option><option>数字</option><option>日期</option><option>是 / 否</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-field__label">选项</label>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <input class="input" value="手术治疗" />
+                  <input class="input" value="放疗" />
+                  <input class="input" value="化疗" />
+                  <input class="input" value="HER2 靶向治疗" />
+                  <input class="input" value="内分泌治疗" />
+                  <input class="input" value="暂未治疗" />
+                </div>
+                <button class="btn btn--text mt-3" style="font-size:11px;">+ 添加选项</button>
+              </div>
+              <label class="checkbox" style="margin-bottom:8px;">
+                <input type="checkbox" />
+                <span>设为必填</span>
+              </label>
+              <button class="btn btn--primary" style="width:100%;margin-top:14px;">保存修改</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="../assets/prototype.js" defer></script>
+</body>
+</html>

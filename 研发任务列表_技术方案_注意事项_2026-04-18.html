@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>临床试验患者招募网站 V1 - 研发任务列表与技术方案</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a2a4a 100%);
+            color: #e2e8f0;
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 0.95em;
+            color: #94a3b8;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(96, 165, 250, 0.2);
+            border: 1px solid #60a5fa;
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: #60a5fa;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: rgba(96, 165, 250, 0.1);
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            color: #60a5fa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background: rgba(96, 165, 250, 0.2);
+            border-color: #60a5fa;
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+        }
+
+        .section {
+            display: none;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            color: #a78bfa;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(167, 139, 250, 0.3);
+        }
+
+        h3 {
+            font-size: 1.3em;
+            color: #60a5fa;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .task-group {
+            background: rgba(30, 41, 59, 0.6);
+            border-left: 4px solid #60a5fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .task-group:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-left-color: #a78bfa;
+            transform: translateX(5px);
+        }
+
+        .task-group-title {
+            font-size: 1.15em;
+            color: #60a5fa;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phase-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(167, 139, 250, 0.2);
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #a78bfa;
+        }
+
+        .task-list {
+            list-style: none;
+        }
+
+        .task-item {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #cbd5e1;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-item::before {
+            content: "▸";
+            position: absolute;
+            left: 10px;
+            color: #60a5fa;
+            font-size: 1.2em;
+        }
+
+        .task-item.sub {
+            padding-left: 50px;
+            font-size: 0.95em;
+            color: #a0aec0;
+        }
+
+        .task-item.sub::before {
+            content: "○";
+            left: 25px;
+            color: #a78bfa;
+        }
+
+        .section-divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.3), transparent);
+            margin: 30px 0;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .tech-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .tech-card:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: #60a5fa;
+            box-shadow: 0 8px 20px rgba(96, 165, 250, 0.2);
+        }
+
+        .tech-card h4 {
+            color: #60a5fa;
+            margin-bottom: 12px;
+            font-size: 1.05em;
+        }
+
+        .tech-card p {
+            color: #cbd5e1;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+
+        .tech-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .tech-card li {
+            color: #a0aec0;
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .tech-card li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4ade80;
+        }
+
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .warning-title {
+            color: #fca5a5;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .warning-text {
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .success-box {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .success-title {
+            color: #86efac;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .success-text {
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-title {
+            color: #93c5fd;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .info-text {
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        th {
+            background: rgba(96, 165, 250, 0.1);
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        td {
+            color: #cbd5e1;
+        }
+
+        tr:hover {
+            background: rgba(96, 165, 250, 0.05);
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            margin-bottom: 30px;
+            padding-left: 40px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: #60a5fa;
+            border: 3px solid #0f172a;
+            border-radius: 50%;
+        }
+
+        .timeline-item::after {
+            content: "";
+            position: absolute;
+            left: 8px;
+            top: 20px;
+            width: 4px;
+            height: 30px;
+            background: rgba(96, 165, 250, 0.3);
+        }
+
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        .timeline-title {
+            color: #60a5fa;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .timeline-content {
+            color: #cbd5e1;
+            font-size: 0.95em;
+        }
+
+        .db-schema {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+
+        .db-table {
+            color: #a78bfa;
+            font-weight: 600;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .db-field {
+            color: #60a5fa;
+            margin-left: 20px;
+        }
+
+        .risk-level {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .risk-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+
+        .risk-medium {
+            background: rgba(251, 146, 60, 0.2);
+            color: #fb923c;
+        }
+
+        .risk-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            padding: 10px;
+            padding-left: 35px;
+            position: relative;
+            color: #cbd5e1;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .checklist li::before {
+            content: "□";
+            position: absolute;
+            left: 10px;
+            color: #60a5fa;
+            font-size: 1.1em;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #64748b;
+            font-size: 0.9em;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            margin-top: 50px;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-btn {
+                width: 100%;
+                text-align: left;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .meta-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .tech-stack {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 临床试验患者招募网站 V1</h1>
+            <p class="subtitle">研发任务列表 + 技术实现方案 + 工程注意事项</p>
+            <div class="meta-info">
+                <div class="meta-item">
+                    <span>📅 2026-04-18</span>
+                </div>
+                <div class="meta-item">
+                    <span class="badge">Vibe Coding</span>
+                </div>
+                <div class="meta-item">
+                    <span>⏱️ 建议周期：8-12周</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="nav-tabs sticky-nav">
+            <button class="nav-btn active" onclick="switchTab('overview')">📋 概览</button>
+            <button class="nav-btn" onclick="switchTab('tasks')">✓ 任务清单</button>
+            <button class="nav-btn" onclick="switchTab('tech')">⚙️ 技术方案</button>
+            <button class="nav-btn" onclick="switchTab('notice')">⚠️ 关键注意事项</button>
+            <button class="nav-btn" onclick="switchTab('faq')">❓ 常见问题</button>
+        </div>
+
+        <!-- 概览 -->
+        <div id="overview" class="section active">
+            <h2>📊 项目概览</h2>
+
+            <h3>项目规模评估</h3>
+            <table>
+                <tr>
+                    <th>维度</th>
+                    <th>评估</th>
+                    <th>说明</th>
+                </tr>
+                <tr>
+                    <td>代码量</td>
+                    <td>15,000 - 25,000 行</td>
+                    <td>前后端合计，含UI、业务逻辑、数据库操作</td>
+                </tr>
+                <tr>
+                    <td>数据表数</td>
+                    <td>23 张表</td>
+                    <td>患者侧 + 运营侧 + 社区 + 审计</td>
+                </tr>
+                <tr>
+                    <td>API 端点</td>
+                    <td>60+ 个</td>
+                    <td>患者端 16 个 + 后台 43+ 个</td>
+                </tr>
+                <tr>
+                    <td>前端页面</td>
+                    <td>27 个</td>
+                    <td>患者侧 16 页 + 后台 11 页</td>
+                </tr>
+                <tr>
+                    <td>核心功能点</td>
+                    <td>8 大能力</td>
+                    <td>试验发现、预筛、账户、社区、FAQ、后台、线索、统计</td>
+                </tr>
+            </table>
+
+            <h3>三阶段推荐进度</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-title">🎯 第一阶段：主链路闭环（3-4周）</div>
+                    <div class="timeline-content">
+                        <p>【目标】患者能找到试验 → 提交预筛 → 产生线索被跟进</p>
+                        <p>【输出】13 项任务完成，系统可用于初始试运营</p>
+                        <p style="margin-top: 8px; color: #60a5fa;">投入：1 名全栈工程师 + 1 名产品验收</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-title">💡 第二阶段：信任层与内容层（3-4周）</div>
+                    <div class="timeline-content">
+                        <p>【目标】补足 FAQ、社区、患者账户，建立患者信任</p>
+                        <p>【输出】8 项任务完成，系统功能相对完整</p>
+                        <p style="margin-top: 8px; color: #60a5fa;">投入：1 名全栈工程师 + 内容审核支持</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-title">📈 第三阶段：运营完善（2-3周）</div>
+                    <div class="timeline-content">
+                        <p>【目标】完善工作台、统计、配置管理</p>
+                        <p>【输出】6 项任务完成，系统完全可运营</p>
+                        <p style="margin-top: 8px; color: #60a5fa;">投入：1 名后端工程师</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Vibe Coding 的含义</h3>
+            <div class="success-box">
+                <div class="success-title">✨ 快速迭代的工程方法</div>
+                <div class="success-text">
+                    <p>vibe coding 在这个项目中意味着：</p>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>✓ 不过度设计，直接写代码解决实际问题</li>
+                        <li>✓ 固定页面结构和状态流，避免引入复杂配置引擎</li>
+                        <li>✓ 单数据库、单应用架构，快速部署和验证</li>
+                        <li>✓ 按功能模块（试验、预筛、社区、后台）逐步交付</li>
+                        <li>✓ 每个阶段交付可用产品，而非完全等待所有功能完成</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 任务清单 -->
+        <div id="tasks" class="section">
+            <h2>✓ 研发任务列表（27 项）</h2>
+
+            <div class="info-box">
+                <div class="info-title">💡 如何使用这份清单</div>
+                <div class="info-text">
+                    每项任务都有明确的验收标准。建议让工程师认领任务时对照标准进行开发和自测。前端和后端可以并行推进，但要在集成时点确保数据流畅通。
+                </div>
+            </div>
+
+            <h3>⭐ 第一阶段：主链路闭环（13项，3-4周）</h3>
+            <p style="color: #a0aec0; margin-bottom: 20px;">这个阶段的目标是跑通"患者找试验 → 提交预筛 → 后台跟进"的完整链路。</p>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>1.1 患者端基础框架与首页</span>
+                    <span class="phase-badge">第一阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>创建 React/Next.js 项目框架</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">包含：路由结构、全局样式、导航组件、响应式布局</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>设计全局导航栏</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">包含：首页、找试验、患者社区、患者帮助、联系我们、登录入口</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现首页（Hero + 病种入口 + 推荐试验 + 流程说明）</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">验收：首页可展示 4-5 个重点病种，3-5 个推荐试验，平台价值说明清晰可见</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>1.2 试验发现能力</span>
+                    <span class="phase-badge">第一阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现试验列表页（列表 + 筛选）</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">筛选维度：病种/适应症、城市、招募状态；显示结果数量</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现试验详情页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">包含：标题、摘要、患者友好说明、适合人群、不适合人群、参与流程、位置、预筛按钮</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>创建病种/适应症标签体系</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">兼容传统疾病（肺癌、糖尿病等）+ 医美适应症（脱发、黄褐斑等）</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>1.3 患者登录与账户</span>
+                    <span class="phase-badge">第一阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现登录/注册页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">方案：简化版手机号登录（可用伪验证码快速实现，正式上线再对接短信服务）</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现患者基本资料页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">字段：姓名、性别、年龄、手机号、所在城市、主要病种；保存后可用于表单预填</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现登录回跳机制</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">登录后返回用户原始目标页（预筛表单、社区发帖等）</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>1.4 预筛表单与提交</span>
+                    <span class="phase-badge">第一阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>设计预筛表单数据结构与字段类型</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">类型：单行文本、多行文本、单选、多选、是/否、数字、日期</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现项目级预筛表单页（前端+后端）</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：加载特定项目表单 → 自动预填基础资料 → 填写项目问题 → 校验 → 提交</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现预筛提交成功页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">展示：感谢信息、后续跟进说明、FAQ 入口、社区入口</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>1.5 后台基础框架与试验管理</span>
+                    <span class="phase-badge">第一阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>创建后台登录页和权限体系</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">角色：operator（运营）、admin（管理员）；简化版权限，无细粒度 RBAC</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现试验列表与编辑页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：新建、编辑、筛选、复制已有试验；字段包括标题、说明、城市、病种、状态等</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现预筛表单配置页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：从固定字段库选择 → 配置顺序、必填、说明 → 预览 → 发布</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>1.6 线索池与跟进</span>
+                    <span class="phase-badge">第一阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现线索生成逻辑</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">预筛提交时自动创建线索记录，包含患者资料、答案、来源、时间</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现线索列表与筛选</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">筛选：试验、病种、城市、提交时间、状态；显示患者名（脱敏）、手机号、试验名等</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现线索详情与跟进记录</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：查看患者资料 + 预筛答案 + 来源 + 状态流转 + 录入跟进时间/方式/备注</div>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>💡 第二阶段：信任层与内容层（8项，3-4周）</h3>
+            <p style="color: #a0aec0; margin-bottom: 20px;">这个阶段补足 FAQ、社区、患者账户等信任与留存机制，提升转化率。</p>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>2.1 FAQ 体系</span>
+                    <span class="phase-badge">第二阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现 FAQ 列表和详情页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">前台：列表支持分类展示，详情页展示相关试验和病种入口</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现 FAQ 后台管理</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：新建、编辑、发布、下线；字段包括标题、分类、病种标签、关联试验等</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>2.2 患者社区（一级功能）</span>
+                    <span class="phase-badge">第二阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现社区首页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">展示：病种社区入口、精选帖子、官方 FAQ、推荐试验</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现病种/适应症社区页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">显示：社区名和简介、帖子列表、相关试验卡片、预筛入口</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现帖子详情和评论区</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：展示标题、正文、作者、标签、相关试验卡片；支持评论</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现发帖与评论</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：已登录患者可发帖（提问/经验分享）和评论；支持匿名发布</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现我的帖子/评论页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">显示用户发布的帖子和评论，包括审核状态</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>2.3 患者账户（我的报名）</span>
+                    <span class="phase-badge">第二阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现我的报名页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">显示：报名试验名、提交时间、当前状态、详情入口；状态需友好化呈现</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>2.4 社区内容审核（后台）</span>
+                    <span class="phase-badge">第二阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现社区审核工作台</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：审核帖子和评论，支持通过/驳回/隐藏/精选操作；记录原因和审计日志</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现敏感词检测（基础版）</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">检测：联系方式外露、售药代购、违规医疗宣传、垃圾内容；审核页展示风险提示</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现社区分区配置</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：配置每个病种社区的名称、简介、推荐 FAQ、推荐试验</div>
+                    </li>
+                </ul>
+            </div>
+
+            <h3>📈 第三阶段：运营完善（6项，2-3周）</h3>
+            <p style="color: #a0aec0; margin-bottom: 20px;">完善后台工作台、统计和系统配置，使系统完全可运营。</p>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>3.1 后台工作台与统计</span>
+                    <span class="phase-badge">第三阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现工作台首页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">显示：今日新增线索数、待联系线索数、待审核内容数、招募中试验数、最近 7 日预筛统计</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现基础统计页</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">指标：首页访问、试验详情浏览、预筛启动/提交、注册用户、社区浏览、社区到预筛转化</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>3.2 系统配置与后台账号</span>
+                    <span class="phase-badge">第三阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现后台账号管理</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">能力：新建/停用账号、重置密码、设置角色</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现系统配置字典维护</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">配置：病种/适应症标签、城市列表、敏感词、线索关闭原因等</div>
+                    </li>
+                    <li class="task-item">
+                        <strong>实现审计日志查询</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">记录：后台登录、试验创建/编辑/发布、表单发布、线索状态变更、审核操作等</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="task-group">
+                <div class="task-group-title">
+                    <span>3.3 公开页面补全</span>
+                    <span class="phase-badge">第三阶段</span>
+                </div>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <strong>实现联系我们页和页脚</strong>
+                        <div style="color: #a0aec0; margin-top: 5px;">包含：联系方式、关于我们、隐私政策、用户协议等</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 技术方案 -->
+        <div id="tech" class="section">
+            <h2>⚙️ 技术实现方案</h2>
+
+            <h3>推荐技术栈</h3>
+            <div class="tech-stack">
+                <div class="tech-card">
+                    <h4>前端框架</h4>
+                    <p><strong>Next.js</strong>（带 TypeScript）</p>
+                    <ul>
+                        <li>App Router for modern routing</li>
+                        <li>Server Components for performance</li>
+                        <li>Built-in API routes for backend integration</li>
+                        <li>SSR/SSG for SEO-friendly content</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <h4>UI 组件库</h4>
+                    <p><strong>Shadcn/ui + Tailwind CSS</strong></p>
+                    <ul>
+                        <li>Production-ready component set</li>
+                        <li>Fully customizable</li>
+                        <li>Responsive design out of box</li>
+                        <li>Dark mode support</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <h4>后端框架</h4>
+                    <p><strong>Node.js + Express 或 NestJS</strong></p>
+                    <ul>
+                        <li>RESTful API design</li>
+                        <li>Middleware for auth & logging</li>
+                        <li>Easy to deploy & scale</li>
+                        <li>Rich ecosystem</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <h4>数据库</h4>
+                    <p><strong>PostgreSQL</strong>（推荐）或 MySQL</p>
+                    <ul>
+                        <li>Relational data integrity</li>
+                        <li>Strong ACID compliance</li>
+                        <li>Excellent for structured data</li>
+                        <li>Built-in JSON support</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <h4>ORM/Query Tool</h4>
+                    <p><strong>Prisma 或 TypeORM</strong></p>
+                    <ul>
+                        <li>Type-safe database access</li>
+                        <li>Auto migrations</li>
+                        <li>Schema introspection</li>
+                        <li>Great DX</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <h4>认证方案</h4>
+                    <p><strong>NextAuth.js（简化版）或自建</strong></p>
+                    <ul>
+                        <li>Session-based auth for V1</li>
+                        <li>Easy integration with Next.js</li>
+                        <li>Support multiple providers</li>
+                        <li>Simple but secure</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <h4>部署方案</h4>
+                    <p><strong>Vercel（前端）+ 自建服务器或云（后端）</strong></p>
+                    <ul>
+                        <li>Vercel: Next.js native, auto scaling</li>
+                        <li>Backend: Docker + Docker Compose</li>
+                        <li>Database: Managed PostgreSQL service</li>
+                        <li>Single command deployment</li>
+                    </ul>
+                </div>
+
+                <div class="tech-card">
+                    <h4>事件埋点</h4>
+                    <p><strong>PostHog 或 Mixpanel</strong></p>
+                    <ul>
+                        <li>Easy frontend SDK integration</li>
+                        <li>Built-in funnel analysis</li>
+                        <li>Session replay capability</li>
+                        <li>Privacy-first options available</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>项目结构建议（单一仓库）</h3>
+            <div class="db-schema">
+<pre>patient-recruitment-platform/
+├── apps/
+│   ├── web/              # Next.js 前端 (患者端 + 后台)
+│   │   ├── app/
+│   │   │   ├── (public)/     # 患者端页面
+│   │   │   ├── (auth)/       # 登录/注册
+│   │   │   └── admin/        # 后台页面
+│   │   ├── lib/              # 工具函数、API 调用
+│   │   └── components/       # UI 组件
+│   │
+│   └── api/              # Node.js 后端服务
+│       ├── src/
+│       │   ├── routes/       # API 路由
+│       │   ├── controllers/  # 业务逻辑
+│       │   ├── services/     # 数据库操作
+│       │   ├── middleware/   # 认证、日志等
+│       │   ├── models/       # 数据模型定义
+│       │   └── utils/        # 工具函数
+│       └── prisma/
+│           └── schema.prisma # 数据库 schema
+│
+├── packages/
+│   ├── types/            # 共用 TypeScript 类型
+│   └── constants/        # 共用常量
+│
+├── docs/                 # 文档、API 文档
+└── docker-compose.yml    # 本地开发一键启动</pre>
+            </div>
+
+            <h3>关键数据模型（简化版本示例）</h3>
+            <div class="db-schema">
+<pre><strong style="color: #a78bfa;">患者侧核心表</strong>
+<span class="db-table">• patient_user</span>
+<span class="db-field">  id, phone, status, created_at</span>
+<span class="db-table">• patient_profile</span>
+<span class="db-field">  user_id, name, gender, age, city, disease_tag</span>
+
+<strong style="color: #a78bfa;">试验管理表</strong>
+<span class="db-table">• trial</span>
+<span class="db-field">  id, title, description, recruitment_status, publish_status</span>
+<span class="db-table">• trial_city</span>
+<span class="db-field">  trial_id, city_code</span>
+<span class="db-table">• disease_tag</span>
+<span class="db-field">  id, name, type (disease/beauty)</span>
+
+<strong style="color: #a78bfa;">预筛相关表</strong>
+<span class="db-table">• prescreen_form</span>
+<span class="db-field">  id, trial_id, status, version, published_at</span>
+<span class="db-table">• prescreen_form_field</span>
+<span class="db-field">  id, form_id, field_type, is_required, options_json</span>
+<span class="db-table">• prescreen_submission</span>
+<span class="db-field">  id, form_id, patient_id, trial_id, submitted_at</span>
+
+<strong style="color: #a78bfa;">线索与跟进表</strong>
+<span class="db-table">• lead</span>
+<span class="db-field">  id, trial_id, patient_id, status, owner_id, source_page</span>
+<span class="db-table">• lead_follow_up</span>
+<span class="db-field">  id, lead_id, channel, note, created_at</span>
+
+<strong style="color: #a78bfa;">社区表</strong>
+<span class="db-table">• community_post</span>
+<span class="db-field">  id, author_id, title, content, group_id, review_status</span>
+<span class="db-table">• community_comment</span>
+<span class="db-field">  id, post_id, author_id, content, review_status</span></pre>
+            </div>
+
+            <h3>API 设计原则</h3>
+            <div class="info-box">
+                <div class="info-title">RESTful 约定</div>
+                <div class="info-text">
+                    <p><strong>患者端 API：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>GET /api/trials - 获取试验列表</li>
+                        <li>GET /api/trials/:id - 获取试验详情</li>
+                        <li>POST /api/trials/:id/prescreen - 提交预筛</li>
+                        <li>GET /api/me/profile - 获取个人资料</li>
+                        <li>GET /api/me/applications - 获取报名记录</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>后台 API：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>GET /api/admin/trials - 试验列表</li>
+                        <li>POST /api/admin/trials - 创建试验</li>
+                        <li>GET /api/admin/leads - 线索列表</li>
+                        <li>PATCH /api/admin/leads/:id - 更新线索状态</li>
+                    </ul>
+                    <p style="margin-top: 10px; color: #a0aec0;">所有请求返回统一格式：</p>
+                    <div style="background: rgba(15, 23, 42, 0.8); padding: 10px; border-radius: 4px; margin-top: 10px; font-family: monospace; font-size: 0.85em;">
+{ "code": 0, "message": "success", "data": {...} }
+                    </div>
+                </div>
+            </div>
+
+            <h3>前后端分离与集成</h3>
+            <table>
+                <tr>
+                    <th>阶段</th>
+                    <th>前端任务</th>
+                    <th>后端任务</th>
+                    <th>集成策略</th>
+                </tr>
+                <tr>
+                    <td><strong>第一周</strong></td>
+                    <td>页面框架、导航、首页UI</td>
+                    <td>数据库设计、API 框架</td>
+                    <td>Mock API 调用，协定接口契约</td>
+                </tr>
+                <tr>
+                    <td><strong>第二周</strong></td>
+                    <td>试验列表、详情、登录页</td>
+                    <td>试验 API、登录 API</td>
+                    <td>前端对接真实后端，进行集成测试</td>
+                </tr>
+                <tr>
+                    <td><strong>第三周</strong></td>
+                    <td>预筛表单、报名页、后台基础</td>
+                    <td>预筛 API、线索 API、后台 API</td>
+                    <td>完整流程测试：用户提交 → 后台生成线索 → 运营处理</td>
+                </tr>
+                <tr>
+                    <td><strong>第四周</strong></td>
+                    <td>打磨 UI、移动适配、性能优化</td>
+                    <td>优化查询、完善错误处理、审计日志</td>
+                    <td>功能完成，进入 QA 和压测阶段</td>
+                </tr>
+            </table>
+
+            <h3>安全与合规要点</h3>
+            <div class="warning-box">
+                <div class="warning-title">🔐 必须实现</div>
+                <div class="warning-text">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li><strong>会话管理</strong>：用户登录后必须通过 JWT 或 Session Cookie 验证，后端每次 API 调用验证身份</li>
+                        <li><strong>手机号脱敏</strong>：后台列表页展示手机号时必须脱敏（如 138****8888）</li>
+                        <li><strong>敏感词过滤</strong>：社区内容发布前必须过滤敏感词，记录风险提示供审核人员参考</li>
+                        <li><strong>审计日志</strong>：所有关键操作（试验创建/编辑、线索状态变更、审核操作）必须记录操作人、时间、变更内容</li>
+                        <li><strong>HTTPS</strong>：生产环境必须使用 HTTPS，禁止明文传输任何敏感数据</li>
+                        <li><strong>表单校验</strong>：前端和后端都必须校验用户输入（不能只在前端校验）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>性能优化策略</h3>
+            <div class="success-box">
+                <div class="success-title">⚡ 快速启动的优化</div>
+                <div class="success-text">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li><strong>数据库索引</strong>：在 trial_id、patient_id、created_at 等频繁查询字段上建索引</li>
+                        <li><strong>API 缓存</strong>：试验列表、FAQ、社区分区等不常变的数据用 Redis 缓存，5-10 分钟过期</li>
+                        <li><strong>前端优化</strong>：Next.js Image 组件优化图片、代码分割减少 JS 包体积</li>
+                        <li><strong>分页加载</strong>：列表页默认每页 20-50 条，避免一次性加载大量数据</li>
+                        <li><strong>数据库分离</strong>：读写分离不是首版重点，但可预留扩展空间</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关键注意事项 -->
+        <div id="notice" class="section">
+            <h2>⚠️ 项目搭建过程中的关键注意事项</h2>
+
+            <h3>🚨 高优先级注意事项（必须做）</h3>
+
+            <div class="warning-box">
+                <div class="warning-title">1. 数据流闭环要验证清楚</div>
+                <div class="warning-text">
+                    <p><strong>问题：</strong>患者提交预筛后，后台线索没有生成或显示错误。</p>
+                    <p style="margin-top: 10px;"><strong>解决方案：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>在第一阶段 Week 2 就要完成"患者端提交 → 后台线索生成"的端到端测试</li>
+                        <li>不能等到第一阶段结束才发现这个问题</li>
+                        <li>工程师自测时必须包括：登录患者 → 提交预筛 → 后台看到线索这个完整流程</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">2. 预筛表单的版本管理要做对</div>
+                <div class="warning-text">
+                    <p><strong>问题：</strong>运营修改了项目 A 的预筛表单，但患者之前的答案展示错乱。</p>
+                    <p style="margin-top: 10px;"><strong>解决方案：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>每次发布新版预筛表单时，必须生成版本号（v1, v2, v3...）</li>
+                        <li>患者提交时记录当前表单版本号</li>
+                        <li>后台查看答案时，始终按照提交时使用的版本号来解析答案</li>
+                        <li>不能因为表单变更就改变历史答案的解读方式</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">3. 试验状态与前台可见性的映射要明确</div>
+                <div class="warning-text">
+                    <p><strong>问题：</strong>运营下线了某个试验，但患者端仍然能看到"立即预筛"按钮。</p>
+                    <p style="margin-top: 10px;"><strong>解决方案：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>定义清晰的状态机：试验必须同时满足 publish_status=已发布 AND recruitment_status=招募中，才能在前台显示预筛入口</li>
+                        <li>任何一个条件不满足，预筛按钮都应该被隐藏或变为"暂时无法预筛"</li>
+                        <li>后端 API 返回试验详情时，必须包含 can_prescreen=true/false 标志</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">4. 病种/适应症的多表关系要处理好</div>
+                <div class="warning-text">
+                    <p><strong>问题：</strong>一个试验可能关联多个病种标签（如"肺癌"和"脑转移瘤"），但数据库查询时容易出现重复或遗漏。</p>
+                    <p style="margin-top: 10px;"><strong>解决方案：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>用关联表 trial_tag 连接 trial 和 disease_tag，支持多对多</li>
+                        <li>前端分页列表和后台列表在展示时，注意 DISTINCT 或分组，避免同一个试验显示多次</li>
+                        <li>社区分组也要对应到 disease_tag，每个分区一个病种，确保清晰</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">5. 登录回跳要实现正确</div>
+                <div class="warning-text">
+                    <p><strong>问题：</strong>患者点击"预筛"按钮 → 进入登录页，登录后应该回到预筛表单页，但回到了首页。</p>
+                    <p style="margin-top: 10px;"><strong>解决方案：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>登录页接收 redirect_to 参数（或从 referer 推断）</li>
+                        <li>登录成功后，如果 redirect_to 存在，跳转到该地址；否则跳转到首页</li>
+                        <li>常见的回跳目标：/trials/:id/prescreen, /community/new, /me/profile</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>⚡ 中等优先级注意事项（强烈建议做）</h3>
+
+            <div class="info-box">
+                <div class="info-title">6. 手机号登录的实现方案</div>
+                <div class="info-text">
+                    <p><strong>当前状态：</strong>PRD 中提到"产品层按手机号设计，技术层可先采用简化认证方案"。</p>
+                    <p style="margin-top: 10px;"><strong>建议方案：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li><strong>V1 实现（快速启动）：</strong>用伪验证码（模拟短信，后端直接接受任何 6 位数字）</li>
+                        <li>患者输入手机号 → 前端发送 /api/auth/send-code → 后端返回伪验证码给前端（仅开发环境） → 患者输入验证码 → 生成 Session/Token</li>
+                        <li>生产前（第一阶段结束前）对接真实短信服务（阿里云/腾讯云等）</li>
+                        <li>不要在 UI 上隐藏伪验证码逻辑，这会造成测试困难；改为让测试人员知道验证码规则即可</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-title">7. 患者资料预填的时机</div>
+                <div class="info-text">
+                    <p><strong>关键场景：</strong>已登录患者进入预筛表单，基础资料字段应该自动填充。</p>
+                    <p style="margin-top: 10px;"><strong>实现细节：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>后端 GET /api/trials/:id/prescreen-form 时，返回当前用户的 patient_profile 数据</li>
+                        <li>前端渲染表单时，如果字段 is_profile_field=true 且当前用户已登录，则将 profile 数据填入该字段</li>
+                        <li>但要让用户可以修改预填的数据（不能只读）</li>
+                        <li>患者修改资料后提交预筛，该提交答案应该自动更新患者 profile（可选优化）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-title">8. 社区与试验详情的 CTA 位置要突出</div>
+                <div class="info-text">
+                    <p><strong>问题：</strong>用户在社区看到帖子，想报名相关试验，但找不到"立即预筛"按钮。</p>
+                    <p style="margin-top: 10px;"><strong>解决方案：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>社区帖子详情页底部或侧边栏必须显示相关试验卡片 + 立即预筛按钮</li>
+                        <li>社区分区页也要展示本分区关联的试验列表 + 预筛入口</li>
+                        <li>这不仅是 UX 问题，也是转化漏斗的关键</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-title">9. 审核状态的友好映射</div>
+                <div class="info-text">
+                    <p><strong>后台数据库状态：</strong>post_review_status 有 4 种：待审核、已通过、已驳回、已隐藏</p>
+                    <p style="margin-top: 10px;"><strong>患者端展示规则：</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>已通过 → 公开展示</li>
+                        <li>待审核 → 显示"审核中...请耐心等待"</li>
+                        <li>已驳回 → 显示"您的帖子未符合社区规范，已隐藏"（不要展示"驳回"这个冷冰冰的词）</li>
+                        <li>已隐藏 → 隐藏（不显示或显示"已隐藏"）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>📋 低优先级注意事项（未来优化）</h3>
+
+            <div class="success-box">
+                <div class="success-title">10. 线索自动分配（先不做）</div>
+                <div class="success-text">
+                    <p>当前实现：运营人工在后台指定线索负责人。</p>
+                    <p style="margin-top: 10px;">V2 方向：可以加入自动分配规则（按 operator 的当前负责线索数均衡分配等），但 V1 不做。</p>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">11. 复杂条件跳转（先不做）</div>
+                <div class="success-text">
+                    <p>当前实现：预筛表单支持 7 种字段类型，但不支持"如果选择了 A，则显示 B"这样的条件逻辑。</p>
+                    <p style="margin-top: 10px;">理由：会大幅提升复杂度，不适合短周期 Vibe Coding。V2 再考虑。</p>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-title">12. 多租户和研究中心后台（先不做）</div>
+                <div class="success-text">
+                    <p>当前实现：单一平台、单一运营后台。研究中心的协作信息通过运营人员在线索详情页人工录入。</p>
+                    <p style="margin-top: 10px;">理由：建设研究中心后台会引入权限、数据隔离等复杂问题。V1 不需要。</p>
+                </div>
+            </div>
+
+            <h3>🛠️ 工程最佳实践</h3>
+
+            <table>
+                <tr>
+                    <th>实践</th>
+                    <th>为什么重要</th>
+                    <th>如何执行</th>
+                </tr>
+                <tr>
+                    <td><strong>每日集成</strong></td>
+                    <td>及早发现前后端不匹配的问题</td>
+                    <td>前端和后端每天至少同步一次集成状态，验证关键流程能否打通</td>
+                </tr>
+                <tr>
+                    <td><strong>数据库迁移脚本</strong></td>
+                    <td>线上更新时能够正确修改表结构</td>
+                    <td>用 Prisma Migrate 或 Alembic，每次 schema 变更都生成迁移文件，版本控制</td>
+                </tr>
+                <tr>
+                    <td><strong>Mock 数据</strong></td>
+                    <td>测试时不依赖真实数据，加快反复迭代</td>
+                    <td>为每个主要实体准备 5-10 条 Mock 数据，用 faker 库自动生成，集成到 seed script</td>
+                </tr>
+                <tr>
+                    <td><strong>单元测试</strong></td>
+                    <td>防止低级 bug，提高重构信心</td>
+                    <td>后端关键业务逻辑（预筛提交、线索生成、状态流转）必须有测试，覆盖率目标 >60%</td>
+                </tr>
+                <tr>
+                    <td><strong>API 文档</strong></td>
+                    <td>前端工程师快速理解后端接口</td>
+                    <td>用 Swagger/OpenAPI，自动生成交互式文档，减少沟通成本</td>
+                </tr>
+                <tr>
+                    <td><strong>日志体系</strong></td>
+                    <td>生产环境问题排查</td>
+                    <td>后端用 Winston 或 Bunyan 打结构化日志，包括 request ID、user ID、重要业务事件</td>
+                </tr>
+            </table>
+
+            <h3>⏰ 常见时间陷阱</h3>
+
+            <div class="warning-box">
+                <div class="warning-title">⏱️ 容易低估的工作量</div>
+                <div class="warning-text">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li><strong>响应式布局适配</strong>：UI 在 PC 和手机上看起来一样简单，但适配移动端的边界情况很多，通常需要 15-20% 的额外工时</li>
+                        <li><strong>表单校验和错误提示</strong>：从"能提交"到"体验友好的表单"，差异很大，包括前端校验、后端校验、错误信息的清晰度</li>
+                        <li><strong>列表筛选排序分页</strong>：简单的分页容易实现，但加上多个筛选条件后，SQL 查询优化和性能成为瓶颈</li>
+                        <li><strong>数据脱敏和安全检查</strong>：不只是隐藏手机号，还要考虑 XSS、SQL 注入、CSRF 等防御，加法规检查代码往往需要 3-5 天</li>
+                        <li><strong>审计日志实现</strong>：看起来简单（记录谁在什么时间做了什么），但要确保不遗漏关键操作、性能不下降，需要仔细设计</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>📝 质量检查清单（第一阶段末）</h3>
+            <ul class="checklist">
+                <li>患者能完整走通"找试验 → 登录 → 提交预筛 → 运营看到线索"的闭环</li>
+                <li>后台试验列表能正确筛选和展示，试验编辑后前台生效</li>
+                <li>预筛表单配置和发布成功，患者答案完整保存并可在后台查看</li>
+                <li>已登录患者资料自动预填到预筛表单，用户可修改</li>
+                <li>线索生成、状态流转、跟进记录录入的完整流程可用</li>
+                <li>未登录患者点击预筛后能成功回跳到表单页</li>
+                <li>试验状态与前台可见性映射正确（招募中+已发布时才显示预筛按钮）</li>
+                <li>后台支持基础的 operator 和 admin 权限区分</li>
+                <li>所有关键操作有审计日志记录</li>
+                <li>移动端和 PC 端基本可用，关键流程不破裂</li>
+            </ul>
+        </div>
+
+        <!-- FAQ -->
+        <div id="faq" class="section">
+            <h2>❓ 常见问题</h2>
+
+            <h3>Q1：能否先做传统疾病项目，后续再支持医美适应症？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>不建议。建议从一开始就设计病种标签体系兼容两类。理由是：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>数据库 schema 和前端筛选逻辑都一样，没有额外复杂度</li>
+                        <li>早期支持能为未来客户拓展做准备</li>
+                        <li>如果后续再改，会涉及迁移历史数据，成本更高</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Q2：第一阶段 3-4 周的估算是否现实？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>假设 1 名有经验的全栈工程师，这个估算是现实的，但需要：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>需求（PRD）在开发前最终确认，不要在开发中频繁改需求</li>
+                        <li>工程师可以全职投入，不被其他项目打断</li>
+                        <li>产品或设计在关键集成节点（Week 2、Week 3）及时验收反馈</li>
+                        <li>测试环境和数据库环境可以快速搭建</li>
+                    </ul>
+                    <p style="margin-top: 10px;">如果是初级工程师，建议预留 +30% 时间（4-5 周）。</p>
+                </div>
+            </div>
+
+            <h3>Q3：为什么推荐 Next.js 而不是其他框架？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>对于这个项目的最优选择：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li><strong>Next.js 优势：</strong>前后端可以用一套框架，API routes 支持简单后端，SSR 对 SEO 友好（试验详情页需要）</li>
+                        <li><strong>如果全分离：</strong>React + Express，学习成本和部署复杂度都会增加</li>
+                        <li><strong>如果用全栈框架：</strong>Remix、SvelteKit 也不错，但 Next.js 生态更成熟</li>
+                    </ul>
+                    <p style="margin-top: 10px;">简单说：用 Next.js 可以一个工程师快速搞定前后端，减少协调成本。</p>
+                </div>
+            </div>
+
+            <h3>Q4：社区内容如何审核？需要机器学习吗？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>V1 不需要 ML，用规则即可：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li><strong>本地敏感词库：</strong>维护一份敏感词列表（联系方式、违规医疗词汇等），用正则或字符串匹配检测</li>
+                        <li><strong>自动拦截：</strong>内容发布时如果命中敏感词，标记为"待审核"而不是直接拒绝</li>
+                        <li><strong>人工审核：</strong>运营人员每天登录后台审核工作台，通过/驳回/隐藏，处理速度快（5-10 分钟一条）</li>
+                        <li><strong>V2 方向：</strong>如果审核量爆炸，再考虑接入第三方内容审核 API（阿里云、腾讯云等）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Q5：为什么不做 App 版本？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>短周期和 ROI 考虑：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>V1 用 Web 响应式方案，工作量 100%；加 iOS/Android 各需要额外 50%+ 工时</li>
+                        <li>临床试验患者通常用浏览器访问（搜索、链接分享），不是高频 App 用户</li>
+                        <li>Web 版本用 iOS PWA 或微信小程序也能接近 App 体验，投入更低</li>
+                        <li>如果 6 个月后数据表明需要 App，再专门开发，到时候 Web 代码已经稳定</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Q6：如何处理"一个患者重复提交同一项目"？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>设计规则：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li><strong>当前实现：</strong>允许重复提交，每次提交生成新线索，后台可查看该患者的所有历史提交</li>
+                        <li><strong>防止误操作：</strong>前台"我的报名"页展示已提交的项目，患者可以看到自己之前报过哪些</li>
+                        <li><strong>不强制去重：</strong>因为可能是不同时间点、不同健康状态的重新评估，都应该保留</li>
+                        <li><strong>后台视角：</strong>运营可以选择合并线索或创建新的，不强制系统自动处理</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Q7：预筛表单字段能否扩展？例如增加文件上传？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>V1 不做文件上传，理由：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>增加复杂度：需要文件存储、病毒扫描、存储容量管理</li>
+                        <li>医疗合规性：文件涉及患者隐私数据，需要加密存储和安全审计</li>
+                        <li>实际需求不强：早期预筛只需要基本信息，真正需要病历的场景交给线下协同</li>
+                        <li><strong>V2 方向：</strong>如果运营反馈患者无法在线提供必需信息，再加文件上传能力</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Q8：后台账号能否支持微信/钉钉登录？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>不建议 V1 做，原因：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>增加依赖（微信、钉钉的 OAuth）和配置复杂度</li>
+                        <li>运营人员通常没有企业微信账号，反而降低可用性</li>
+                        <li>用传统用户名/密码，运营可以快速申请账号，更灵活</li>
+                        <li><strong>V2 方向：</strong>如果企业已经全面使用钉钉或企业微信，再做单点登录</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Q9：线索导出为 Excel 是否是 V1 需求？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>根据 PRD 的 Open Questions，这点尚未决策。建议：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li><strong>如果运营说"必须"：</strong>在 Week 2 的集成点加入简单导出功能（勾选线索 → 生成 CSV）</li>
+                        <li><strong>如果没有硬需求：</strong>放到 V1.1（上线 2 周后基于反馈），先保证线索管理的核心功能可用</li>
+                        <li>导出本身不难（后端查询 + CSV 生成），但要考虑数据量大时的性能和权限</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Q10：如何保证数据安全，特别是患者隐私？</h3>
+            <div class="info-box">
+                <div class="info-title">答案</div>
+                <div class="info-text">
+                    <p>分层保护：</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li><strong>传输层：</strong>生产环境必须 HTTPS，禁止明文 HTTP</li>
+                        <li><strong>存储层：</strong>患者手机号等敏感字段可考虑加密存储（如 AES），但不是首版必须</li>
+                        <li><strong>展示层：</strong>后台列表脱敏手机号（138****8888），不要显示完整号码</li>
+                        <li><strong>访问控制：</strong>后台操作需要登录认证，线索数据只有有权限的运营可见</li>
+                        <li><strong>审计：</strong>所有关键操作记录日志，包括谁在什么时间访问了哪些患者数据</li>
+                        <li><strong>合规：</strong>在用户协议和隐私政策中声明数据使用方式，用户同意才能使用</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>📄 这份文档是 2026-04-18 生成的，基于《临床试验患者招募网站 V1 总 PRD》。</p>
+            <p>如有任何疑问或需要调整，请和产品负责人讨论后更新本文档。</p>
+            <p style="margin-top: 20px; color: #475569;">Document Version: 1.0 | Generated: 2026-04-18</p>
+        </footer>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(s => s.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+
+            // Show selected section
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Set first tab as active on load
+        document.querySelector('.nav-btn').classList.add('active');
+    </script>
+</body>
+</html>

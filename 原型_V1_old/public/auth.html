@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>登录 / 注册 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  body { background: var(--cream-50); }
+  .auth-shell { display: grid; grid-template-columns: 1.1fr 1fr; min-height: 100vh; }
+  @media (max-width: 880px) { .auth-shell { grid-template-columns: 1fr; } }
+
+  .auth-side {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    padding: 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+  .auth-side__deco {
+    position: absolute;
+    right: -120px;
+    bottom: -120px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, var(--accent), transparent 70%);
+    opacity: .4;
+    pointer-events: none;
+  }
+  .auth-side__decoLines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .08;
+    background-image:
+      linear-gradient(to right, var(--cream-50) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--cream-50) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+  .auth-side > * { position: relative; z-index: 1; }
+  .auth-side .brand { color: var(--cream-50); }
+  .auth-side .brand__logo { background: var(--lime); color: var(--ink-900); }
+
+  .auth-side h2 {
+    color: var(--cream-50);
+    
+    font-size: clamp(40px, 5vw, 72px);
+    margin: 48px 0 24px;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+  }
+  .auth-side h2 em { color: var(--lime); font-style: italic; }
+  .auth-side p {
+    color: rgba(253, 250, 243, .8);
+    font-size: var(--fs-xl);
+    max-width: 36ch;
+    line-height: 1.5;
+  }
+  .auth-side__benefits { display: flex; flex-direction: column; gap: 0; margin-top: 48px; }
+  .auth-side__benefit {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 18px 0;
+    color: var(--cream-50);
+    font-size: var(--fs-md);
+    border-top: 1px solid rgba(253, 250, 243, .12);
+  }
+  .auth-side__benefit:last-child { border-bottom: 1px solid rgba(253, 250, 243, .12); }
+  .auth-side__benefit__num { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; color: var(--lime); }
+
+  .auth-side__foot {
+    color: rgba(253, 250, 243, .5);
+    font-size: var(--fs-xs);
+    font-family: var(--font-mono);
+    letter-spacing: .04em;
+  }
+
+  .auth-main { display: grid; place-items: center; padding: 56px 32px; }
+  .auth-form { width: 100%; max-width: 460px; }
+  .auth-form h1 {
+    
+    font-size: 64px;
+    font-weight: 400;
+    margin-bottom: 12px;
+    line-height: 1;
+    letter-spacing: -.02em;
+  }
+  .auth-form > p.sub { margin-bottom: 36px; color: var(--gray-600); font-size: var(--fs-lg); }
+
+  .tab-switch {
+    display: flex;
+    background: transparent;
+    border: 1px solid var(--ink-200);
+    padding: 4px;
+    border-radius: var(--r-pill);
+    margin-bottom: 32px;
+  }
+  .tab-switch button {
+    flex: 1;
+    padding: 11px 16px;
+    border: none;
+    background: transparent;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--gray-500);
+    cursor: pointer;
+    font-family: var(--font-sans);
+  }
+  .tab-switch button[aria-selected="true"] {
+    background: var(--ink-900);
+    color: var(--cream-50);
+  }
+
+  .otp-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; }
+
+  .agreement { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 28px; font-size: var(--fs-sm); color: var(--gray-600); }
+  .agreement input { margin-top: 4px; accent-color: var(--accent); }
+
+  .divider {
+    text-align: center; margin: 28px 0;
+    color: var(--gray-400);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .divider::before, .divider::after {
+    content: ""; display: inline-block; width: 30%; height: 1px;
+    background: var(--ink-200); vertical-align: middle; margin: 0 12px;
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="auth-shell">
+  <aside class="auth-side">
+    <div class="auth-side__decoLines" aria-hidden="true"></div>
+    <div class="auth-side__deco" aria-hidden="true"></div>
+
+    <a class="brand" href="home.html" style="text-decoration:none;">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰临研</span>
+    </a>
+
+    <div>
+      <span class="eyebrow" style="color:var(--lime);">加入九泰</span>
+      <h2>登录后<br />让招募更顺畅</h2>
+      <p>2 分钟完成预筛，资料自动复用，运营 24 小时内主动联系你。</p>
+
+      <div class="auth-side__benefits">
+        <div class="auth-side__benefit">
+          <span class="auth-side__benefit__num">/ 01</span>
+          <span>基础资料一次填，多次复用</span>
+        </div>
+        <div class="auth-side__benefit">
+          <span class="auth-side__benefit__num">/ 02</span>
+          <span>查看你的全部报名记录</span>
+        </div>
+        <div class="auth-side__benefit">
+          <span class="auth-side__benefit__num">/ 03</span>
+          <span>在病友社区发帖与讨论</span>
+        </div>
+        <div class="auth-side__benefit">
+          <span class="auth-side__benefit__num">/ 04</span>
+          <span>订阅试验状态变更通知</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-side__foot">© 2026 九泰药械 · 你的信息严格脱敏与保密</div>
+  </aside>
+
+  <main id="main" class="auth-main">
+    <div class="auth-form">
+      <span class="eyebrow">欢迎回来</span>
+      <h1 style="margin-top:14px;">登录<br />或注册</h1>
+      <p class="sub">使用手机号一键登录，首次登录将自动创建账户。</p>
+
+      <div class="tab-switch" role="tablist" aria-label="登录方式">
+        <button role="tab" aria-selected="true">手机号</button>
+        <button role="tab" aria-selected="false">邮箱</button>
+        <button role="tab" aria-selected="false">微信</button>
+      </div>
+
+      <form>
+        <div class="form-field">
+          <label class="form-field__label" for="auth-phone">手机号 <span class="required">*</span></label>
+          <input class="input" id="auth-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="如：13800000000" required />
+        </div>
+
+        <div class="form-field">
+          <label class="form-field__label" for="auth-otp">短信验证码 <span class="required">*</span></label>
+          <div class="otp-row">
+            <input class="input" id="auth-otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="6 位数字" required />
+            <button type="button" class="btn btn--ghost">获取验证码</button>
+          </div>
+          <p class="form-field__hint">收不到？60 秒后可以重新获取，或联系客服。</p>
+        </div>
+
+        <div class="agreement">
+          <input type="checkbox" id="agree" required />
+          <label for="agree">我已阅读并同意 <a href="#" style="text-decoration:underline;">用户协议</a> 与 <a href="#" style="text-decoration:underline;">隐私政策</a>。</label>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--lg" style="width:100%;">登录 / 注册 <span class="arrow">→</span></button>
+
+        <div class="divider">或</div>
+
+        <button type="button" class="btn btn--ghost btn--lg" style="width:100%;">微信扫码登录</button>
+      </form>
+    </div>
+  </main>
+</div>
+</body>
+</html>

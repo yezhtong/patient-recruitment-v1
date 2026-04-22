@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>了解更多 — 九泰临研</title>
+<meta name="description" content="什么是临床试验？参加临床试验安全吗？花钱吗？这里解答你最常问的问题。" />
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  /* 局部布局 */
+  .about-hero { padding: 80px 0 48px; border-bottom: var(--border-strong); }
+  .about-hero h1 { font-size: clamp(56px, 8vw, 112px); margin-bottom: 24px; }
+  .about-hero p { color: var(--gray-600); font-size: var(--fs-xl); max-width: 56ch; line-height: 1.5; }
+
+  .toc {
+    position: sticky;
+    top: 100px;
+    padding: 28px 0;
+  }
+  .toc__title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ink-200);
+  }
+  .toc__list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .toc__list a {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    color: var(--gray-700);
+    font-size: var(--fs-sm);
+    border-bottom: 1px solid var(--ink-100);
+  }
+  .toc__list a:hover { color: var(--accent); text-decoration: none; }
+  .toc__list a span:first-child { font-family: var(--font-mono); font-size: 10px; color: var(--gray-400); letter-spacing: .04em; flex-shrink: 0; margin-right: 14px; }
+  .toc__list a strong { font-weight: 500; flex: 1; font-family: var(--font-sans); }
+
+  .layout-2 { display: grid; grid-template-columns: 240px 1fr; gap: 96px; align-items: start; padding: 64px 0 96px; }
+  @media (max-width: 960px) { .layout-2 { grid-template-columns: 1fr; gap: 48px; } .toc { position: static; } }
+
+  .doc-section { padding-bottom: 80px; margin-bottom: 80px; border-bottom: 1px solid var(--ink-200); }
+  .doc-section:last-child { border-bottom: none; margin-bottom: 0; }
+  .doc-section .num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .12em;
+    margin-bottom: 16px;
+    display: inline-block;
+  }
+  .doc-section h2 {
+    font-size: clamp(36px, 5vw, 64px);
+    margin-bottom: 32px;
+    max-width: 22ch;
+  }
+  .doc-section p { color: var(--gray-700); font-size: var(--fs-lg); line-height: 1.8; margin-bottom: 18px; max-width: 64ch; }
+  .doc-section h3 { font-family: var(--font-serif); font-size: 28px; font-weight: 400; margin: 40px 0 14px; letter-spacing: -.01em; }
+  .doc-section .lead {
+    font-family: var(--font-serif);
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.4;
+    color: var(--ink-900);
+    font-style: italic;
+    margin-bottom: 32px;
+    max-width: 36ch;
+  }
+
+  /* 阶段流程 */
+  .phase-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: var(--border-strong);
+    margin-top: 32px;
+  }
+  @media (max-width: 700px) { .phase-grid { grid-template-columns: 1fr 1fr; } }
+  .phase {
+    padding: 28px;
+    border-right: var(--border-strong);
+    border-bottom: var(--border-strong);
+  }
+  .phase:last-child { border-right: none; }
+  .phase__num { font-family: var(--font-serif); font-size: 56px; line-height: 1; color: var(--ink-200); letter-spacing: -.03em; margin-bottom: 12px; }
+  .phase__title { font-family: var(--font-serif); font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+  .phase__sub { color: var(--gray-600); font-size: var(--fs-sm); line-height: 1.6; }
+
+  /* 数字保障 */
+  .safety-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border-top: var(--border-strong);
+    border-left: var(--border-strong);
+  }
+  @media (max-width: 700px) { .safety-grid { grid-template-columns: 1fr; } }
+  .safety {
+    padding: 36px;
+    border-right: var(--border-strong);
+    border-bottom: var(--border-strong);
+  }
+  .safety__id { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: .12em; margin-bottom: 12px; }
+  .safety h4 { font-family: var(--font-serif); font-size: 26px; font-weight: 400; margin-bottom: 12px; letter-spacing: -.01em; }
+  .safety p { color: var(--gray-700); font-size: var(--fs-md); line-height: 1.7; margin: 0; }
+
+  /* FAQ 折叠 */
+  details.q { border-bottom: 1px solid var(--ink-200); padding: 24px 0; }
+  details.q summary { cursor: pointer; font-family: var(--font-serif); font-size: 26px; color: var(--ink-900); list-style: none; display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+  details.q summary::after { content: "+"; font-family: var(--font-mono); color: var(--accent); font-size: 28px; transition: transform .25s var(--ease-out); flex-shrink: 0; line-height: 1.2; }
+  details.q[open] summary::after { transform: rotate(45deg); }
+  details.q summary::-webkit-details-marker { display: none; }
+  details.q .answer { padding: 16px 0 4px; color: var(--gray-700); line-height: 1.8; font-size: var(--fs-md); max-width: 64ch; }
+  details.q .answer p { margin-bottom: 14px; }
+  details.q .answer ul { padding-left: 22px; line-height: 1.9; }
+
+  /* 时间线 */
+  .timeline-block { display: flex; flex-direction: column; gap: 0; margin-top: 32px; }
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    padding: 24px 0;
+    border-top: 1px solid var(--ink-200);
+  }
+  .timeline-row:last-child { border-bottom: 1px solid var(--ink-200); }
+  .timeline-row__year { font-family: var(--font-serif); font-size: 32px; color: var(--accent); line-height: 1; }
+  .timeline-row__title { font-family: var(--font-serif); font-size: 22px; margin-bottom: 6px; }
+  .timeline-row__sub { color: var(--gray-600); font-size: var(--fs-md); line-height: 1.6; }
+
+  .pull-quote {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    padding: 56px 48px;
+    border-radius: var(--r-2xl);
+    margin: 48px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .pull-quote__deco {
+    position: absolute;
+    top: 12px; left: 28px;
+    font-family: var(--font-serif);
+    font-size: 200px;
+    line-height: 1;
+    color: rgba(200,255,74,.1);
+  }
+  .pull-quote p {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: clamp(28px, 3.5vw, 42px);
+    line-height: 1.3;
+    color: var(--cream-50);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    max-width: 28ch;
+  }
+  .pull-quote cite {
+    font-family: var(--font-mono);
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-top: 24px;
+    display: block;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰<em style="font-style:italic;color:var(--accent);">临研</em></span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html">找试验</a>
+      <a href="my-applications.html">我的报名</a>
+      <a href="about.html" aria-current="page">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="auth.html" style="border:none;font-size:var(--fs-sm);">登录</a>
+      <a class="btn btn--ink btn--sm" href="trials.html">开始找试验 <span class="arrow">→</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="about-hero">
+    <div class="container">
+      <span class="eyebrow">★ 关于临床试验 + 关于我们</span>
+      <h1 style="margin-top:18px;">把不熟悉的事，<br /><em>讲明白</em></h1>
+      <p>这里是给患者看的指南。从"什么是临床试验"，到"我们是谁"、"怎么保障你的安全"，全部用日常语言解释清楚。</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="layout-2">
+      <!-- 左侧目录 -->
+      <aside class="toc">
+        <div class="toc__title">本页目录</div>
+        <ul class="toc__list">
+          <li><a href="#what"><span>01</span><strong>什么是临床试验</strong></a></li>
+          <li><a href="#phase"><span>02</span><strong>试验的不同期</strong></a></li>
+          <li><a href="#consent"><span>03</span><strong>知情同意书</strong></a></li>
+          <li><a href="#safety"><span>04</span><strong>你的安全保障</strong></a></li>
+          <li><a href="#privacy"><span>05</span><strong>隐私与信息保密</strong></a></li>
+          <li><a href="#exit"><span>06</span><strong>如何申请退出</strong></a></li>
+          <li><a href="#who"><span>07</span><strong>我们是谁</strong></a></li>
+          <li><a href="#faq"><span>08</span><strong>常见问题</strong></a></li>
+        </ul>
+        <div style="margin-top:36px;padding:24px 0;border-top:var(--border-strong);">
+          <span class="eyebrow">★ 还想问？</span>
+          <p style="margin-top:12px;color:var(--gray-600);font-size:var(--fs-sm);line-height:1.6;">没有找到你想要的答案，可以直接联系我们。</p>
+          <a href="contact.html" class="btn btn--ghost btn--sm mt-3">联系我们 →</a>
+        </div>
+      </aside>
+
+      <!-- 右侧内容 -->
+      <div>
+
+        <!-- 01 -->
+        <section class="doc-section" id="what">
+          <span class="num">/ 01 什么是临床试验</span>
+          <h2>临床试验是<em>什么</em>？</h2>
+          <p class="lead">"临床试验"听起来吓人，其实就是医生在严格监督下，给病人用一种<strong style="color:var(--ink-900);">已经初步证明可能有效</strong>的新药或新治疗，并观察效果与安全性的过程。</p>
+
+          <h3>它为什么存在？</h3>
+          <p>所有今天上市的、你在医院里能拿到的药，几乎全都经过了临床试验。如果没有当年那些参与试验的病人，今天的医生就没有这些治疗手段。</p>
+          <p>对你来说，参加试验的好处可能是：</p>
+          <ul style="padding-left:22px;color:var(--gray-700);font-size:var(--fs-lg);line-height:1.9;">
+            <li>用上一种<strong style="color:var(--ink-900);">还没正式上市但已经初步看到效果的新药</strong>；</li>
+            <li>得到比常规门诊更<strong style="color:var(--ink-900);">细致的监测和检查</strong>；</li>
+            <li>所有研究用药与研究检查<strong style="color:var(--ink-900);">免费</strong>；</li>
+            <li>有机会让自己的经历，<strong style="color:var(--ink-900);">帮助到未来更多的人</strong>。</li>
+          </ul>
+
+          <div class="pull-quote">
+            <span class="pull-quote__deco">"</span>
+            <p>临床试验不是把你当小白鼠，而是医生把可能更好的治疗，提前让你用上。</p>
+            <cite>— 主任医师 / 复旦肿瘤医院</cite>
+          </div>
+        </section>
+
+        <!-- 02 -->
+        <section class="doc-section" id="phase">
+          <span class="num">/ 02 试验的不同期</span>
+          <h2>I 期、II 期、III 期，<em>差别在哪</em>？</h2>
+          <p>你在项目页常会看到"I 期"、"II 期"、"III 期"这种标签。它们其实代表试验进行到了哪一步：从最早的小范围探索，到最后的大规模验证。</p>
+
+          <div class="phase-grid">
+            <div class="phase">
+              <div class="phase__num">I</div>
+              <div class="phase__title">最早期 · 小范围</div>
+              <div class="phase__sub">通常 20-100 人，主要看这种新药对人是否安全。</div>
+            </div>
+            <div class="phase">
+              <div class="phase__num">II</div>
+              <div class="phase__title">初步看效果</div>
+              <div class="phase__sub">一般 100-300 人，初步评估对你这种病的疗效。</div>
+            </div>
+            <div class="phase">
+              <div class="phase__num">III</div>
+              <div class="phase__title">大规模验证</div>
+              <div class="phase__sub">几百到几千人，与现有标准治疗对比，决定能否上市。</div>
+            </div>
+            <div class="phase">
+              <div class="phase__num">IV</div>
+              <div class="phase__title">上市后追踪</div>
+              <div class="phase__sub">药物已经上市，继续追踪长期安全性与罕见副作用。</div>
+            </div>
+          </div>
+
+          <p style="margin-top:32px;font-family:var(--font-mono);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);">★ 期数越靠后，药物的疗效与安全证据越充分</p>
+        </section>
+
+        <!-- 03 -->
+        <section class="doc-section" id="consent">
+          <span class="num">/ 03 知情同意书</span>
+          <h2>"知情同意书"<br />其实是<em>你的护身符</em></h2>
+          <p class="lead">这是法律规定的、你参加任何临床试验前必须签的文件。它不是免责声明，更像是医生写给你的<strong style="color:var(--ink-900);">使用说明书</strong>。</p>
+
+          <h3>知情同意书会告诉你什么？</h3>
+          <ul style="padding-left:22px;color:var(--gray-700);font-size:var(--fs-lg);line-height:1.9;">
+            <li>这次试验的目的、方法、可能持续多长时间；</li>
+            <li>你可能会得到什么好处；</li>
+            <li>你可能面临哪些风险与不便；</li>
+            <li>有没有其他替代治疗方法可以选；</li>
+            <li>研究中心怎么保护你的隐私；</li>
+            <li>如果发生不良反应，谁来承担费用；</li>
+            <li><strong style="color:var(--ink-900);">你随时可以退出，并且不影响你后续的治疗。</strong></li>
+          </ul>
+
+          <h3>建议你这样做</h3>
+          <p>不要一拿到就签字。带回家慢慢看，不懂的标记出来，下次见医生时一条一条问清楚。也可以让家人或者你信任的人陪你一起看。</p>
+        </section>
+
+        <!-- 04 -->
+        <section class="doc-section" id="safety">
+          <span class="num">/ 04 你的安全保障</span>
+          <h2>我们是怎么<em>守住你的</em></h2>
+
+          <div class="safety-grid">
+            <div class="safety">
+              <div class="safety__id">/ 01 双重审批</div>
+              <h4>国家药监局 + 医院伦理委员会</h4>
+              <p>所有项目都通过了国家药品监督管理局的批准，同时经过研究医院独立伦理委员会的逐项审查，缺一不可。</p>
+            </div>
+            <div class="safety">
+              <div class="safety__id">/ 02 全程监测</div>
+              <h4>研究中心团队为你定期评估</h4>
+              <p>入组期间，医生护士会按照固定节奏给你做检查、问情况，任何不适都有专人对接处理。</p>
+            </div>
+            <div class="safety">
+              <div class="safety__id">/ 03 严重不良反应应急机制</div>
+              <h4>24 小时报告通道</h4>
+              <p>研究中心一旦发现严重不良反应，必须在 24 小时内上报药监局与伦理委员会，并立即启动应急预案。</p>
+            </div>
+            <div class="safety">
+              <div class="safety__id">/ 04 受试者保险</div>
+              <h4>大部分项目配套保险</h4>
+              <p>研究方为参与者购买专项保险，对试验相关的健康损害提供保障。具体细则会写在知情同意书里。</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 05 -->
+        <section class="doc-section" id="privacy">
+          <span class="num">/ 05 隐私与信息保密</span>
+          <h2>你的资料，<br /><em>不会被乱用</em></h2>
+          <p class="lead">我们对你的承诺：你的手机号、姓名、病历不会出现在任何公开页面，也不会被卖给任何第三方。</p>
+
+          <h3>具体怎么做</h3>
+          <ul style="padding-left:22px;color:var(--gray-700);font-size:var(--fs-lg);line-height:1.9;">
+            <li>在公开网站任何页面，<strong style="color:var(--ink-900);">永远不会出现</strong>你的手机号、身份证、地址；</li>
+            <li>在我们的运营后台，手机号默认<strong style="color:var(--ink-900);">脱敏</strong>显示（如 138****0000），运营人员需要主动点击"查看完整号码"才能看到，每次都会留下记录；</li>
+            <li>研究中心拿到你资料的，只有承担本项目的医生与协调员；</li>
+            <li>你的资料默认仅用于本次报名匹配，<strong style="color:var(--ink-900);">需经你同意</strong>才会保留用于以后其他项目的预筛复用；</li>
+            <li>你随时可以在"个人中心"申请删除账号与全部资料。</li>
+          </ul>
+        </section>
+
+        <!-- 06 -->
+        <section class="doc-section" id="exit">
+          <span class="num">/ 06 如何申请退出</span>
+          <h2>不想继续？<em>随时可以走</em></h2>
+          <p>这是你的合法权利，写在《赫尔辛基宣言》和我国《药物临床试验质量管理规范》里。</p>
+
+          <h3>三种情况，三种做法</h3>
+
+          <div class="timeline-block">
+            <div class="timeline-row">
+              <div class="timeline-row__year">A</div>
+              <div>
+                <div class="timeline-row__title">报名了，但还没被联系</div>
+                <div class="timeline-row__sub">直接在"我的报名"页面点"取消报名"即可，不会有任何后续。</div>
+              </div>
+            </div>
+            <div class="timeline-row">
+              <div class="timeline-row__year">B</div>
+              <div>
+                <div class="timeline-row__title">已经被联系，但还没入组</div>
+                <div class="timeline-row__sub">告诉运营同事一声，或者直接挂掉电话不接也可以，不会影响你以后任何事。</div>
+              </div>
+            </div>
+            <div class="timeline-row">
+              <div class="timeline-row__year">C</div>
+              <div>
+                <div class="timeline-row__title">已经入组，想中途退出</div>
+                <div class="timeline-row__sub">直接告诉研究中心的医生，签一份《退出知情同意》即可。研究方还会跟你做最后一次安全评估，确认你的身体状况。</div>
+              </div>
+            </div>
+          </div>
+
+          <p style="margin-top:32px;font-family:var(--font-mono);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);">★ 退出后，你以后在这家医院的就医不会受任何影响</p>
+        </section>
+
+        <!-- 07 -->
+        <section class="doc-section" id="who">
+          <span class="num">/ 07 我们是谁</span>
+          <h2>九泰临研，<em>是干什么的</em></h2>
+          <p class="lead">我们是九泰药械（北京）有限公司旗下的临床试验患者招募平台，专注于让"找到合适的临床试验"这件事，对患者更友好一点。</p>
+
+          <h3>我们做了什么</h3>
+          <ul style="padding-left:22px;color:var(--gray-700);font-size:var(--fs-lg);line-height:1.9;">
+            <li>把全国正在招募的临床试验，按病种、城市汇总到一个地方；</li>
+            <li>用日常语言重新写每个项目的说明，告别监管文件式术语；</li>
+            <li>提供一份你只需要填一次、就可以反复使用的基础资料；</li>
+            <li>有专业的运营团队，主动联系你、跟进你的状态、回答你的问题。</li>
+          </ul>
+
+          <h3>我们的发展</h3>
+          <div class="timeline-block">
+            <div class="timeline-row">
+              <div class="timeline-row__year">2024</div>
+              <div>
+                <div class="timeline-row__title">九泰药械 CRO 业务成立</div>
+                <div class="timeline-row__sub">服务超过 80 家医药企业的临床研究项目管理。</div>
+              </div>
+            </div>
+            <div class="timeline-row">
+              <div class="timeline-row__year">2025</div>
+              <div>
+                <div class="timeline-row__title">患者招募业务启动</div>
+                <div class="timeline-row__sub">发现"找到合适患者"是行业最大瓶颈，决心从患者侧着手。</div>
+              </div>
+            </div>
+            <div class="timeline-row">
+              <div class="timeline-row__year">2026</div>
+              <div>
+                <div class="timeline-row__title">九泰临研患者招募平台上线</div>
+                <div class="timeline-row__sub">面向患者、家属和病友的友好版招募平台正式启用。</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 08 FAQ -->
+        <section class="doc-section" id="faq">
+          <span class="num">/ 08 你最常问的</span>
+          <h2><em>常见问题</em></h2>
+
+          <details class="q" open>
+            <summary>参加临床试验，到底安全吗？</summary>
+            <div class="answer">
+              <p>所有上线项目都通过了国家药监局批准、医院伦理委员会审查。研究中心的医生护士会全程监测你的健康指标，发现任何异常都会立即处理。大部分项目还为参与者购买了专项保险。</p>
+              <p>但任何医疗行为都有风险，包括我们日常吃的药。所以参加前，一定要认真读知情同意书，把你担心的问题问清楚。</p>
+            </div>
+          </details>
+
+          <details class="q">
+            <summary>参加试验需要花钱吗？</summary>
+            <div class="answer">
+              <p>研究用药、研究相关的检查、研究随访 — 这些都是<strong style="color:var(--ink-900);">免费</strong>的，由研究方承担。</p>
+              <p>你需要承担的，可能是：往返研究中心的交通费、自行选择的非研究相关检查、误工费等。部分项目会给你交通补贴，具体看项目页或者问运营。</p>
+            </div>
+          </details>
+
+          <details class="q">
+            <summary>报名后，多久会有人联系我？</summary>
+            <div class="answer">
+              <p>正常情况下 <strong style="color:var(--ink-900);">24 小时内</strong> 我们的运营同事会通过电话或微信联系你。</p>
+              <p>如果超过 24 小时还没人联系，可能是赶上周末或节假日。你可以直接联系我们的客服催促一下。</p>
+            </div>
+          </details>
+
+          <details class="q">
+            <summary>如果我后悔了，能退出吗？退出后会不会被追责？</summary>
+            <div class="answer">
+              <p>任何时候、任何阶段，你都可以退出。这是你的合法权利。</p>
+              <p>退出后：
+                <ul>
+                  <li>不会承担任何法律责任；</li>
+                  <li>不会影响你以后在这家医院的就医；</li>
+                  <li>研究方会做最后一次安全评估，确保你身体状况无碍。</li>
+                </ul>
+              </p>
+            </div>
+          </details>
+
+          <details class="q">
+            <summary>我是不是适合参加？怎么判断？</summary>
+            <div class="answer">
+              <p>每个项目页都有"<strong style="color:var(--ink-900);">适合参加的人</strong>"和"<strong style="color:var(--ink-900);">不适合参加的人</strong>"两个清单，你可以先自己对照一下。</p>
+              <p>但最终是否符合，还要看研究中心医生的专业评估。预筛只是初步筛选。</p>
+            </div>
+          </details>
+
+          <details class="q">
+            <summary>我的手机号会被泄露吗？会被骚扰电话打吗？</summary>
+            <div class="answer">
+              <p>不会。你的手机号在公开网站任何页面都不会出现，运营后台默认脱敏，仅授权的运营人员和研究中心可以看到完整号码，每次访问都会留下记录可追溯。</p>
+              <p>我们绝不会把你的资料卖给任何第三方。</p>
+            </div>
+          </details>
+
+          <details class="q">
+            <summary>如果我没被选上，是不是说明我有问题？</summary>
+            <div class="answer">
+              <p>不是。每个项目都有非常严格、有时甚至很奇怪的入组标准（比如最近 4 周不能参加过其他试验、HbA1c 必须在某个区间），不符合并不代表你的健康有问题，仅仅是这个项目这个时刻不合适你。</p>
+              <p>我们会保留你的资料，等你符合条件的项目出现时主动通知你。</p>
+            </div>
+          </details>
+
+          <details class="q">
+            <summary>我是患者家属，可以代替患者报名吗？</summary>
+            <div class="answer">
+              <p>可以。但最终需要患者本人到场，由患者本人签署知情同意书。如果患者意识不清晰或缺乏行为能力，需由法定监护人签署。</p>
+            </div>
+          </details>
+
+        </section>
+
+        <!-- 底部 CTA -->
+        <div style="background:var(--accent);color:var(--ink-900);padding:48px;border-radius:var(--r-2xl);margin-top:80px;display:flex;justify-content:space-between;gap:24px;align-items:center;flex-wrap:wrap;">
+          <div>
+            <h3 style="font-family:var(--font-serif);font-size:36px;font-weight:400;margin-bottom:8px;">还有问题没解答？</h3>
+            <p style="color:var(--ink-900);">直接联系我们，电话、微信、邮件都可以。</p>
+          </div>
+          <a href="contact.html" class="btn btn--ink btn--lg">联系我们 <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__deco" aria-hidden="true">JIUTAI</div>
+  <div class="container">
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
+        <div class="brand" style="color:var(--cream-50);">
+          <div class="brand__logo">JT</div>
+          <span translate="no">九泰临研</span>
+        </div>
+        <p>九泰药械旗下临床试验患者招募平台，帮你找到适合自己的临床试验，全程陪伴。</p>
+      </div>
+      <div>
+        <h5>找试验</h5>
+        <ul>
+          <li><a href="trials.html">看全部项目</a></li>
+          <li><a href="trials.html">按病种查找</a></li>
+          <li><a href="trials.html">按城市查找</a></li>
+          <li><a href="trials.html">医美相关</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>了解更多</h5>
+        <ul>
+          <li><a href="about.html#what">什么是临床试验</a></li>
+          <li><a href="about.html#faq">常见问题</a></li>
+          <li><a href="my-applications.html">我的报名</a></li>
+          <li><a href="about.html#safety">安全保障</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>关于我们</h5>
+        <ul>
+          <li><a href="about.html#who">关于九泰临研</a></li>
+          <li><a href="contact.html">联系方式</a></li>
+          <li><a href="#">隐私政策</a></li>
+          <li><a href="#">用户协议</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span>本平台内容仅作信息提供，不能替代医生的专业建议</span>
+    </div>
+  </div>
+</footer>
+<script src="../assets/prototype.js" defer></script>
+</body>
+</html>

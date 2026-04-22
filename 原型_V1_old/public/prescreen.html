@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>预筛 — HER2+ 早期乳腺癌靶向药研究</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  body { background: var(--cream-100); }
+  .form-shell { padding: 32px 0 96px; }
+
+  .form-progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+  .form-progress__item {
+    height: 4px;
+    background: var(--ink-200);
+    border-radius: 2px;
+    position: relative;
+  }
+  .form-progress__item.active { background: var(--accent); }
+  .form-progress__item.done { background: var(--ink-900); }
+  .form-progress__label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-top: 8px;
+    display: block;
+  }
+  .form-progress__item.active + .form-progress__label,
+  .form-progress__item.done + .form-progress__label { color: var(--ink-900); }
+
+  .form-card {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-2xl);
+    padding: 40px 44px;
+    margin-bottom: 18px;
+  }
+  .form-card__title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .form-card__title h3 {
+    
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -.01em;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .form-card__title h3 .num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: .12em;
+    font-weight: 500;
+  }
+  .form-card__sub { color: var(--gray-500); font-size: var(--fs-md); margin-bottom: 32px; }
+
+  .prefill-banner {
+    display: flex;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--lime-soft);
+    border: 1px solid var(--lime);
+    border-radius: var(--r-md);
+    color: var(--ink-900);
+    font-size: var(--fs-sm);
+    margin-bottom: 28px;
+    align-items: center;
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .field-row { grid-template-columns: 1fr; } }
+
+  .radio-group, .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+  }
+
+  .form-summary {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    border-radius: var(--r-2xl);
+    padding: 28px;
+    position: sticky;
+    top: 100px;
+  }
+  .form-summary h4 { color: var(--cream-50);  font-size: 24px; font-weight: 400; margin-bottom: 18px; }
+  .form-summary__item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid rgba(253,250,243,.15);
+    font-size: var(--fs-sm);
+  }
+  .form-summary__item:first-of-type { border-top: 1px solid rgba(253,250,243,.15); }
+  .form-summary__item span:first-child { color: rgba(253,250,243,.6); font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  .form-summary__item span:last-child { color: var(--cream-50); font-weight: 500; }
+
+  .layout-form { display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start; }
+  @media (max-width: 960px) { .layout-form { grid-template-columns: 1fr; } }
+
+  .submit-bar {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-2xl);
+    padding: 22px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .submit-bar__hint { color: var(--gray-600); font-size: var(--fs-sm); font-family: var(--font-mono); letter-spacing: .04em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰临研</span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html">找试验</a>
+      <a href="community.html">病友社区</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="my-applications.html" style="border:none;font-size:var(--fs-sm);">小芳，你好</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="form-shell">
+  <div class="container" style="max-width: 1100px;">
+    <div style="margin-bottom: 32px;">
+      <a href="trial-detail.html" class="btn btn--text" style="font-size:var(--fs-sm);">← 返回项目详情</a>
+      <h1 style="font-size:clamp(36px,5vw,56px);font-weight:400;letter-spacing:-.02em;margin-top:14px;">预筛 / 申请</h1>
+      <p class="muted mt-3" style="font-family:var(--font-mono);font-size:var(--fs-xs);letter-spacing:.08em;text-transform:uppercase;">某新型靶向药对 HER2+ 早期乳腺癌的疗效研究</p>
+    </div>
+
+    <!-- 进度条 -->
+    <div>
+      <div class="form-progress" aria-label="表单进度">
+        <div class="form-progress__item done"></div>
+        <div class="form-progress__item active"></div>
+        <div class="form-progress__item"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:48px;">
+        <span class="form-progress__label">/ 01 基础资料</span>
+        <span class="form-progress__label" style="color:var(--ink-900);">/ 02 项目相关</span>
+        <span class="form-progress__label">/ 03 信息确认</span>
+      </div>
+    </div>
+
+    <div class="layout-form">
+      <form>
+        <section class="form-card">
+          <div class="form-card__title">
+            <h3><span class="num">/ 01</span> 基础资料</h3>
+            <a href="#" class="btn btn--text" style="font-size:var(--fs-sm);">前往个人中心修改 →</a>
+          </div>
+          <div class="prefill-banner">
+            <span style="font-size:18px;">✦</span>
+            <span>以下资料已根据你的个人档案自动带入，可直接修改。</span>
+          </div>
+
+          <div class="field-row">
+            <div class="form-field">
+              <label class="form-field__label" for="name">姓名 <span class="required">*</span></label>
+              <input class="input input--prefilled" id="name" type="text" autocomplete="name" value="张芳" required />
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="phone">手机号 <span class="required">*</span></label>
+              <input class="input input--prefilled" id="phone" type="tel" inputmode="tel" autocomplete="tel" value="138 **** 0000" required />
+              <p class="form-field__hint">仅运营人员可见，用于联系你</p>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="form-field">
+              <label class="form-field__label" for="gender">性别 <span class="required">*</span></label>
+              <select class="select input--prefilled" id="gender" autocomplete="sex" required>
+                <option value="female" selected>女</option>
+                <option value="male">男</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="age">年龄 <span class="required">*</span></label>
+              <input class="input input--prefilled" id="age" type="number" inputmode="numeric" min="18" max="80" value="42" required />
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="form-field">
+              <label class="form-field__label" for="city">所在城市 <span class="required">*</span></label>
+              <select class="select input--prefilled" id="city" autocomplete="address-level2" required>
+                <option>上海</option><option>北京</option><option>广州</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-field__label" for="condition">主要病种</label>
+              <input class="input input--prefilled" id="condition" type="text" value="乳腺癌" />
+            </div>
+          </div>
+        </section>
+
+        <section class="form-card">
+          <div class="form-card__title">
+            <h3><span class="num">/ 02</span> 项目相关问题</h3>
+            <span class="badge badge--accent">本项目专属 · 6 题</span>
+          </div>
+          <p class="form-card__sub">这些问题用于初步判断你是否适合本项目，预计 1 分钟完成。</p>
+
+          <div class="form-field">
+            <label class="form-field__label">你是否已经被医生确诊为 HER2 阳性乳腺癌？ <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio radio--checked"><input type="radio" name="diag" checked /><span>是的，已经确诊</span></label>
+              <label class="radio"><input type="radio" name="diag" /><span>不确定</span></label>
+              <label class="radio"><input type="radio" name="diag" /><span>否</span></label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label">确诊距今的时间 <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio radio--checked"><input type="radio" name="t" checked /><span>3 个月内</span></label>
+              <label class="radio"><input type="radio" name="t" /><span>3 - 6 个月</span></label>
+              <label class="radio"><input type="radio" name="t" /><span>6 - 12 个月</span></label>
+              <label class="radio"><input type="radio" name="t" /><span>12 个月以上</span></label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label">是否已经接受过以下治疗？（可多选）</label>
+            <div class="checkbox-group">
+              <label class="checkbox"><input type="checkbox" /><span>手术治疗</span></label>
+              <label class="checkbox"><input type="checkbox" /><span>放疗</span></label>
+              <label class="checkbox"><input type="checkbox" /><span>化疗</span></label>
+              <label class="checkbox"><input type="checkbox" /><span>HER2 靶向治疗</span></label>
+              <label class="checkbox"><input type="checkbox" /><span>内分泌治疗</span></label>
+              <label class="checkbox checkbox--checked"><input type="checkbox" checked /><span>暂未治疗</span></label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="weight">最近一次体检的体重（kg） <span class="required">*</span></label>
+            <input class="input" id="weight" type="number" inputmode="numeric" min="30" max="200" placeholder="如：55" required />
+            <p class="form-field__hint">用于评估用药剂量</p>
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label" for="allergy">是否对以下任一药物过敏？</label>
+            <textarea class="textarea" id="allergy" placeholder="如：曾经使用 XX 药物后出现皮疹…"></textarea>
+            <p class="form-field__hint">没有可不填</p>
+          </div>
+
+          <div class="form-field">
+            <label class="form-field__label">期望就诊的研究中心 <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio radio--checked"><input type="radio" name="site" checked /><span>上海·复旦肿瘤</span></label>
+              <label class="radio"><input type="radio" name="site" /><span>上海·瑞金</span></label>
+              <label class="radio"><input type="radio" name="site" /><span>由运营推荐</span></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="form-card">
+          <div class="form-card__title">
+            <h3><span class="num">/ 03</span> 信息确认</h3>
+          </div>
+          <label class="checkbox" style="border:1px solid var(--ink-200);margin-bottom:8px;">
+            <input type="checkbox" required />
+            <span>我已阅读并同意 <a href="#" style="text-decoration:underline;">隐私政策</a> 与 <a href="#" style="text-decoration:underline;">用户协议</a>，授权平台将我的预筛资料发送给本项目研究中心。</span>
+          </label>
+          <label class="checkbox" style="border:1px solid var(--ink-200);">
+            <input type="checkbox" />
+            <span>同意将我的基础资料保留以便复用到其他项目预筛。</span>
+          </label>
+        </section>
+
+        <div class="submit-bar">
+          <span class="submit-bar__hint">提交后，运营会在 24 小时内联系你</span>
+          <div style="display:flex;gap:10px;">
+            <button type="button" class="btn btn--ghost">保存草稿</button>
+            <button type="submit" class="btn btn--primary btn--lg">提交预筛 <span class="arrow">→</span></button>
+          </div>
+        </div>
+      </form>
+
+      <aside>
+        <div class="form-summary">
+          <span class="eyebrow" style="color:var(--lime);">项目快览</span>
+          <h4 style="margin-top:12px;">HER2+ 早期乳腺癌</h4>
+          <div style="margin-top:24px;">
+            <div class="form-summary__item"><span>项目类型</span><span>III 期</span></div>
+            <div class="form-summary__item"><span>就诊城市</span><span>上海</span></div>
+            <div class="form-summary__item"><span>预计访视</span><span>每 3 周一次</span></div>
+            <div class="form-summary__item"><span>研究周期</span><span>12 个月</span></div>
+            <div class="form-summary__item"><span>研究用药</span><span style="color:var(--lime);">免费</span></div>
+          </div>
+
+          <div style="margin-top:24px;padding:14px;background:rgba(200,255,74,.08);border-radius:10px;font-size:var(--fs-xs);color:var(--lime);font-family:var(--font-mono);letter-spacing:.04em;line-height:1.5;">
+            🔒 你的个人信息会经过严格脱敏，仅运营与研究中心可见。
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+</body>
+</html>

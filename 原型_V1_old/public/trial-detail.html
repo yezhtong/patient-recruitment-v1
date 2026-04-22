@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>HER2+ 早期乳腺癌靶向药研究 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  .breadcrumb {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 32px 0 24px;
+  }
+  .breadcrumb a { color: var(--gray-500); }
+  .breadcrumb a:hover { color: var(--accent); }
+  .breadcrumb strong { color: var(--ink-900); font-weight: 500; }
+
+  .trial-hero {
+    padding: 24px 0 64px;
+    border-bottom: var(--border-strong);
+    margin-bottom: 64px;
+  }
+  .trial-hero__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .trial-hero h1 {
+    font-size: clamp(36px, 5.5vw, 72px);
+    margin-bottom: 32px;
+    max-width: 22ch;
+  }
+  .trial-hero__meta-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--ink-200);
+    border-top: var(--border-strong);
+    border-bottom: var(--border-strong);
+    margin-bottom: 32px;
+  }
+  @media (max-width: 768px) { .trial-hero__meta-bar { grid-template-columns: repeat(2, 1fr); } }
+  .trial-hero__meta-item {
+    background: var(--cream-50);
+    padding: 20px 24px;
+  }
+  .trial-hero__meta-item .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 6px;
+  }
+  .trial-hero__meta-item .value {
+    
+    font-size: 22px;
+    color: var(--ink-900);
+    line-height: 1.2;
+  }
+
+  .layout-2 { display: grid; grid-template-columns: 1fr 360px; gap: 64px; align-items: start; }
+  @media (max-width: 1024px) { .layout-2 { grid-template-columns: 1fr; } }
+
+  .content-block {
+    padding: 0 0 56px;
+    margin-bottom: 56px;
+    border-bottom: 1px solid var(--ink-100);
+  }
+  .content-block:last-child { border-bottom: none; }
+  .content-block h2 {
+    font-size: clamp(28px, 3vw, 40px);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .content-block h2 .num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: .12em;
+    font-weight: 500;
+  }
+  .content-block p { color: var(--gray-700); line-height: 1.75; font-size: var(--fs-lg); }
+
+  .criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 700px) { .criteria-grid { grid-template-columns: 1fr; } }
+  .criteria-card {
+    padding: 28px;
+    border-radius: var(--r-xl);
+    border: 1px solid;
+  }
+  .criteria-card h4 {
+    
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .criteria-card.--ok { background: var(--lime-soft); border-color: var(--lime); }
+  .criteria-card.--ok h4::before { content: "✓"; font-family: var(--font-mono); color: var(--success-700); font-size: 18px; }
+  .criteria-card.--no { background: var(--accent-soft); border-color: var(--accent); }
+  .criteria-card.--no h4::before { content: "✗"; font-family: var(--font-mono); color: var(--accent-dark); font-size: 18px; }
+  .criteria-card ul { padding-left: 22px; font-size: var(--fs-md); color: var(--gray-700); line-height: 1.9; }
+
+  .flow-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: var(--border-strong);
+  }
+  @media (max-width: 700px) { .flow-steps { grid-template-columns: 1fr 1fr; } }
+  .flow-step {
+    padding: 28px 24px;
+    border-right: var(--border-strong);
+    border-bottom: var(--border-strong);
+    background: var(--cream-50);
+  }
+  .flow-step:last-child { border-right: none; }
+  .flow-step__num {
+    
+    font-size: 56px;
+    color: var(--ink-200);
+    line-height: 1;
+    margin-bottom: 14px;
+    letter-spacing: -.03em;
+  }
+  .flow-step__title {  font-size: 22px; font-weight: 400; color: var(--ink-900); margin-bottom: 4px; }
+  .flow-step__sub { color: var(--gray-500); font-size: var(--fs-sm); font-family: var(--font-mono); letter-spacing: .04em; }
+
+  .city-list { display: flex; flex-wrap: wrap; gap: 12px; }
+  .city-chip {
+    padding: 14px 20px;
+    border: 1px solid var(--ink-200);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-md);
+    color: var(--ink-900);
+    transition: all .2s var(--ease-out);
+  }
+  .city-chip:hover { border-color: var(--ink-900); background: var(--ink-900); color: var(--cream-50); }
+  .city-chip strong {  font-size: 18px; margin-right: 6px; }
+  .city-chip span { color: var(--gray-500); font-size: var(--fs-sm); font-family: var(--font-mono); }
+  .city-chip:hover span { color: rgba(253,250,243,.7); }
+
+  details { border-bottom: 1px solid var(--ink-200); padding: 18px 0; }
+  details summary { cursor: pointer;  font-size: 22px; color: var(--ink-900); list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  details summary::after { content: "+"; font-family: var(--font-mono); color: var(--accent); font-size: 24px; transition: transform .2s var(--ease-out); }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { color: var(--gray-600); margin-top: 12px; }
+  details summary::-webkit-details-marker { display: none; }
+
+  /* Sticky CTA */
+  .sticky-cta {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    border-radius: var(--r-2xl);
+    padding: 32px;
+    position: sticky;
+    top: 100px;
+  }
+  .sticky-cta__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 20px;
+  }
+  .sticky-cta h3 {
+    
+    font-size: 36px;
+    font-weight: 400;
+    color: var(--cream-50);
+    line-height: 1.1;
+    margin-bottom: 8px;
+  }
+  .sticky-cta p { color: rgba(253,250,243,.7); font-size: var(--fs-md); margin-bottom: 28px; line-height: 1.6; }
+  .sticky-cta__list { display: flex; flex-direction: column; gap: 14px; font-size: var(--fs-sm); margin-bottom: 28px; }
+  .sticky-cta__list li {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    color: var(--cream-50);
+    list-style: none;
+    border-top: 1px solid rgba(253,250,243,.15);
+    padding-top: 14px;
+  }
+  .sticky-cta__list li::before {
+    content: "→";
+    color: var(--lime);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+  .sticky-cta ul { padding: 0; margin: 0; }
+  .sticky-cta .btn--primary { width: 100%; }
+
+  .side-block {
+    border: var(--border);
+    border-radius: var(--r-xl);
+    padding: 28px;
+    margin-top: 18px;
+  }
+  .side-block h4 {
+    
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 16px;
+  }
+  .related-item {
+    display: block;
+    padding: 14px 0;
+    color: var(--ink-900);
+    font-size: var(--fs-sm);
+    border-top: 1px solid var(--ink-100);
+  }
+  .related-item:first-of-type { border-top: none; }
+  .related-item:hover { color: var(--accent); text-decoration: none; }
+  .related-item strong { display: block;  font-size: 18px; font-weight: 400; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰临研</span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html" aria-current="page">找试验</a>
+      <a href="community.html">病友社区</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="auth.html" style="border:none;font-size:var(--fs-sm);">登录</a>
+      <a class="btn btn--ink btn--sm" href="trials.html">开始找试验 <span class="arrow">→</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <div class="container">
+    <div class="breadcrumb" aria-label="面包屑">
+      <a href="home.html">首页</a><span>/</span>
+      <a href="trials.html">找试验</a><span>/</span>
+      <a href="trials.html?d=breast">乳腺癌</a><span>/</span>
+      <strong>当前项目</strong>
+    </div>
+
+    <!-- 试验头部 -->
+    <header class="trial-hero">
+      <div class="trial-hero__top">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span class="tag tag--filled">乳腺癌</span>
+          <span class="tag">III 期</span>
+          <span class="tag">HER2 阳性</span>
+        </div>
+        <span class="badge badge--success">招募中 · 8 月底截止</span>
+      </div>
+
+      <h1>某新型靶向药对 HER2 阳性 早期乳腺癌的疗效与安全性研究</h1>
+
+      <div class="trial-hero__meta-bar">
+        <div class="trial-hero__meta-item">
+          <div class="label">研究中心</div>
+          <div class="value">上海·北京·广州</div>
+        </div>
+        <div class="trial-hero__meta-item">
+          <div class="label">入组条件</div>
+          <div class="value">18 - 70 岁女性</div>
+        </div>
+        <div class="trial-hero__meta-item">
+          <div class="label">预筛耗时</div>
+          <div class="value">约 2 分钟</div>
+        </div>
+        <div class="trial-hero__meta-item">
+          <div class="label">参与费用</div>
+          <div class="value" style="color:var(--accent);">免费</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <a href="prescreen.html" class="btn btn--primary btn--lg">立即预筛 <span class="arrow">→</span></a>
+        <button class="btn btn--ghost btn--lg">收藏项目</button>
+        <button class="btn btn--ghost btn--lg">↗ 分享</button>
+      </div>
+    </header>
+
+    <div class="layout-2">
+      <!-- 左侧主内容 -->
+      <div>
+        <section class="content-block">
+          <h2><span class="num">/ 01</span> 项目一句话</h2>
+          <p>这是一项针对 HER2 阳性早期乳腺癌 患者的新药临床试验。研究目的是评估某新型 HER2 靶向药联合标准化疗方案，相较于单一标准方案，在 3 年无病生存率上的改善。</p>
+        </section>
+
+        <section class="content-block">
+          <h2><span class="num">/ 02</span> 适合参加的人</h2>
+          <div class="criteria-grid">
+            <div class="criteria-card --ok">
+              <h4>你符合以下条件可能合适</h4>
+              <ul>
+                <li>年龄 18 - 70 岁</li>
+                <li>女性，已确诊为 HER2 阳性早期乳腺癌</li>
+                <li>未接受过系统性治疗</li>
+                <li>能够定期到研究中心随访</li>
+                <li>愿意签署知情同意书</li>
+              </ul>
+            </div>
+            <div class="criteria-card --no">
+              <h4>以下情况暂不适合</h4>
+              <ul>
+                <li>晚期或转移性乳腺癌</li>
+                <li>既往使用过 HER2 靶向药</li>
+                <li>合并严重心、肝、肾功能不全</li>
+                <li>正在哺乳或妊娠期</li>
+                <li>近 4 周参加过其他临床试验</li>
+              </ul>
+            </div>
+          </div>
+          <p style="font-family:var(--font-mono);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.1em;color:var(--gray-500);margin-top:24px;">最终是否符合需经研究中心医生评估，预筛只用于初步筛查</p>
+        </section>
+
+        <section class="content-block">
+          <h2><span class="num">/ 03</span> 你需要走的流程</h2>
+          <div class="flow-steps">
+            <div class="flow-step">
+              <div class="flow-step__num">01</div>
+              <div class="flow-step__title">在线预筛</div>
+              <div class="flow-step__sub">2 MIN</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step__num">02</div>
+              <div class="flow-step__title">运营沟通</div>
+              <div class="flow-step__sub">24H 内</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step__num">03</div>
+              <div class="flow-step__title">中心面诊</div>
+              <div class="flow-step__sub">1-2 次访视</div>
+            </div>
+            <div class="flow-step">
+              <div class="flow-step__num">04</div>
+              <div class="flow-step__title">入组治疗</div>
+              <div class="flow-step__sub">12 个月</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-block">
+          <h2><span class="num">/ 04</span> 研究中心 / 城市</h2>
+          <div class="city-list">
+            <div class="city-chip"><strong>上海</strong> <span>复旦肿瘤·瑞金</span></div>
+            <div class="city-chip"><strong>北京</strong> <span>协和·中日友好</span></div>
+            <div class="city-chip"><strong>广州</strong> <span>中山肿瘤·南方医院</span></div>
+          </div>
+        </section>
+
+        <section class="content-block" style="border-bottom:none;">
+          <h2><span class="num">/ 05</span> 常见问题</h2>
+          <details>
+            <summary>参加这项研究安全吗？</summary>
+            <p>所有研究均经过国家药监局批准并通过伦理委员会审查，研究中心会全程监测参与者的安全指标。</p>
+          </details>
+          <details>
+            <summary>参加是否需要付费？</summary>
+            <p>研究用药、研究相关的检查均由项目方承担，部分中心还提供交通补贴。</p>
+          </details>
+          <details>
+            <summary>中途可以退出吗？</summary>
+            <p>完全可以。任何阶段你都可以申请退出，不会影响后续在该医院就诊。</p>
+          </details>
+        </section>
+      </div>
+
+      <!-- 右侧 -->
+      <aside>
+        <div class="sticky-cta">
+          <span class="sticky-cta__pill">免费参与</span>
+          <h3>2 分钟<br />完成预筛</h3>
+          <p>提交后运营会在 24 小时内通过电话或微信联系你。</p>
+          <ul class="sticky-cta__list">
+            <li>免费研究用药与检查</li>
+            <li>专人跟进，全程指导</li>
+            <li>信息脱敏严格保密</li>
+            <li>可随时申请退出</li>
+          </ul>
+          <a href="prescreen.html" class="btn btn--primary btn--lg">立即预筛 <span class="arrow">→</span></a>
+          <p style="text-align:center;margin-top:14px;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:rgba(253,250,243,.5);">本周已有 23 人开始预筛</p>
+        </div>
+
+        <div class="side-block">
+          <span class="eyebrow" style="margin-bottom:14px;">病友讨论</span>
+          <h4 style="margin-top:14px;">来自相同病种<br />的真实分享</h4>
+          <a href="post-detail.html" class="related-item">
+            <strong>HER2+ 患者的真实经验</strong>
+            <span class="muted">@匿名 · 18 评论</span>
+          </a>
+          <a href="post-detail.html" class="related-item">
+            <strong>第一次面诊带什么资料？</strong>
+            <span class="muted">@小芳 · 26 评论</span>
+          </a>
+          <a href="community.html" class="btn btn--text mt-4">进入乳腺癌患者圈 →</a>
+        </div>
+
+        <div class="side-block">
+          <span class="eyebrow" style="margin-bottom:14px;">相关 FAQ</span>
+          <a href="#" class="related-item"><strong>HER2 阳性是什么意思？</strong></a>
+          <a href="#" class="related-item"><strong>临床试验的不同期是什么？</strong></a>
+          <a href="#" class="related-item"><strong>知情同意书要签什么？</strong></a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer" style="margin-top:120px;">
+  <div class="container">
+    <div class="site-footer__bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span><a href="home.html">返回首页</a> · <a href="../index.html">原型导览</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

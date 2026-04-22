@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>病友社区 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  .c-hero { padding: 64px 0 48px; border-bottom: var(--border-strong); position: relative; overflow: hidden; }
+  .c-hero h1 { font-size: clamp(48px, 7vw, 96px); margin-bottom: 24px; }
+  .c-hero p { color: var(--gray-600); font-size: var(--fs-xl); max-width: 56ch; line-height: 1.5; }
+  .c-hero__deco {
+    position: absolute;
+    right: -100px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-soft), transparent 70%);
+    pointer-events: none;
+  }
+
+  .group-section { padding: 64px 0; }
+  .group-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: var(--border-strong);
+    border-left: var(--border-strong);
+  }
+  @media (max-width: 1024px) { .group-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px)  { .group-grid { grid-template-columns: 1fr; } }
+  .group-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 28px;
+    border-right: var(--border-strong);
+    border-bottom: var(--border-strong);
+    text-decoration: none;
+    color: var(--ink-900);
+    background: transparent;
+    min-height: 220px;
+    transition: background .3s var(--ease-out), color .3s var(--ease-out);
+    position: relative;
+  }
+  .group-card:hover { background: var(--ink-900); color: var(--cream-50); text-decoration: none; }
+  .group-card:hover .group-card__num { color: var(--lime); }
+  .group-card:hover .group-card__meta { color: rgba(253,250,243,.7); }
+  .group-card__num {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: .12em;
+    color: var(--gray-400);
+  }
+  .group-card__title {
+    
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -.01em;
+  }
+  .group-card__meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .group-card__meta .arrow { color: var(--accent); transition: transform .3s var(--ease-out); }
+  .group-card:hover .arrow { transform: translateX(6px); color: var(--lime); }
+
+  .layout-2 { display: grid; grid-template-columns: 1fr 360px; gap: 64px; align-items: start; padding-bottom: 96px; }
+  @media (max-width: 960px) { .layout-2 { grid-template-columns: 1fr; } }
+
+  .post-card {
+    padding: 32px 0;
+    border-bottom: 1px solid var(--ink-200);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .post-card:first-child { border-top: var(--border-strong); }
+  .post-card__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .post-card__author { display: flex; gap: 10px; align-items: center; font-size: var(--fs-sm); color: var(--gray-500); font-family: var(--font-mono); letter-spacing: .04em; text-transform: uppercase; font-size: 11px; }
+  .post-card__author .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--ink-900);
+    color: var(--cream-50);
+    display: grid; place-items: center;
+    font-size: var(--fs-xs);
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+  .post-card__author strong { color: var(--ink-900); font-family: var(--font-sans); font-weight: 600; text-transform: none; letter-spacing: -.01em; font-size: var(--fs-sm); }
+  .post-card h3 {
+    
+    font-size: clamp(24px, 2.6vw, 36px);
+    font-weight: 400;
+    letter-spacing: -.01em;
+    line-height: 1.2;
+  }
+  .post-card h3 a { color: var(--ink-900); }
+  .post-card h3 a:hover { color: var(--accent); text-decoration: none; }
+  .post-card__excerpt {
+    color: var(--gray-600);
+    font-size: var(--fs-md);
+    line-height: 1.7;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .post-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: var(--gray-500);
+    font-size: var(--fs-xs);
+    font-family: var(--font-mono);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .side-block {
+    border: var(--border);
+    border-radius: var(--r-xl);
+    padding: 28px;
+    margin-bottom: 18px;
+  }
+  .side-block h4 {
+    
+    font-size: 22px;
+    font-weight: 400;
+    margin-bottom: 16px;
+  }
+  .ranking { list-style: none; padding: 0; margin: 0; }
+  .ranking li { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--ink-100); align-items: baseline; }
+  .ranking li:first-child { border-top: none; }
+  .ranking li .rank { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: .04em; flex-shrink: 0; }
+  .ranking li a { color: var(--ink-900); font-size: var(--fs-sm); line-height: 1.4; }
+  .ranking li a:hover { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="home.html">
+      <div class="brand__logo">JT</div>
+      <span translate="no">九泰临研</span>
+    </a>
+    <nav class="nav" aria-label="主导航">
+      <a href="home.html">首页</a>
+      <a href="trials.html">找试验</a>
+      <a href="community.html" aria-current="page">病友社区</a>
+      <a href="about.html">了解更多</a>
+      <a href="contact.html">联系我们</a>
+    </nav>
+    <div class="site-header__cta">
+      <a class="btn btn--text" href="auth.html" style="border:none;font-size:var(--fs-sm);">登录</a>
+      <a class="btn btn--ink btn--sm" href="trials.html">开始找试验 <span class="arrow">→</span></a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="c-hero">
+    <div class="c-hero__deco" aria-hidden="true"></div>
+    <div class="container">
+      <span class="eyebrow">九泰社区</span>
+      <h1 style="margin-top:20px;">真实病友的<br />经验与陪伴</h1>
+      <p>真实病友的经验分享与互动，帮你建立对临床试验的信任，找到与你情况相似的人。</p>
+      <div style="display:flex;gap:14px;margin-top:32px;flex-wrap:wrap;">
+        <a href="auth.html" class="btn btn--primary btn--lg">📝 我要发帖 <span class="arrow">→</span></a>
+        <a href="#" class="btn btn--ghost btn--lg">查看官方 FAQ</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 病种社区 -->
+  <section class="group-section">
+    <div class="container">
+      <div class="section-head">
+        <div class="section-head__row">
+          <div>
+            <span class="eyebrow">选择病种社区</span>
+            <h2 style="margin-top:16px;">找到与你<br />相似的人</h2>
+          </div>
+          <a href="#" class="btn btn--text">查看全部 30+ 分区 →</a>
+        </div>
+      </div>
+
+      <div class="group-grid">
+        <a href="#" class="group-card">
+          <span class="group-card__num">/ 01</span>
+          <span class="group-card__title">乳腺癌患者圈</span>
+          <span class="group-card__meta"><span>3.2K · 218 帖</span><span class="arrow">→</span></span>
+        </a>
+        <a href="#" class="group-card">
+          <span class="group-card__num">/ 02</span>
+          <span class="group-card__title">糖尿病患者圈</span>
+          <span class="group-card__meta"><span>5.6K · 432 帖</span><span class="arrow">→</span></span>
+        </a>
+        <a href="#" class="group-card">
+          <span class="group-card__num">/ 03</span>
+          <span class="group-card__title">肺癌患者圈</span>
+          <span class="group-card__meta"><span>2.1K · 156 帖</span><span class="arrow">→</span></span>
+        </a>
+        <a href="#" class="group-card">
+          <span class="group-card__num">/ 04</span>
+          <span class="group-card__title">银屑病患者圈</span>
+          <span class="group-card__meta"><span>1.8K · 124 帖</span><span class="arrow">→</span></span>
+        </a>
+        <a href="#" class="group-card">
+          <span class="group-card__num">/ 05</span>
+          <span class="group-card__title">特应性皮炎</span>
+          <span class="group-card__meta"><span>1.2K · 89 帖</span><span class="arrow">→</span></span>
+        </a>
+        <a href="#" class="group-card">
+          <span class="group-card__num">/ 06</span>
+          <span class="group-card__title">罕见病联盟</span>
+          <span class="group-card__meta"><span>980 · 76 帖</span><span class="arrow">→</span></span>
+        </a>
+        <a href="#" class="group-card">
+          <span class="group-card__num">/ 07</span>
+          <span class="group-card__title">医美咨询</span>
+          <span class="group-card__meta"><span>2.4K · 142 帖</span><span class="arrow">→</span></span>
+        </a>
+        <a href="#" class="group-card">
+          <span class="group-card__num">/ 08</span>
+          <span class="group-card__title">查看全部 →</span>
+          <span class="group-card__meta"><span>30+ 分区</span><span class="arrow">→</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 帖子流 -->
+  <div class="container">
+    <div class="layout-2">
+      <section>
+        <div class="section-head" style="margin-bottom:0;padding-bottom:24px;border-bottom:1px solid var(--ink-200);">
+          <div class="section-head__row" style="align-items:center;">
+            <div>
+              <span class="eyebrow">精选帖子</span>
+              <h3 style="margin-top:10px;font-size:36px;font-weight:400;letter-spacing:-.01em;">最近的 真实分享</h3>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn--ink btn--sm">最新</button>
+              <button class="btn btn--ghost btn--sm">最热</button>
+            </div>
+          </div>
+        </div>
+
+        <article class="post-card">
+          <div class="post-card__head">
+            <div class="post-card__author">
+              <div class="avatar">匿</div>
+              <span><strong>匿名病友</strong> · 2 小时前</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span class="tag tag--accent">精选</span>
+              <span class="tag">乳腺癌</span>
+            </div>
+          </div>
+          <h3><a href="post-detail.html">HER2+ 早期乳腺癌患者的真实经验：从确诊到入组试验的 90 天</a></h3>
+          <p class="post-card__excerpt">3 个月前刚被确诊 HER2 阳性，当时整个人都懵了。后来经病友推荐来到这里，最近刚入组了 XX 试验，分享一下整个过程的心路历程，希望能帮到正在纠结的姐妹们…</p>
+          <div class="post-card__meta">
+            <span>32 评论</span>
+            <span>1.2K 浏览</span>
+            <span>↗ 关联试验：HER2+ 早期乳腺癌</span>
+          </div>
+        </article>
+
+        <article class="post-card">
+          <div class="post-card__head">
+            <div class="post-card__author">
+              <div class="avatar">王</div>
+              <span><strong>王女士</strong> · 5 小时前</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span class="tag">糖尿病</span>
+              <span class="tag">提问</span>
+            </div>
+          </div>
+          <h3><a href="post-detail.html">糖尿病患者参加临床试验，对原本的降糖药需要停用吗？</a></h3>
+          <p class="post-card__excerpt">最近想报名一项 GLP-1 类的临床试验，但我现在每天都在吃二甲双胍，不知道入组之后会怎么处理…</p>
+          <div class="post-card__meta">
+            <span>18 评论</span>
+            <span>856 浏览</span>
+          </div>
+        </article>
+
+        <article class="post-card">
+          <div class="post-card__head">
+            <div class="post-card__author">
+              <div class="avatar">李</div>
+              <span><strong>李芳</strong> · 1 天前</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span class="tag tag--accent">精选</span>
+              <span class="tag">医美</span>
+            </div>
+          </div>
+          <h3><a href="post-detail.html">参加法令纹注射类项目的术前术后真实记录（30 天对比）</a></h3>
+          <p class="post-card__excerpt">本人 35 岁，参加了一项注射类填充材料试验，记录一下从知情同意到术后 30 天的全过程，包含术前术后照片对比和真实感受…</p>
+          <div class="post-card__meta">
+            <span>56 评论</span>
+            <span>3.4K 浏览</span>
+            <span>↗ 关联试验：法令纹改善</span>
+          </div>
+        </article>
+
+        <article class="post-card">
+          <div class="post-card__head">
+            <div class="post-card__author">
+              <div class="avatar">张</div>
+              <span><strong>张老师</strong> · 2 天前 · <span style="color:var(--accent);font-weight:600;">官方</span></span>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <span class="tag tag--filled">官方公告</span>
+            </div>
+          </div>
+          <h3><a href="post-detail.html">【官方】关于"知情同意书"你需要知道的 5 件事</a></h3>
+          <p class="post-card__excerpt">很多病友在面诊环节会被要求签署"知情同意书"，这是临床试验最重要的环节之一。本帖整理了 5 个最常被问到的问题…</p>
+          <div class="post-card__meta">
+            <span>24 评论</span>
+            <span>2.1K 浏览</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- 右侧 -->
+      <aside style="position:sticky;top:100px;">
+        <div class="side-block" style="background:var(--ink-900);color:var(--cream-50);border-color:var(--ink-900);">
+          <span class="eyebrow" style="color:var(--lime);">推荐试验</span>
+          <h4 style="margin-top:14px;color:var(--cream-50);">基于你的浏览，智能推荐</h4>
+          <a href="trial-detail.html" style="display:block;margin-top:18px;padding:16px;background:rgba(253,250,243,.05);border-radius:12px;color:var(--cream-50);text-decoration:none;border:1px solid rgba(253,250,243,.1);">
+            <strong style="font-size:18px;font-weight:400;display:block;margin-bottom:6px;">HER2+ 早期乳腺癌靶向药</strong>
+            <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(253,250,243,.6);">📍 上海 · 招募中</div>
+          </a>
+          <a href="prescreen.html" class="btn btn--primary mt-4" style="width:100%;">立即预筛 <span class="arrow">→</span></a>
+        </div>
+
+        <div class="side-block">
+          <span class="eyebrow">本周热门</span>
+          <h4 style="margin-top:14px;">病友最关注的</h4>
+          <ol class="ranking" style="margin-top:14px;">
+            <li><span class="rank">01</span><a href="post-detail.html">HER2+ 患者真实经验分享</a></li>
+            <li><span class="rank">02</span><a href="post-detail.html">糖尿病试验药物冲突？</a></li>
+            <li><span class="rank">03</span><a href="post-detail.html">法令纹试验术前术后</a></li>
+            <li><span class="rank">04</span><a href="post-detail.html">第一次面诊带什么资料？</a></li>
+            <li><span class="rank">05</span><a href="post-detail.html">罕见病联盟招募中</a></li>
+          </ol>
+        </div>
+
+        <div class="side-block">
+          <span class="eyebrow">官方 FAQ</span>
+          <h4 style="margin-top:14px;">关于临床试验</h4>
+          <ol class="ranking" style="margin-top:14px;">
+            <li><span class="rank">→</span><a href="#">什么是临床试验？</a></li>
+            <li><span class="rank">→</span><a href="#">参加临床试验安全吗？</a></li>
+            <li><span class="rank">→</span><a href="#">报名后多久会被联系？</a></li>
+            <li><span class="rank">→</span><a href="#">参加试验需要付费吗？</a></li>
+          </ol>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__bottom" style="border-top:none;padding-top:0;">
+      <span>© 2026 九泰药械（北京）有限公司</span>
+      <span><a href="home.html">返回首页</a> · <a href="../index.html">原型导览</a></span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

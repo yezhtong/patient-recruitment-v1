@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>临床试验患者招募网站 - 原型设计思路对比</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a2a4a 100%);
+            color: #e2e8f0;
+            line-height: 1.8;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #cbd5e1;
+            margin-bottom: 30px;
+        }
+
+        .intro-box {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .intro-text {
+            color: #cbd5e1;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        .design-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .design-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .design-card:hover {
+            border-color: #60a5fa;
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .design-header {
+            padding: 20px;
+            border-bottom: 2px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .design-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .design-title {
+            font-size: 1.4em;
+            color: #60a5fa;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .design-subtitle {
+            color: #a0aec0;
+            font-size: 0.95em;
+        }
+
+        .design-body {
+            padding: 25px;
+        }
+
+        .design-preview {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-content {
+            text-align: center;
+            width: 100%;
+        }
+
+        .preview-title {
+            color: #60a5fa;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .color-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75em;
+            color: #a0aec0;
+            white-space: nowrap;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .feature-item {
+            padding: 10px 0;
+            color: #cbd5e1;
+            padding-left: 25px;
+            position: relative;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-item::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .section-title {
+            color: #60a5fa;
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .pros {
+            background: rgba(34, 197, 94, 0.05);
+            border-left: 4px solid #22c55e;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .pros-title {
+            color: #86efac;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .pros-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .pros-list li {
+            color: #cbd5e1;
+            font-size: 0.9em;
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .pros-list li::before {
+            content: "→";
+            position: absolute;
+            left: 5px;
+            color: #22c55e;
+        }
+
+        .cons {
+            background: rgba(239, 68, 68, 0.05);
+            border-left: 4px solid #ef4444;
+            padding: 12px;
+            border-radius: 4px;
+        }
+
+        .cons-title {
+            color: #fca5a5;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .cons-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .cons-list li {
+            color: #cbd5e1;
+            font-size: 0.9em;
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .cons-list li::before {
+            content: "⚠";
+            position: absolute;
+            left: 5px;
+            color: #ef4444;
+        }
+
+        .best-for {
+            background: rgba(59, 130, 246, 0.05);
+            border-left: 4px solid #3b82f6;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .best-for-title {
+            color: #93c5fd;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .best-for-text {
+            color: #cbd5e1;
+            font-size: 0.9em;
+        }
+
+        .select-button {
+            width: 100%;
+            padding: 12px;
+            background: rgba(96, 165, 250, 0.1);
+            border: 2px solid #60a5fa;
+            color: #60a5fa;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .select-button:hover {
+            background: rgba(96, 165, 250, 0.2);
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.3);
+        }
+
+        .select-button.selected {
+            background: #60a5fa;
+            color: white;
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+        }
+
+        /* 预览样式 */
+        .style-preview-1 {
+            background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .style-preview-1 .preview-content {
+            color: #1f2937;
+        }
+
+        .style-preview-1 .color-swatch {
+            border-color: #e5e7eb;
+        }
+
+        .style-1-color1 { background: #0066cc; }
+        .style-1-color2 { background: #ffffff; border: 2px solid #d1d5db; }
+        .style-1-color3 { background: #f3f4f6; }
+        .style-1-color4 { background: #6b7280; }
+
+        .style-preview-2 {
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe8f0 100%);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .style-preview-2 .preview-content {
+            color: #831843;
+        }
+
+        .style-2-color1 { background: #ec4899; }
+        .style-2-color2 { background: #fce7f3; }
+        .style-2-color3 { background: #fff5f7; }
+        .style-2-color4 { background: #be185d; }
+
+        .style-preview-3 {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .style-preview-3 .preview-content {
+            color: #0c4a6e;
+        }
+
+        .style-3-color1 { background: #06b6d4; }
+        .style-3-color2 { background: #cffafe; }
+        .style-3-color3 { background: #ecf8ff; }
+        .style-3-color4 { background: #0369a1; }
+
+        /* 布局示意 */
+        .layout-demo {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .layout-section {
+            background: rgba(96, 165, 250, 0.1);
+            border-left: 3px solid #60a5fa;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #cbd5e1;
+        }
+
+        .layout-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin-top: 50px;
+            border-collapse: collapse;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .comparison-table th {
+            background: rgba(96, 165, 250, 0.1);
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(96, 165, 250, 0.05);
+        }
+
+        .comparison-table td {
+            color: #cbd5e1;
+        }
+
+        .dimension {
+            font-weight: 600;
+            color: #60a5fa;
+        }
+
+        .next-step {
+            background: rgba(167, 139, 250, 0.1);
+            border: 2px solid rgba(167, 139, 250, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .next-step h2 {
+            color: #a78bfa;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .next-step p {
+            color: #cbd5e1;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 1em;
+        }
+
+        .action-btn-primary {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            color: white;
+        }
+
+        .action-btn-primary:hover {
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .action-btn-secondary {
+            background: rgba(96, 165, 250, 0.1);
+            border: 2px solid #60a5fa;
+            color: #60a5fa;
+        }
+
+        .action-btn-secondary:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #64748b;
+            font-size: 0.9em;
+            border-top: 1px solid rgba(148, 163, 184, 0.2);
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .design-options {
+                grid-template-columns: 1fr;
+            }
+
+            .color-palette {
+                gap: 5px;
+            }
+
+            .color-swatch {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 原型设计思路对比</h1>
+            <p class="subtitle">临床试验患者招募网站 V1 - 3 个设计方向选择</p>
+        </header>
+
+        <div class="intro-box">
+            <p class="intro-text">
+                👉 下面是 3 个完全不同的设计思路，分别从不同的用户角度出发。每个思路都能实现 PRD 功能，但视觉感受、用户体验和品牌传达方式都不同。
+            </p>
+            <p class="intro-text" style="color: #a0aec0; font-size: 0.95em;">
+                选择一个最符合你心目中的方向，我会为该方向完整输出页面原型和设计规范。
+            </p>
+        </div>
+
+        <div class="design-options">
+            <!-- 设计思路 1 -->
+            <div class="design-card">
+                <div class="design-header">
+                    <div class="design-number">01</div>
+                    <div class="design-title">医学专业风格</div>
+                    <div class="design-subtitle">正式、信息化、医学感强</div>
+                </div>
+                <div class="design-body">
+                    <div class="design-preview">
+                        <div class="style-preview-1">
+                            <div class="preview-content">
+                                <div class="preview-title">Clinical Trials</div>
+                                <p style="font-size: 0.85em; color: #6b7280; margin: 10px 0;">Professional Platform for Patients</p>
+                                <div style="margin-top: 15px; padding: 10px; background: white; border-left: 4px solid #0066cc; text-align: left; font-size: 0.8em; color: #1f2937;">
+                                    <p><strong>Study Info:</strong> Detailed medical information</p>
+                                    <p><strong>Eligibility:</strong> Precise criteria</p>
+                                    <p><strong>Protocol:</strong> Complete documentation</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="color-palette">
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">主色</div>
+                            <div class="color-swatch style-1-color1"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">背景</div>
+                            <div class="color-swatch style-1-color2"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">浅色</div>
+                            <div class="color-swatch style-1-color3"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">文字</div>
+                            <div class="color-swatch style-1-color4"></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">核心特点</div>
+                    <ul class="feature-list">
+                        <li class="feature-item">信息密集，内容优先</li>
+                        <li class="feature-item">医学术语和规范表述</li>
+                        <li class="feature-item">表格、图表、数据展示</li>
+                        <li class="feature-item">深蓝色 + 灰白色配色</li>
+                        <li class="feature-item">科研和临床从业者友好</li>
+                    </ul>
+
+                    <div class="section-title">适用页面布局</div>
+                    <div class="layout-demo">
+                        <div class="layout-section">Header：导航 + 快速筛选</div>
+                        <div class="layout-section">Content：两列布局（列表 + 详情）</div>
+                        <div class="layout-section">Sidebar：过滤条件、相关FAQ</div>
+                        <div class="layout-section">Footer：法律声明、技术文档</div>
+                    </div>
+
+                    <div class="pros">
+                        <div class="pros-title">✓ 优势</div>
+                        <ul class="pros-list">
+                            <li>显得权威和专业</li>
+                            <li>信息清晰易查阅</li>
+                            <li>适合医学文献型内容</li>
+                            <li>容易获得医学专家认可</li>
+                        </ul>
+                    </div>
+
+                    <div class="cons">
+                        <div class="cons-title">⚠ 劣势</div>
+                        <ul class="cons-list">
+                            <li>普通患者可能觉得冷冰冰</li>
+                            <li>视觉设计感不强</li>
+                            <li>转化率可能偏低</li>
+                            <li>社区氛围难以营造</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-for">
+                        <div class="best-for-title">🎯 最适合</div>
+                        <div class="best-for-text">医学中心、学术平台、科研导向的企业</div>
+                    </div>
+
+                    <button class="select-button" onclick="selectDesign(1)">选择此方向</button>
+                </div>
+            </div>
+
+            <!-- 设计思路 2 -->
+            <div class="design-card">
+                <div class="design-header">
+                    <div class="design-number">02</div>
+                    <div class="design-title">患者温暖风格</div>
+                    <div class="design-subtitle">亲切、易懂、鼓励参与</div>
+                </div>
+                <div class="design-body">
+                    <div class="design-preview">
+                        <div class="style-preview-2">
+                            <div class="preview-content">
+                                <div class="preview-title">✨ 找到适合你的试验</div>
+                                <p style="font-size: 0.85em; color: #be185d; margin: 10px 0;">和病友一起，重获健康</p>
+                                <div style="margin-top: 15px; padding: 10px; background: #fce7f3; border-radius: 8px; text-align: left; font-size: 0.8em; color: #831843;">
+                                    <p>💙 <strong>简单理解</strong>：不用医学词汇</p>
+                                    <p>👥 <strong>病友支持</strong>：社区经验分享</p>
+                                    <p>✅ <strong>轻松参与</strong>：只需3步报名</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="color-palette">
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">主色</div>
+                            <div class="color-swatch style-2-color1"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">浅粉</div>
+                            <div class="color-swatch style-2-color2"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">背景</div>
+                            <div class="color-swatch style-2-color3"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">深色</div>
+                            <div class="color-swatch style-2-color4"></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">核心特点</div>
+                    <ul class="feature-list">
+                        <li class="feature-item">视觉化友好，用图片说话</li>
+                        <li class="feature-item">简单易懂的语言</li>
+                        <li class="feature-item">卡片式设计，容易浏览</li>
+                        <li class="feature-item">粉红色 + 白色 + 浅紫色</li>
+                        <li class="feature-item">突出社区和病友支持</li>
+                    </ul>
+
+                    <div class="section-title">适用页面布局</div>
+                    <div class="layout-demo">
+                        <div class="layout-section">Hero：大标题 + 鼓励文案 + CTA</div>
+                        <div class="layout-section">Cards：试验卡片网格展示</div>
+                        <div class="layout-section">Story：病友故事、用户推荐</div>
+                        <div class="layout-section">CTA："立即报名"按钮突出</div>
+                    </div>
+
+                    <div class="pros">
+                        <div class="pros-title">✓ 优势</div>
+                        <ul class="pros-list">
+                            <li>患者容易产生亲近感</li>
+                            <li>转化率相对较高</li>
+                            <li>社区氛围温暖有吸引力</li>
+                            <li>视觉设计感强，易分享</li>
+                        </ul>
+                    </div>
+
+                    <div class="cons">
+                        <div class="cons-title">⚠ 劣势</div>
+                        <ul class="cons-list">
+                            <li>可能显得不够专业</li>
+                            <li>医学专家可能质疑</li>
+                            <li>需要优质的视觉素材和文案</li>
+                            <li>运营内容负担重</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-for">
+                        <div class="best-for-title">🎯 最适合</div>
+                        <div class="best-for-text">面向普通患者的商业化平台、CRO 企业品牌建设</div>
+                    </div>
+
+                    <button class="select-button" onclick="selectDesign(2)">选择此方向</button>
+                </div>
+            </div>
+
+            <!-- 设计思路 3 -->
+            <div class="design-card">
+                <div class="design-header">
+                    <div class="design-number">03</div>
+                    <div class="design-title">平台生态风格</div>
+                    <div class="design-subtitle">现代、聚合、以内容为中心</div>
+                </div>
+                <div class="design-body">
+                    <div class="design-preview">
+                        <div class="style-preview-3">
+                            <div class="preview-content">
+                                <div class="preview-title">探索临床机会</div>
+                                <p style="font-size: 0.85em; color: #0369a1; margin: 10px 0;">试验·科普·社区·报名一站式</p>
+                                <div style="margin-top: 15px; padding: 10px; background: #ecf8ff; border-radius: 8px; text-align: left; font-size: 0.8em; color: #0c4a6e;">
+                                    <p>📚 <strong>动态资讯</strong>：试验热点、研究进展</p>
+                                    <p>🔍 <strong>智能发现</strong>：个性化推荐、高效筛选</p>
+                                    <p>💬 <strong>社区互动</strong>：FAQ、论坛、经验交流</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="color-palette">
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">主色</div>
+                            <div class="color-swatch style-3-color1"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">浅青</div>
+                            <div class="color-swatch style-3-color2"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">背景</div>
+                            <div class="color-swatch style-3-color3"></div>
+                        </div>
+                        <div style="text-align: center; flex: 1;">
+                            <div class="color-label">深色</div>
+                            <div class="color-swatch style-3-color4"></div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">核心特点</div>
+                    <ul class="feature-list">
+                        <li class="feature-item">多内容聚合中心</li>
+                        <li class="feature-item">试验、FAQ、社区并重</li>
+                        <li class="feature-item">平台气质，现代感强</li>
+                        <li class="feature-item">青色 + 白色 + 灰色</li>
+                        <li class="feature-item">动态、持续更新的感觉</li>
+                    </ul>
+
+                    <div class="section-title">适用页面布局</div>
+                    <div class="layout-demo">
+                        <div class="layout-section">Feed：动态流，试验+FAQ+社区混合</div>
+                        <div class="layout-section">Tabs：试验、FAQ、社区标签切换</div>
+                        <div class="layout-section">Sidebar：热点、推荐、进度追踪</div>
+                        <div class="layout-section">Integration：内容相互关联和导流</div>
+                    </div>
+
+                    <div class="pros">
+                        <div class="pros-title">✓ 优势</div>
+                        <ul class="pros-list">
+                            <li>内容丰富，用户停留时间长</li>
+                            <li>现代感和专业感兼具</li>
+                            <li>FAQ 和社区自然导流到预筛</li>
+                            <li>易于扩展新功能和内容</li>
+                        </ul>
+                    </div>
+
+                    <div class="cons">
+                        <div class="cons-title">⚠ 劣势</div>
+                        <ul class="cons-list">
+                            <li>需要高质量的内容持续输出</li>
+                            <li>首屏信息较多，易分散注意</li>
+                            <li>中等偏长的学习曲线</li>
+                            <li>运营复杂度最高</li>
+                        </ul>
+                    </div>
+
+                    <div class="best-for">
+                        <div class="best-for-title">🎯 最适合</div>
+                        <div class="best-for-text">长期运营的平台、内容驱动型的商业模式、有内容团队支持</div>
+                    </div>
+
+                    <button class="select-button" onclick="selectDesign(3)">选择此方向</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 对比表 -->
+        <h2 style="color: #a78bfa; margin-bottom: 25px; font-size: 1.5em;">📊 三个思路详细对比</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>维度</th>
+                    <th>01 医学专业风格</th>
+                    <th>02 患者温暖风格</th>
+                    <th>03 平台生态风格</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="dimension">首页重点</td>
+                    <td>试验列表、筛选条件、数据查询</td>
+                    <td>病友故事、推荐试验、社区入口</td>
+                    <td>混合信息流、热点推荐、内容聚合</td>
+                </tr>
+                <tr>
+                    <td class="dimension">用户群体</td>
+                    <td>医学专业人士、文献素养高</td>
+                    <td>普通患者、家属、对医学信息敏感</td>
+                    <td>所有患者、信息获取和社交均衡</td>
+                </tr>
+                <tr>
+                    <td class="dimension">信息架构</td>
+                    <td>试验详情 > 预筛 > 后续跟进</td>
+                    <td>社区信任 > 试验理解 > 预筛</td>
+                    <td>试验、FAQ、社区三足鼎立</td>
+                </tr>
+                <tr>
+                    <td class="dimension">视觉设计</td>
+                    <td>正式、冷静、信息密集</td>
+                    <td>温暖、活泼、视觉化强</td>
+                    <td>现代、平衡、内容为中心</td>
+                </tr>
+                <tr>
+                    <td class="dimension">社区角色</td>
+                    <td>补充信息、参考资料</td>
+                    <td>核心信任建设工具</td>
+                    <td>与试验平行的重要内容来源</td>
+                </tr>
+                <tr>
+                    <td class="dimension">转化漏斗</td>
+                    <td>信息查询 → 符合度判断 → 预筛</td>
+                    <td>信任建立 → 病情共鸣 → 预筛</td>
+                    <td>多渠道探索 → 内容共振 → 预筛</td>
+                </tr>
+                <tr>
+                    <td class="dimension">内容运营</td>
+                    <td>低（主要是试验信息维护）</td>
+                    <td>高（需要病友故事、案例、视频）</td>
+                    <td>最高（FAQ、社区、试验资讯三线）</td>
+                </tr>
+                <tr>
+                    <td class="dimension">开发周期</td>
+                    <td>最快（8-10周）</td>
+                    <td>中等（10-12周，需要素材）</td>
+                    <td>最长（12-14周，需要内容初始化）</td>
+                </tr>
+                <tr>
+                    <td class="dimension">技术复杂度</td>
+                    <td>最低（标准 CRUD）</td>
+                    <td>低（卡片布局、推荐算法简单）</td>
+                    <td>中等（Feed 流渲染、关联推荐）</td>
+                </tr>
+                <tr>
+                    <td class="dimension">后期扩展</td>
+                    <td>难以添加社区和新媒体</td>
+                    <td>易于增加视频、直播、活动</td>
+                    <td>天然支持内容扩展</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 下一步 -->
+        <div class="next-step">
+            <h2>➡️ 选择后的下一步</h2>
+            <p>点击上方任一"选择此方向"按钮后，我会为你输出：</p>
+            <ul style="text-align: left; display: inline-block; margin-bottom: 25px; color: #cbd5e1;">
+                <li style="padding: 8px 0;">✓ 完整的页面原型（Figma 设计稿思路或交互示意）</li>
+                <li style="padding: 8px 0;">✓ 设计规范文档（色彩、排版、组件库定义）</li>
+                <li style="padding: 8px 0;">✓ 关键页面的详细布局和内容框架</li>
+                <li style="padding: 8px 0;">✓ 与工程实现的连接指南</li>
+            </ul>
+            <div class="action-buttons">
+                <button class="action-btn action-btn-primary" onclick="submitSelection()">确认选择并继续</button>
+                <button class="action-btn action-btn-secondary" onclick="needMoreInfo()">我还要对比一下</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>💡 选择一个设计方向是产品的重要决策，会影响后续的品牌认知和用户体验。如有疑问，随时可以调整。</p>
+            <p style="margin-top: 15px; color: #475569;">Document: 原型设计思路对比 | 2026-04-18</p>
+        </footer>
+    </div>
+
+    <script>
+        let selectedDesign = null;
+
+        function selectDesign(designNumber) {
+            selectedDesign = designNumber;
+
+            // Remove previous selection
+            document.querySelectorAll('.select-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Add selection to clicked button
+            event.target.classList.add('selected');
+            event.target.textContent = '✓ 已选择此方向';
+
+            // Show confirmation message
+            const designNames = {
+                1: '医学专业风格',
+                2: '患者温暖风格',
+                3: '平台生态风格'
+            };
+
+            console.log('已选择：' + designNames[designNumber]);
+        }
+
+        function submitSelection() {
+            if (!selectedDesign) {
+                alert('请先选择一个设计方向！');
+                return;
+            }
+
+            const designNames = {
+                1: '医学专业风格',
+                2: '患者温暖风格',
+                3: '平台生态风格'
+            };
+
+            alert(`您选择了"${designNames[selectedDesign]}"。\n\n现在请告诉我确认这个选择，我会为你生成完整的原型设计和设计规范。`);
+        }
+
+        function needMoreInfo() {
+            alert('没问题！你可以：\n\n1. 点击任一卡片查看更详细的信息\n2. 参考右侧的对比表\n3. 和团队讨论后再做选择\n\n准备好了就点击上面的"选择此方向"按钮。');
+        }
+    </script>
+</body>
+</html>
