@@ -105,6 +105,7 @@ export default async function AdminRecruitsPage({
         )}
       </form>
 
+      <div className="admin-table-wrap">
       <table className="admin-table">
         <thead>
           <tr>
@@ -159,6 +160,7 @@ export default async function AdminRecruitsPage({
           )}
         </tbody>
       </table>
+      </div>
     </>
   );
 }

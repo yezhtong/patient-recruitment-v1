@@ -179,14 +179,18 @@
 }
 .cm-post-card__title {
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: clamp(18px, 2.4vw, 22px);
   font-weight: 400;
   line-height: 1.2;
   margin-bottom: 8px;
   letter-spacing: -0.01em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .cm-post-card--featured .cm-post-card__title {
-  font-size: 26px;
+  font-size: clamp(20px, 2.6vw, 24px);
 }
 .cm-post-card__summary {
   color: var(--gray-700);

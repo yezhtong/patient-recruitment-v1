@@ -75,4 +75,9 @@
 }
 .applied-tag button { background: none; border: none; color: var(--lime); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
 
-.results-list { display: flex; flex-direction: column; gap: 16px; }
+.results-list { display: flex; flex-direction: column; gap: var(--sp-6); }
+
+/* #2 UI debt fix */
+@media (max-width: 960px) {
+  .filter-panel { position: static; top: auto; }
+}

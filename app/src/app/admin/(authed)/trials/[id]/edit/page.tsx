@@ -33,6 +33,12 @@ export default async function AdminTrialEditPage({
         </div>
         <div className="admin-actions">
           <Link
+            href={`/admin/trials/${trial.id}/form`}
+            className="btn-admin"
+          >
+            📋 编辑预筛表单
+          </Link>
+          <Link
             href={`/trials/${trial.slug}`}
             target="_blank"
             className="btn-admin"

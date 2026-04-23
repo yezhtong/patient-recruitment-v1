@@ -13,18 +13,7 @@ export default function BulkImportForm() {
     <form action={formAction} className="admin-form">
       <fieldset>
         <legend>粘贴词库内容</legend>
-        <div
-          style={{
-            background: "var(--cream-100)",
-            padding: "10px 14px",
-            borderRadius: 8,
-            fontFamily: "var(--font-mono)",
-            fontSize: 12,
-            color: "var(--gray-600)",
-            marginBottom: 10,
-            whiteSpace: "pre-wrap",
-          }}
-        >
+        <div className="admin-codeblock">
           {"# 示例：\nhigh|contact|加我微信\nmedium|quackery|祖传秘方\nlow|ad|免费体验"}
         </div>
         <div className="field">

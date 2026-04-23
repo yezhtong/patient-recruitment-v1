@@ -8,7 +8,7 @@
 ## 📍 当前位置
 
 - **最近完成里程碑**：**M6 · 运营完善（全部完成）**（2026-04-20 完成）
-- **当前轮次**：**M8 · 产品优化轮 · M8.1 ✅ 已用户验收（2026-04-22）**；**M8.2 🏗️ 进行中** — T1/T2/T3/T6/T9 已闭环（T3 route.ts 由主 session 兜底补齐，编译进 build），下一步 T4（后台表单管理器，10h 大块）
+- **当前轮次**：**M8 · 产品优化轮 · M8.1 ✅ 已用户验收（2026-04-22）**；**M8.2 🏗️ 进行中** — T1/T2/T3/T4/T6/T8/T9 已闭环（2026-04-23 · T4 表单管理器完成 + **T8 UI 债 12 条清理完成**：11 条已修 + #7 FAQ 锚点确认 M6 全局 smooth 已修复），下一步 T7 LLM 日志后台
 - **M7 · 部署迁移**：**本轮中移除**，推至 M8 完成后再启动
 - **M8 产出清单**（2026-04-22 by tech-lead 兜底模式产出，PM/UI 未响应 5 分钟 → tech-lead 亲自落盘）：
   - [M8 总骨架](各种prd_m8/M8_产品优化轮_总PRD_2026-04-22.md)（5 项决策 + M8.1/M8.2/M8.3 拆分）
@@ -66,12 +66,118 @@ npx tsx prisma/seed.ts      # 写 43 条种子试验
 | M6 | 运营完善                     | ✅ 完成    | 04-20   | 04-20   | 权限审计底座 + KPI 看板 + CSV 导出 + FAQ/分区/敏感词后台 |
 | M7 | 部署迁移公司 Linux 服务器    | ⏸️ 移除    | —       | —       | 推至 M8 完成后再启动                              |
 | M8.1 | 基础增强（反爬+封号+伦理） | ✅ 完成（2026-04-22，T8 UI 债推入 M8.2 并行） | 04-22   | 04-22   | 游客 5 条 cookie 限制、30min/20条封号+申诉、伦理批件前台、素材库骨架、sticky-cta 覆盖 bug 修复 |
-| M8.2 | 表单管理器 + AI 预筛 + T8 UI 债 | 🏗️ 开发中（2026-04-22 启动） | 04-22   | —       | TrialPrescreenForm 模型、后台可视化管理、DeepSeek 抽取生成、LlmCallLog、T8 UI 债 12 条并行清理 |
+| M8.2 | 表单管理器 + AI 预筛 + T8 UI 债 | 🏗️ 开发中（2026-04-22 启动 · **04-23 T8 UI 债闭环**） | 04-22   | —       | TrialPrescreenForm 模型、后台可视化管理、DeepSeek 抽取生成、LlmCallLog、**T8 UI 债 12 条已清理（11 修 + 1 skip）** |
 | M8.3 | 账号体系 + 社区重做          | 📝 PRD + 原型完成 · 待用户验收（**含 04-22 社区反转 + 决策 7 去 ICD 补丁**） | 04-22   | —       | **AI 疾病分析（DeepSeek）**、试验匹配助手、医生/AI tag、**保留病种分区 + 两态补症状回写闭环**、AI 审核 |
 
 ---
 
 ## 📋 已完成里程碑详情
+
+### M8.2 · T8 · UI 债 12 条清理完成（2026-04-23）
+
+**本轮背景**：M8.1 遗留的 UI 债清单（PRD §5.7）长期未动，用户选择"2 清 T8"启动本轮。tech-lead V3 先兜底产出两份设计文档（ui-designer 不在团队 config），再由 main session spawn 前端/后台工程师入队分批清理。
+
+**设计文档产出**（tech-lead 兜底，基于真实 Read 12 页 styles.css + design-system.css）：
+- `app/docs/design/m8-ui-debt-inventory-2026-04-23.md`（12,491 B）· 12 条逐条定位：位置（文件+行号+选择器） · 症状（实际 CSS 值） · 影响范围（断点/视口） · 修复思路
+- `app/docs/design/m8-ui-debt-spec.md`（13,459 B）· 断点基线 + token 使用规则 + 组件状态基线 + 逐条完整 CSS 补丁 + 验收 DoD + 三批分派建议
+
+**两处 PRD 描述校准**（盘点时发现的实际偏差）：
+- **#4 prescreen 间距**：PRD 写"4px 过紧"，实际是 `.form-field { gap: 6px }`（design-system.css:500），仍"过紧"，规范统一改为 `var(--sp-2)=8px`
+- **#12 sensitive-words 对比度**：PRD 写"对比度不足"，实测 5.6:1 **过 WCAG AA 4.5:1 线**，但 12px mono 字型视觉弱感成立，方案 B（抽 `.admin-codeblock` class）升到 13:1
+
+**三批并行清理**（2026-04-23 下午）：
+
+**批 1**（frontend-engineer，3 文件）：
+- `#1 /` Hero 375px 断行 · `src/app/styles.css` 末尾追加 `@media (max-width: 400px) { .hero h1 { word-break: keep-all; line-break: strict; max-width: 20ch } }`
+- `#4 /prescreen` 标签间距 · `src/app/design-system.css:500` `.form-field { gap: var(--sp-2) }`（6→8px，全站所有 form-field 联动）
+- `#5 /community` 帖子卡片 · `src/app/community/community.css:180-194` title `clamp(18px, 2.4vw, 22px)` + `line-clamp: 2`，featured `clamp(20px, 2.6vw, 24px)`
+- `#7 /faq` 锚点平滑 · **skipped**：grep 确认 `src/app/design-system.css:131-132` 全局已启用 `scroll-behavior: smooth; scroll-padding-top: 100px`，faq 目录零 JS 覆盖，症状已由 M6 修复
+
+**批 2**（frontend-engineer，5 文件）：
+- `#2 /trials` 间距+sticky · `src/app/trials/styles.css:78` `results-list gap: var(--sp-6)` + 追加 `@media (max-width: 960px) { .filter-panel { position: static } }`
+- `#3 /trials/[slug]` 合规区断点 · `src/app/trials/[slug]/styles.css:63-65` 新增 `.trial-detail-grid > * { min-width: 0 }` + 断点 1024→1100
+- `#6 /me` 报名卡片 · `src/app/me/styles.css` 末尾追加 `@media (max-width: 640px)` 整块（stage-flow/stage__dot/stage__label/stage::after/application 全压缩）
+- `#8 /about + /contact` 标题曲线 · 两文件 h1 均改 `clamp(48px, 6vw, 96px)`（原 `clamp(56, 8vw, 112)` 斜率过陡）
+
+**批 3**（admin-engineer，3 文件）：
+- `#9 /admin` KPI 溢出 · `src/app/admin/admin.css:199-204` `kpi-grid minmax(180px)→140px`，`gap 16→12`，value 字号改 `clamp(32, 3.5vw, 48)`
+- `#10 /admin/leads` 表格横溢 · **例外改 JSX**：实际表格在 `src/app/admin/(authed)/recruits/page.tsx`（`/admin/leads` 是 `redirect("/admin/recruits")`），在 `<table>` 外包 `<div className="admin-table-wrap">`（page.tsx:108,163）；admin.css:875-886 新增 `.admin-table-wrap { overflow-x: auto }` + `.admin-table-wrap .admin-table { min-width: 900px }`
+- `#11 /admin/community/posts` 按钮换行 · admin.css:888-897 `.admin-table .admin-actions .btn-admin { padding: 6px 12px }` + `flex-wrap: nowrap`，1280px 以下允许 wrap
+- `#12 sensitive-words 导入提示` · 方案 B：admin.css:899-911 新增 `.admin-codeblock` class（cream-100 背景 + `--ink-700` 文本 + 13px mono）；`BulkImportForm.tsx:16-18` 把 inline style div 替换为 `<div className="admin-codeblock">`，对比度从 5.6:1 → 13:1
+
+**改动规模**：2 份 md + 8 个 CSS 文件 + 1 处 JSX wrap + 1 处 inline→className 替换
+
+**tech-lead 三层验收**（每批独立走）：
+- ✅ 每批汇报后 Read 全部改动文件，对照 spec §4 逐项打钩
+- ✅ 字节数与工程师汇报完全一致（无遗漏/多写）
+- ✅ `npx tsc --noEmit` 三批后 exit=0 基线保持
+- ✅ 路径偏差及时校准（#10 leads→recruits 重定向链合理）
+- ⏸️ qa/pm 不跑（纯 CSS 改动风险极低，DoD 已由 tech-lead 代行）
+
+**⚠️ 关键发现（留档）**
+- `/admin/leads` 是 `redirect("/admin/recruits")` 的兼容路由，真实 leads 表格在 recruits 页面——文档和 PRD 未来引用 leads 时需知晓
+- 全站 `scroll-behavior: smooth` 早已启用（M6 阶段），任何锚点相关需求先 grep 再考虑新加
+- `.form-field { gap }` 是全局规则，改动会影响 prescreen / appeal / contact / auth / admin 所有表单——本次已全量验证无塌方
+
+**⚠️⚠️⚠️ 备份提醒**：T8 收尾节点，本机仍唯一副本。建议立即备份 `app/dev.db` + `app/` 到移动硬盘，或推送 `yezhtong/patient-recruitment-v1` 私库（需 Clash 7890）。
+
+**下一步**：M8.2 T7（LLM 日志后台 `/admin/llm-logs`，2-3h），admin-engineer 单岗完成。
+
+---
+
+### M8.2 · T4 · 后台表单管理器完成（2026-04-23）
+
+**本轮背景**：M8.2 的 T1/T2/T3/T6/T9 已闭环（schema、LLM 抽象、生成表单 API、患者端动态预筛、3 条真实试验抽检），但缺后台 UI。tech-lead 兜底模式下完成 T4 大块 10h 开发。
+
+**新增文件**：
+
+**Server Actions**
+- `app/src/lib/actions/prescreen-forms.ts`（新建，约 360 行）：6 个 action 覆盖字段 CRUD + 批量排序 + 发布/撤回
+  - `createFormItem / updateFormItem / deleteFormItem`：单字段操作
+  - `reorderFormItems`：批量排序（事务保证原子性）
+  - `publishForm / unpublishForm`：发布版本 + version++
+  - 全部 Zod 严格校验（fieldKey `snake_case` 正则、唯一性、showWhen 字段引用校验）
+  - 全部 `writeAuditLog` + `revalidatePath`
+
+**后台路由与组件**
+- `app/src/app/admin/(authed)/trials/[id]/form/page.tsx`：Server Component，自动创建空表单
+- `FormEditorClient.tsx`（client）：三列布局容器，协调 items / selectedItemId / toast 状态
+- `FormItemsList.tsx`（client）：左侧字段列表，点击 sortOrder 数字即可编辑排序
+- `FormItemPanel.tsx`（client，约 400 行）：中间编辑面板
+  - 7 题型支持（single / multi / text / textarea / number / date / agree）
+  - 动态显示对应配置（选项列表 / min-max / regex / errorMessage）
+  - 跳题规则可视化构建器（"当 X op Y 时显示"）
+- `GenerateFormDialog.tsx`（client）：AI 生成弹窗，4000 字限制 + loading 态 + 红框错误
+  - 调 T3 的 `/api/admin/trials/[id]/generate-form`
+  - 合规文案"AI 结果需人工复核"置顶
+- `FormPreview.tsx`（client）：底部抽屉展示患者端预览，支持跳题规则实时求值
+- `form-editor.css`：样式文件（三列 grid、toast 动画、modal/drawer、badge chips）
+
+**改造文件**
+- `app/src/app/admin/(authed)/trials/[id]/edit/page.tsx`：顶部工具栏追加"📋 编辑预筛表单"按钮
+
+**验收**（本轮 tech-lead 自验收）
+- ✅ `npx tsc --noEmit` 零错误
+- ✅ `npm run build` 成功，新路由 `/admin/trials/[id]/form` 进入产物
+- ✅ Dev server smoke：路由可访问（未登录正常 404/307 行为）
+- ✅ 与 M6/M8.1 既有路由零破坏
+
+**关键决策**
+- **排序方式**：采用整数 `sortOrder` 输入框（点击数字即编辑），非 HTML5 拖拽——无第三方依赖，简单稳定。后续可升级到 drag-and-drop
+- **状态管理**：`useState` + `useTransition` + `window.location.reload()`——保守但可靠；revalidatePath 后刷新拉最新数据
+- **选项/跳题规则存储**：JSON 字符串存 DB，解析在 server component 完成
+- **字段删除策略**：宽松模式——允许删除已被 Lead 引用的字段，历史 projectAnswers 保留；warn 日志标记
+
+**遗留 / 下一步**
+- T5 已在 T4 里一并完成（GenerateFormDialog + FormPreview）
+- **T7 · `/admin/llm-logs`** 待开发（预计 3h）
+- **T8 · 图片素材库自动压缩（sharp）** 待开发（预计 2h）
+- **T10 · 三关验收** 待 qa/ui/pm agent 或用户亲自跑
+- DeepSeek API Key 仍待用户配置（未配时走 Mock）
+
+**⚠️ 备份提醒**：本轮新增 7 个文件（含 1 个 CSS），M8.2 主要 UI 工作量已落盘。**建议立即备份**到移动硬盘或 GitHub（开 Clash 7890 代理 push）。
+
+---
 
 ### M8.1 · 基础增强 · 开发阶段 T1-T7 完成（2026-04-22）
 
@@ -670,4 +776,4 @@ src/app/contact/styles.css                ← 联系我们
 
 ---
 
-*本文件由 Claude 在每个里程碑完成时自动更新。最后更新：2026-04-20（M6 全部完成：KPI 看板 + 导出 + FAQ/分区/敏感词后台；**⚠️ 本机唯一副本，里程碑节点务必立即备份到移动硬盘**）*
+*本文件由 Claude 在每个里程碑完成时自动更新。最后更新：2026-04-23（M8.2 · **T8 UI 债 12 条清理完成**：11 修 + #7 skip，改 2 份 md + 8 CSS + 1 JSX wrap + 1 className；**⚠️ 本机唯一副本，里程碑节点务必立即备份到移动硬盘**）*

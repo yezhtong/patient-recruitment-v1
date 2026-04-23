@@ -115,3 +115,12 @@
   .hero-promises { grid-template-columns: repeat(3, 1fr); }
   .hero-promise { padding: 0 10px; }
 }
+
+/* #1 UI debt fix: 375px headline 换行规整 */
+@media (max-width: 400px) {
+  .hero h1 {
+    word-break: keep-all;
+    line-break: strict;
+    max-width: 20ch;
+  }
+}

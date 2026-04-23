@@ -497,7 +497,7 @@ p.lead {
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--sp-2);
   margin-bottom: var(--sp-5);
 }
 .form-field__label {

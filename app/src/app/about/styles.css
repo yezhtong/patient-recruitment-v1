@@ -1,6 +1,6 @@
   /* 局部布局 */
   .about-hero { padding: 80px 0 48px; border-bottom: var(--border-strong); }
-  .about-hero h1 { font-size: clamp(56px, 8vw, 112px); margin-bottom: 24px; }
+  .about-hero h1 { font-size: clamp(48px, 6vw, 96px); margin-bottom: 24px; }
   .about-hero p { color: var(--gray-600); font-size: var(--fs-xl); max-width: 56ch; line-height: 1.5; }
 
   .toc {

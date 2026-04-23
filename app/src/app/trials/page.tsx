@@ -9,6 +9,9 @@ import {
   getCategoryById,
   summarizeCategories,
 } from "@/lib/trials-filter";
+import { getUserSession, isLoggedIn } from "@/lib/user-session";
+import { getAdminSession } from "@/lib/admin-session";
+import { GUEST_TRIAL_DETAIL_QUOTA } from "@/lib/rate-limit";
 import "./styles.css";
 
 export const metadata: Metadata = {
@@ -97,10 +100,17 @@ export default async function TrialsPage({ searchParams }: Props) {
   if (status) where.status = status;
   if (q) where.title = { contains: q };
 
-  const trials = await prisma.clinicalTrial.findMany({
+  const allTrials = await prisma.clinicalTrial.findMany({
     where,
     orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
   });
+
+  // M8.1 · 游客列表限流：未登录 + 非运营员 → 只露前 GUEST_TRIAL_DETAIL_QUOTA 条
+  const userSession = await getUserSession();
+  const adminSession = await getAdminSession();
+  const isGuest = !isLoggedIn(userSession) && !adminSession.operatorId;
+  const trials = isGuest ? allTrials.slice(0, GUEST_TRIAL_DETAIL_QUOTA) : allTrials;
+  const guestHiddenCount = isGuest ? Math.max(allTrials.length - trials.length, 0) : 0;
 
   const statusLabel = (s: string) => STATUS_LABELS[s] ?? s;
   const statusBadgeClass = (s: string) =>
@@ -315,7 +325,20 @@ export default async function TrialsPage({ searchParams }: Props) {
             <div className="results-bar">
               <div>
                 <span className="results-count">
-                  找到 <em className="tabular">{trials.length}</em> 项试验
+                  找到 <em className="tabular">{allTrials.length}</em> 项试验
+                  {isGuest && guestHiddenCount > 0 ? (
+                    <span
+                      style={{
+                        marginLeft: 10,
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "var(--fs-xs)",
+                        color: "var(--accent-dark)",
+                        letterSpacing: ".04em",
+                      }}
+                    >
+                      · 游客只展示前 {GUEST_TRIAL_DETAIL_QUOTA} 条
+                    </span>
+                  ) : null}
                 </span>
               </div>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -503,8 +526,44 @@ export default async function TrialsPage({ searchParams }: Props) {
               )}
             </div>
 
+            {/* M8.1 · 游客触顶注册引导 */}
+            {isGuest && guestHiddenCount > 0 ? (
+              <div
+                className="card"
+                style={{
+                  marginTop: 32,
+                  padding: "28px 32px",
+                  background: "var(--accent-soft)",
+                  border: "1px solid var(--accent)",
+                  borderRadius: "var(--r-xl)",
+                  textAlign: "center",
+                }}
+              >
+                <span className="eyebrow" style={{ color: "var(--accent-dark)" }}>
+                  ★ 还有 {guestHiddenCount} 项未显示
+                </span>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-serif)",
+                    fontSize: 28,
+                    fontWeight: 400,
+                    margin: "10px 0 8px",
+                    color: "var(--ink-900)",
+                  }}
+                >
+                  注册后查看全部 <em style={{ color: "var(--accent-dark)" }}>{allTrials.length}</em> 项试验
+                </h3>
+                <p className="muted" style={{ fontSize: "var(--fs-sm)", marginBottom: 18 }}>
+                  手机号验证即可登录，免费查看所有项目并获得个性化推荐。
+                </p>
+                <Link href="/auth?reason=guest_limit&next=/trials" className="btn btn--primary">
+                  立即登录 / 注册 <span className="arrow">→</span>
+                </Link>
+              </div>
+            ) : null}
+
             {/* 分页（占位：DB 数据不足一页，按钮仅模仿原型视觉，TODO M2 接真实分页） */}
-            {trials.length > 0 && (
+            {!isGuest && trials.length > 0 && (
               <div style={{ display: "flex", justifyContent: "center", gap: 6, marginTop: 48 }}>
                 <button className="btn btn--ghost btn--sm" disabled>
                   ← 上一页

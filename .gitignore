@@ -32,3 +32,9 @@ graphify-out/
 
 # Brainstorming visual companion (临时 mockup 文件)
 .superpowers/
+
+# Agent 临时 worktree（每次 spawn agent 自动生成）
+.claude/worktrees/
+
+# Office 临时锁文件（~$ 开头）
+~$*

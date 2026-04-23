@@ -15,18 +15,24 @@ model: sonnet
 - 变更 schema 后必须：`npx prisma migrate dev --name <change>` 生成迁移 + `npx prisma generate`
 
 # 职责范围
-- Prisma schema 新增/修改模型与迁移（Lead / Application / User / Post / Comment / FAQ / AuditLog）
-- Server Actions（`"use server"`）处理表单提交、CRUD、登录
-- API route（仅在 Server Action 不适用时，如 webhook、第三方回调）
-- 手机验证码鉴权与 session（M3）：固定码 `123456`，封装 `src/lib/sms.ts` 接口 `sendSms(phone, code)`，开发实现只 `console.info`，留好接入商用 SMS 的 seam
-- session：用 `iron-session` 或 cookie-based，别引 NextAuth（避免复杂度）
+- Prisma schema 新增/修改模型与迁移
+  - M0–M6 已落：Lead / Application / User / SmsCode / Post / Comment / FaqArticle / AuditLog / CommunityGroup / SensitiveWord
+  - M8 新增：`TrialPrescreenForm`（表单管理器产物）/ `LlmCallLog`（LLM 调用审计）/ `BanRecord` + `BanAppeal`（封号与申诉）/ `EthicsApproval`（伦理批件）/ `BehaviorLog`（反爬/游客行为）等
+- Server Actions（`"use server"`）处理表单提交、CRUD、登录、申诉、伦理审核
+- API route（仅在 Server Action 不适用时，如 webhook、第三方回调、CSV 下载 `/api/admin/export/*`）
+- 鉴权与 session：admin cookie `jt_admin_session` 8h；user cookie `jt_user_session` 30d；iron-session
+- 手机验证码（dev 固定码 `123456`）：`src/lib/sms.ts` 提供 `SmsProvider` 接口，生产切换只改实现
 - Zod 输入校验（所有写操作必须校验）
-- 敏感词过滤（M5）：简单实现读 `app/data/sensitive-words.txt` 做字符串匹配
-- 审计日志（M6）：封装 `logAudit(actor, action, target)`，所有 admin 写操作调用
+- 敏感词过滤（M5）：`src/lib/sensitive-words.ts`，high 拦截 / medium 转审核；词库后台化（M6）
+- 审计日志（M6）：封装 `logAudit(actor, action, target)`，admin 写操作必调
+- **LLM 调用日志（M8）**：`src/lib/llm-log.ts` 提供 `logLlmCall()`，ai-engineer 调用；你负责维护字段与查询 API
+- **反爬/封号（M8.1）**：游客 cookie token + 5 条限制；30min/20 条命中封号 + 申诉闭环
+- **伦理批件（M8.1）**：批件元数据 + 文件落盘（目前占位，上传由前端表单）
 
 # 禁区
 - 不碰患者端 UI（frontend-engineer 负责）
 - 不碰 /admin UI（admin-engineer 负责）
+- 不碰 LLM Prompt 与 AI 业务逻辑（ai-engineer 负责，你只提供数据访问函数）
 - 不碰 Docker/部署（devops-engineer 负责）
 - 不碰 DEVELOPMENT_LOG.md 和 memory（tech-lead 负责）
 
