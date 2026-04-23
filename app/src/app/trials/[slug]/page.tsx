@@ -1,8 +1,17 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { SiteShell } from "@/components/SiteShell";
 import { prisma } from "@/lib/prisma";
+import { getUserSession } from "@/lib/user-session";
+import { getAdminSession } from "@/lib/admin-session";
+import { readGuestToken } from "@/lib/guest-token";
+import { logTrialDetailView } from "@/lib/behavior-log";
+import {
+  countDistinctGuestTrialViews,
+  GUEST_TRIAL_DETAIL_QUOTA,
+  shouldLockUserForTrialViews,
+} from "@/lib/rate-limit";
 import "./styles.css";
 
 export async function generateMetadata({
@@ -73,6 +82,93 @@ export default async function TrialDetailPage({
   const { slug } = await params;
   const trial = await prisma.clinicalTrial.findUnique({ where: { slug } });
   if (!trial) return notFound();
+
+  // ========== M8.1 · 反爬 / 游客配额 / 行为日志 ==========
+  const userSession = await getUserSession();
+  const adminSession = await getAdminSession();
+  const userId = userSession.userId ?? null;
+  const isAdminOrOperator = Boolean(adminSession.operatorId);
+  // 白名单：admin / operator 不受反爬限制；doctor role 预留（M8.3 引入）
+
+  // 游客配额剩余（用于底部"还可以看 X 条"提示）
+  let guestRemaining: number | null = null;
+
+  if (userId) {
+    // 1) 先检查用户是否被封（防止绕过 middleware，比如直链访问 server component）
+    const existingLock = await prisma.accountLock.findUnique({
+      where: { userId },
+    });
+    if (existingLock && !existingLock.unlockedAt) {
+      redirect("/account-locked");
+    }
+
+    // 2) 写一条 behavior log
+    await logTrialDetailView({ userId, trialId: trial.id });
+
+    // 3) 检查反爬阈值（包含刚写的这条）
+    if (!isAdminOrOperator) {
+      const { shouldLock, distinctCount } =
+        await shouldLockUserForTrialViews(userId);
+      if (shouldLock) {
+        await prisma.accountLock.upsert({
+          where: { userId },
+          create: {
+            userId,
+            reason: `30 分钟内查看了 ${distinctCount} 条试验详情，触发反爬规则`,
+            triggeredBy: "rate_limit:trial_detail_view",
+          },
+          update: {
+            // 若历史有已解锁的记录，重新锁定
+            unlockedAt: null,
+            unlockedBy: null,
+            unlockReason: null,
+            reason: `30 分钟内查看了 ${distinctCount} 条试验详情，触发反爬规则`,
+            triggeredBy: "rate_limit:trial_detail_view",
+            lockedAt: new Date(),
+            appealStatus: "none",
+            appealText: null,
+            appealedAt: null,
+            appealReplyText: null,
+            appealHandledBy: null,
+            appealHandledAt: null,
+          },
+        });
+        redirect("/account-locked");
+      }
+    }
+  } else if (!isAdminOrOperator) {
+    // 游客路径（guestToken 由 middleware 确保已写入 cookie）
+    const guestToken = await readGuestToken();
+
+    if (guestToken) {
+      // 先看"已看过的不同试验数"（不含本次）
+      const currentDistinctBefore = await countDistinctGuestTrialViews(guestToken);
+      const alreadyViewedThis = await prisma.userBehaviorLog.findFirst({
+        where: {
+          guestToken,
+          action: "trial_detail_view",
+          targetId: trial.id,
+        },
+        select: { id: true },
+      });
+
+      const totalAfter = alreadyViewedThis
+        ? currentDistinctBefore
+        : currentDistinctBefore + 1;
+
+      if (totalAfter > GUEST_TRIAL_DETAIL_QUOTA) {
+        // 第 6 条起拦截，重定向到登录
+        redirect(`/auth?reason=guest_limit&next=/trials/${slug}`);
+      }
+
+      // 允许访问：写一条 behavior log（重复查看同一 trial 不累计配额）
+      await logTrialDetailView({ guestToken, trialId: trial.id });
+
+      guestRemaining = GUEST_TRIAL_DETAIL_QUOTA - totalAfter;
+    }
+    // 若 middleware 尚未跑到（极端情况），本次放行，下次访问会被计数
+  }
+  // ========== M8.1 end ==========
 
   const statusLabel =
     trial.status === "recruiting"
@@ -368,22 +464,38 @@ export default async function TrialDetailPage({
               </div>
             ) : null}
 
-            {trial.ethicsApproval || trial.adVersion ? (
-              <div className="side-block">
-                <span className="eyebrow" style={{ marginBottom: 14 }}>★ 合规信息</span>
-                {trial.ethicsApproval ? (
-                  <p className="muted" style={{ fontSize: "var(--fs-sm)", marginTop: 10 }}>
-                    伦理：{trial.ethicsApproval}
+            {/* M8.1 T6 · 伦理批件号强制显示（空值回落 "—"，用户拍板决策 1） */}
+            <div className="side-block">
+              <span className="eyebrow" style={{ marginBottom: 14 }}>★ 合规信息</span>
+              <p className="muted" style={{ fontSize: "var(--fs-sm)", marginTop: 10 }}>
+                伦理批件号：{trial.ethicsApproval ?? "—"}
+              </p>
+              {trial.adVersion ? (
+                <p className="muted" style={{ fontSize: "var(--fs-sm)" }}>
+                  广告版本：{trial.adVersion}
+                  {trial.adVersionDate
+                    ? `（${new Date(trial.adVersionDate).toISOString().slice(0, 10)}）`
+                    : ""}
+                </p>
+              ) : null}
+            </div>
+
+            {/* M8.1 · 游客配额残余提示 */}
+            {guestRemaining !== null ? (
+              <div className="side-block" style={{ background: "var(--accent-soft)", borderRadius: "var(--r-md)" }}>
+                <span className="eyebrow" style={{ marginBottom: 10, color: "var(--accent-dark)" }}>★ 游客提示</span>
+                {guestRemaining > 0 ? (
+                  <p style={{ fontSize: "var(--fs-sm)", marginTop: 6, lineHeight: 1.65 }}>
+                    你正在以游客身份浏览，还可以免费查看 <strong style={{ color: "var(--accent-dark)" }}>{guestRemaining}</strong> 条试验详情。
+                    <br />
+                    <Link href="/auth" style={{ color: "var(--accent-dark)", textDecoration: "underline" }}>注册账号</Link>
+                    后可无限查看并获得个性化推荐。
                   </p>
-                ) : null}
-                {trial.adVersion ? (
-                  <p className="muted" style={{ fontSize: "var(--fs-sm)" }}>
-                    广告版本：{trial.adVersion}
-                    {trial.adVersionDate
-                      ? `（${new Date(trial.adVersionDate).toISOString().slice(0, 10)}）`
-                      : ""}
+                ) : (
+                  <p style={{ fontSize: "var(--fs-sm)", marginTop: 6, lineHeight: 1.65 }}>
+                    这是你作为游客的最后 1 条免费详情，<Link href="/auth" style={{ color: "var(--accent-dark)", textDecoration: "underline" }}>立即注册</Link>可继续查看其他试验。
                   </p>
-                ) : null}
+                )}
               </div>
             ) : null}
           </aside>

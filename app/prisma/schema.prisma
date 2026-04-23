@@ -48,6 +48,9 @@ model ClinicalTrial {
   applications    Application[] @relation("TrialApplications")
   communityPosts  CommunityPost[] @relation("TrialPosts")
 
+  // M8.2 反向关系
+  prescreenForm   TrialPrescreenForm?
+
   @@index([status, isPublic])
   @@index([disease])
 }
@@ -143,6 +146,9 @@ model User {
   leads           Lead[]   @relation("UserLeads")
   posts           CommunityPost[] @relation("UserPosts")
   comments        CommunityComment[] @relation("UserComments")
+
+  // M8.1 反向关系：一名用户最多一条有效锁
+  lock            AccountLock?
 }
 
 // 短信验证码（一次性，10 分钟有效）
@@ -312,4 +318,144 @@ model Application {
 
   @@index([userId, createdAt])
   @@index([trialId, stage])
+}
+
+// ========== M8.1 · 反爬 / 封锁 / 图片素材库 ==========
+
+// 用户行为日志（游客用 guestToken，登录用 userId）
+model UserBehaviorLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  guestToken  String?
+  action      String   // trial_detail_view / prescreen_start / ...
+  targetType  String?
+  targetId    String?
+  userAgent   String?
+  ipHash      String?  // IP 哈希，不落盘明文
+  createdAt   DateTime @default(now())
+
+  @@index([userId, action, createdAt])
+  @@index([guestToken, action, createdAt])
+  @@index([action, createdAt])
+}
+
+// 账号封锁（一名 user 同时最多一条，解锁后保留历史）
+model AccountLock {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reason          String    // 友好文案 "30min内查看20条试验详情（反爬规则）"
+  triggeredBy     String?   // 规则名 "rate_limit:trial_detail_view"
+  lockedAt        DateTime  @default(now())
+
+  unlockedAt      DateTime?
+  unlockedBy      String?   // OperatorUser.id
+  unlockReason    String?
+
+  appealText      String?
+  appealedAt      DateTime?
+  appealStatus    String    @default("none") // none/pending/approved/rejected
+  appealReplyText String?
+  appealHandledBy String?
+  appealHandledAt DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([appealStatus, createdAt])
+  @@index([unlockedAt])
+}
+
+// 图片素材库（骨架，仅元数据；软删除 via isEnabled）
+model MediaAsset {
+  id           String   @id @default(cuid())
+  filename     String   // 存盘文件名（cuid.ext）
+  originalName String
+  url          String   // 对外 URL  /media/{category}/xxx.ext
+  category     String   // hero / community / trial / faq / avatar
+  width        Int?
+  height       Int?
+  sizeBytes    Int?
+  mimeType     String?
+  note         String?
+  uploadedBy   String?  // OperatorUser.id
+  isEnabled    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@index([category, isEnabled, createdAt])
+}
+
+// ========== M8.2 · 试验预筛表单 + AI 预筛生成 + LLM 日志 ==========
+
+// 一条 ClinicalTrial 对应 0..1 条 Form
+model TrialPrescreenForm {
+  id            String   @id @default(cuid())
+  trialId       String   @unique
+  trial         ClinicalTrial @relation(fields: [trialId], references: [id], onDelete: Cascade)
+
+  version       Int      @default(1)      // 每次大改 +1，便于追溯
+  isPublished   Boolean  @default(false)  // 未发布时 /prescreen 降级到通用版
+  title         String?
+  description   String?
+  successMessage String?
+
+  generatedBy   String?                    // "ai" / "human" / "ai-then-edited"
+  generatedAt   DateTime?
+
+  items         TrialPrescreenFormItem[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([isPublished])
+}
+
+// 字段定义
+model TrialPrescreenFormItem {
+  id            String   @id @default(cuid())
+  formId        String
+  form          TrialPrescreenForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  fieldKey      String                // Lead.projectAnswers 的 key（英文 snake_case）
+  label         String                // 中文问题
+  helpText      String?
+  fieldType     String                // single / multi / text / textarea / number / date / agree
+  options       String?               // JSON: [{value,label},...]
+  placeholder   String?
+  defaultValue  String?               // JSON
+  isRequired    Boolean  @default(false)
+  minValue      Float?
+  maxValue      Float?
+  regex         String?
+  errorMessage  String?
+  showWhen      String?               // JSON: {fieldKey, op, value}  op=eq|neq|in|notIn
+
+  sortOrder     Int      @default(100)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([formId, sortOrder])
+}
+
+// LLM 调用日志（供 /admin/llm-logs）
+model LlmCallLog {
+  id               String   @id @default(cuid())
+  operatorId       String?
+  scenario         String             // prescreen_generate / match_assistant / community_review / disease_analysis / llm_sanity
+  provider         String             // deepseek / mock
+  model            String?            // deepseek-chat / mock
+  promptHash       String             // sha256 前 16 位
+  promptChars      Int
+  responseChars    Int?
+  promptTokens     Int?
+  completionTokens Int?
+  totalTokens      Int?
+  estimatedCostCny Float?             // 精度到 0.0001
+  durationMs       Int?
+  status           String             // success / error / timeout
+  errorMessage     String?
+  createdAt        DateTime @default(now())
+
+  @@index([scenario, createdAt])
+  @@index([provider, status, createdAt])
 }

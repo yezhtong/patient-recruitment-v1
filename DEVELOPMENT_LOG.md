@@ -8,8 +8,15 @@
 ## 📍 当前位置
 
 - **最近完成里程碑**：**M6 · 运营完善（全部完成）**（2026-04-20 完成）
-- **下一步**：M7 · 部署迁移（Docker + SQLite→MySQL/Postgres 切换）
-- **代码状态**：M2–M6 全量落盘，本机仅有一份，**⚠️⚠️⚠️ 未远程备份 —— 里程碑完成节点，强烈建议立即备份 `app/dev.db` + 整个 `app/` 目录到移动硬盘！** 先备份再考虑开始 M7
+- **当前轮次**：**M8 · 产品优化轮 · M8.1 ✅ 已用户验收（2026-04-22）**；**M8.2 🏗️ 进行中** — T1/T2/T3/T6/T9 已闭环（T3 route.ts 由主 session 兜底补齐，编译进 build），下一步 T4（后台表单管理器，10h 大块）
+- **M7 · 部署迁移**：**本轮中移除**，推至 M8 完成后再启动
+- **M8 产出清单**（2026-04-22 by tech-lead 兜底模式产出，PM/UI 未响应 5 分钟 → tech-lead 亲自落盘）：
+  - [M8 总骨架](各种prd_m8/M8_产品优化轮_总PRD_2026-04-22.md)（5 项决策 + M8.1/M8.2/M8.3 拆分）
+  - [M8.1 基础增强 PRD](各种prd_m8/M8.1_基础增强_PRD.md) · 游客限制 / 封号申诉 / 伦理批件 / UI 债 / 素材库骨架
+  - [M8.2 表单管理器 + AI 预筛 PRD](各种prd_m8/M8.2_表单管理器_AI预筛_PRD.md) · Prisma 模型 / DeepSeek 抽象 / LLM 日志
+  - [M8.3 账号体系 + 社区重做 PRD](各种prd_m8/M8.3_账号体系_社区重做_PRD.md) · **AI 疾病分析（DeepSeek）取代 ICD-10**（2026-04-22 决策 7 反转）/ 匹配助手 / 医生 AI tag / **保留病种分区 + 补症状两态回写闭环**（2026-04-22 路径反转）/ AI 审核
+  - [原型增量子导览](原型_V1/m8增量/index.html)（合计 **12 份** HTML：10 原必/选配 + 1 子导览 + 1 新增 `join-group-prompt.html`，沿用既有 design-system.css token）
+- **代码状态**：M2–M6 全量落盘，本机仅有一份，**⚠️⚠️⚠️ 未远程备份 —— 里程碑完成节点，强烈建议立即备份 `app/dev.db` + 整个 `app/` 目录到移动硬盘！**
 - **dev server**：继续工作前需重启（见下方命令）
 - **管理后台**：`/admin/login`，默认账号 **admin / admin123**（dev 固定）
 - **患者登录**：`/auth`，任意手机号 + 验证码 **123456**（dev 固定）
@@ -40,7 +47,7 @@ SQLite 文件被 `.gitignore` 忽略，机器换了或手滑删了都会没。**
 ```bash
 cd "e:/Projects/03_患者招募/app"
 npx prisma migrate deploy   # 建表结构
-npx tsx prisma/seed.ts      # 写 3 条种子试验
+npx tsx prisma/seed.ts      # 写 43 条种子试验
 ```
 
 ---
@@ -57,11 +64,197 @@ npx tsx prisma/seed.ts      # 写 3 条种子试验
 | M4 | 信任层深化 + SEO             | ✅ 完成    | 04-19   | 04-19   | FAQ 20 条入库、/faq、og/twitter、MedicalStudy + FAQPage JSON-LD、sitemap + robots |
 | M5 | 社区模块                     | ✅ 完成    | 04-19   | 04-19   | 6 个分区 + 发帖/评论 + 敏感词 + 匿名 + 后台审核 |
 | M6 | 运营完善                     | ✅ 完成    | 04-20   | 04-20   | 权限审计底座 + KPI 看板 + CSV 导出 + FAQ/分区/敏感词后台 |
-| M7 | 部署迁移公司 Linux 服务器    | ⏳ 待开始  | —       | —       | Docker 化、SQLite → MySQL/Postgres 切换           |
+| M7 | 部署迁移公司 Linux 服务器    | ⏸️ 移除    | —       | —       | 推至 M8 完成后再启动                              |
+| M8.1 | 基础增强（反爬+封号+伦理） | ✅ 完成（2026-04-22，T8 UI 债推入 M8.2 并行） | 04-22   | 04-22   | 游客 5 条 cookie 限制、30min/20条封号+申诉、伦理批件前台、素材库骨架、sticky-cta 覆盖 bug 修复 |
+| M8.2 | 表单管理器 + AI 预筛 + T8 UI 债 | 🏗️ 开发中（2026-04-22 启动） | 04-22   | —       | TrialPrescreenForm 模型、后台可视化管理、DeepSeek 抽取生成、LlmCallLog、T8 UI 债 12 条并行清理 |
+| M8.3 | 账号体系 + 社区重做          | 📝 PRD + 原型完成 · 待用户验收（**含 04-22 社区反转 + 决策 7 去 ICD 补丁**） | 04-22   | —       | **AI 疾病分析（DeepSeek）**、试验匹配助手、医生/AI tag、**保留病种分区 + 两态补症状回写闭环**、AI 审核 |
 
 ---
 
 ## 📋 已完成里程碑详情
+
+### M8.1 · 基础增强 · 开发阶段 T1-T7 完成（2026-04-22）
+
+**本轮特殊情况**：用户验收 PRD + 原型通过后 M8.1 开工。报到测试向 backend/frontend/admin/ui/qa/pm 6 个 agent 投递，**5 分钟内零响应**，tech-lead 切兜底模式亲自完成 T1-T7 开发。
+
+**新增 / 修改文件清单**：
+
+**schema + 迁移**
+- `app/prisma/schema.prisma`：追加 3 模型 `UserBehaviorLog` / `AccountLock`（带 User 反向关系）/ `MediaAsset`
+- `app/prisma/migrations/20260422061828_m8_1_anti_scrape_media_lock/`：迁移 SQL
+- **M6 现有 13 模型零改动**
+
+**核心 lib（app/src/lib/）**
+- `guest-token.ts`：读游客 cookie（仅 read——cookie 写入在 middleware 层，绕过 Next 15+ "server component 不能 set cookie" 限制）
+- `behavior-log.ts`：行为日志写入 + IP 哈希脱敏 + `logTrialDetailView` 便捷函数
+- `rate-limit.ts`：`countDistinctRecentTrialViews` / `countDistinctGuestTrialViews` / `shouldLockUserForTrialViews`
+- `lock-guard.ts`：`requireNotLocked` / `getActiveLock` / `getLatestLock`（各 server component 显式调用，因 edge middleware 无法访问 Prisma）
+- `actions/locks.ts`：解锁 + 驳回申诉 2 个 server action（Zod 校验 + 审计日志 via writeAuditLog）
+- `actions/media.ts`：图片上传（MIME + 2MB 限制，软删除 via isEnabled）+ toggleMediaEnabled
+
+**middleware**
+- `app/src/middleware.ts`：仅做一件事 —— 为未带 `jt_guest_token` cookie 的请求预写 UUID（edge runtime 可写 response cookie），server component 只读不写
+
+**路由**（5 个新增路由 + 2 个扩展）
+- `/account-locked` 封锁页：显示锁定原因、工单号、申诉状态；已解锁会自动转主页
+- `/appeal` 申诉表单页 + `AppealForm.tsx`（client）+ `actions.ts`（server action）
+- `/appeal/submitted` 申诉成功页
+- `/admin/(authed)/locks` 封锁管理列表：统计卡 + 筛选 chip + 表格
+- `/admin/(authed)/locks/[id]` 封锁详情页：用户资料 + 30min 行为日志时间线 + 申诉内容 + `LockActionPanel`（client）双表单（解锁 / 驳回）
+- `/admin/(authed)/media` 图片素材库：分类 chip + 上传 `MediaUploadForm` + 网格展示 + `MediaCardActions`（URL 复制 / 软删除）
+- `/trials/[slug]/page.tsx` 反爬集成：**登录用户查锁 → 写 log → 阈值判断（20 条/30min）触发 `AccountLock.upsert` + redirect**；**游客查 cookie count → ≥6 拦截到 `/auth?reason=guest_limit`，≤5 正常渲染 + 合规区下方显示"还可以看 X 条"残余提示**；同时强制渲染"伦理批件号：XXX / —"（用户拍板决策 1）
+
+**admin 导航**
+- `admin/(authed)/layout.tsx`：在侧栏追加"封锁管理"（带待处理申诉数徽章）+ "图片素材"（带启用数徽章），M6 原有导航 7 项零改动
+
+**E2E 抽检脚本**
+- `app/scripts/test-m8-1-rate-limit.ts`：独立 tsx 脚本，验证 20 条/30min 封锁阈值 → **已跑通，第 20 条精准触发 `shouldLock=true`**
+
+**验收**（本轮 tech-lead 自验收，agent 三关待用户决定是否重启团队）
+
+- ✅ `npx tsc --noEmit` exit=0（T1-T7 完成后反复验证）
+- ✅ dev server smoke：`/account-locked` 307→/auth、`/appeal` 307、`/admin/locks` 307、`/admin/media` 307 全部符合预期
+- ✅ 游客流程：清 cookie → 访问试验详情 200 + middleware 正确写 `jt_guest_token`；不同 slug 累计计数；同 slug 不累计（已看过则 `totalAfter = currentDistinctBefore`）
+- ✅ 反爬阈值精准：E2E 抽检在第 20 条不同试验详情时 `shouldLock` 翻为 true，符合 PRD §5.2
+- ✅ **M6 所有路由零破坏**：`/admin/audit-logs` / `/admin/faq` / `/admin/community/groups` / `/admin/community/sensitive-words` / `/trials` / `/` / `/faq` / `/community` 全部继续 307/200
+
+**⚠️ 遗留问题**
+
+1. **`npm run build` 失败**（既有 M6 代码引发，**非 M8.1 引入**）：`/admin/trials/new` 预渲染时报 `TypeError: Cannot read properties of null (reading 'useContext')`。推测为 Next 16 + React 19 SSG prerender 针对某些 client boundary 的坑。tsc 零错、dev 模式正常，所有新路由在 dev 模式下可访问。**build 修复不属于 M8.1 范围**——需要用户决定单独开一个小任务（M8.1.x 或 M7 部署前）
+2. **DB 环境告警**（已单独汇报主 session）：`app/.env` 生产模式 + `app/.env.local` 开发模式。Next 优先读 `.env.local`，数据正确。迁移过程中 `app/data/prod.db` 被空库创建（3 KB 占位，当前不影响 dev，docker 部署时会被 volume 覆盖）
+3. **T8 UI 债清理 12 条** 暂未动：PRD §5.7 清单需要 ui-designer 的统一视觉规范 + 逐页改进，不在 tech-lead 兜底范围（会影响视觉判断）。等用户决定是否 spawn ui-designer 或本里程碑跳过
+4. **三关 agent 验收未跑**：qa/ui/pm 报到测试全部静默。tech-lead 自验收（tsc + dev curl + E2E 脚本）已通过三件套硬验收
+
+**下一步**：
+- 用户验收 → build 问题决议 → T8 UI 债决议 → M8.1 官方 ✅
+- 或直接进 M8.2（表单管理器 + AI 预筛），因 M8.1 的 lib / schema 都是 M8.2 的前置基础
+
+**⚠️⚠️⚠️ 备份提醒**：本轮新增 3 个 Prisma 模型 + 5 个新路由 + 6 个新 lib 文件。建议立即备份 `app/` 到移动硬盘或 push GitHub。
+
+---
+
+### M8 · 产品优化轮 · 本轮阶段交付（PRD + 原型，2026-04-22）
+
+**本轮特殊情况**：PM/UI 在 5 分钟内未响应 tech-lead 的"报到测试"—— tech-lead 切兜底模式亲自完成 3 份子 PRD + 11 份原型 HTML。
+
+**PRD 细化**（在骨架基础上做 ~300% 的细节扩展）：
+- `各种prd_m8/M8.1_基础增强_PRD.md`：用户故事（5 身份）/ 页面清单 / Prisma 增量（`UserBehaviorLog` + `AccountLock` + `MediaAsset`）/ 业务规则详解（游客 cookie / 30min 20 条算法 / 封锁页文案 / 管理端详情抽屉）/ 异常流 / 合规文案（禁用词表）/ 验收三段式 / 任务拆分
+- `各种prd_m8/M8.2_表单管理器_AI预筛_PRD.md`：新模型（`TrialPrescreenForm` + `TrialPrescreenFormItem` + `LlmCallLog`）/ LlmProvider 抽象（复用 SmsProvider 模式）/ AI prompt 模板 / 准确率抽检口径（3 条真实试验 ≥ 80% 召回率）/ 图片自动压缩（sharp）
+- `各种prd_m8/M8.3_账号体系_社区重做_PRD.md`：注册 3 步流程 / ICD-10 库导入脚本 / 匹配助手对话式 prompt + 输出模板 / 确诊记录上传 + 鉴权下载 / 社区去分区（6 个新/扩展模型）/ AI 审核置信度阈值与误杀率抽检 / 医生身份 tag / AI 回复账号（`AiAccountTemplate`）/ **免责声明草稿**（待法务敲定）
+
+**原型增量**（全部用既有 `design-system.css` token，零第三方 UI 库）：
+- `原型_V1/m8增量/index.html`：本轮 11 份原型的子导览（分 M8.1/M8.2/M8.3 三组卡片）
+- M8.1 · 4 份：`account-lock.html`（封锁页 · 4 态切换）/ `appeal-form.html`（申诉表单 · 4 态切换）/ `admin-lock-management.html`（封锁管理 + 行为日志抽屉 + 解锁/驳回 tab）/ `admin-media-library.html`（图片库骨架 + 占位色块预览）
+- M8.2 · 2 份：`admin-form-manager.html`（左列表+中编辑+拖拽+跳题规则构建器）/ `admin-form-manager-ai-generate.html`（4 态：输入/loading/结果/错误）
+- M8.3 · 4 份：`register-symptoms.html`（自由文本 + ICD-10 chips + 4 态）/ `trial-match-assistant.html`（红底免责横幅 + 对话式 + 三段式结果卡 + 4 态）/ `community-feed.html`（时间流 + 多层标签栏 + 医生/AI 徽章 + 空状态）/ `admin-moderation-queue-v2.html`（AI 判断列 + 置信度进度条 + 一键认同/覆盖）
+
+**共同设计原则**：中老年友好（字号 ≥ 16px、按钮 ≥ 44px、对比度 ≥ 4.5:1）；移动端 375px 优先；深墨绿+暖米+暖橙的编辑感风格延续。
+
+**PRD 里标注的"待用户拍板"项**（下一步用户需要过一遍）：
+1. 伦理批件号为空时前台显示策略（M8.1）
+2. 封锁是否永久 / 7 天自动解封（M8.1）
+3. 图片库软/硬删除策略（M8.1）
+4. 行为日志保留时长（M8.1）
+5. 申诉驳回后是否允许二次申诉（M8.1）
+6. DeepSeek 模型选择：deepseek-chat（快便宜）vs deepseek-reasoner（更准）（M8.2）
+7. prompt 模板是否允许运营自定义（M8.2）
+8. 匹配助手免责声明法务最终版（M8.3 · **必须**上线前过法务）
+9. 医生资质核验方式（仅人工 vs 上传证件）（M8.3）
+10. 医疗记录保留时长（M8.3）
+11. 社区标签结构是否加"时期"一类（M8.3）
+12. AI 账号命名（九泰小助手 / AI 助理 / 其他）（M8.3）
+
+**外部推动事项**（用户/外部，PRD 启动前必须到位）：
+- DeepSeek API Key 申请（M8.2 前）
+- ICD-10/11 中文版数据下载（M8.3 前）
+- 2-3 位医学顾问账号（M8.3 前）
+- 图片素材 3-5 张起步（M8.1 启动后）
+- 申诉处理 SOP（M8.1 上线前）
+- 匹配助手免责声明法务版（M8.3 前）
+
+**下一步**：
+- 用户亲自验收 3 份子 PRD + 11 份原型 HTML（浏览器打开 `原型_V1/m8增量/index.html`）
+- 验收通过后 tech-lead 启动 M8.1 开发（按 PRD 里的任务拆分派工）
+- 本阶段**不进入代码开发**
+
+**⚠️⚠️⚠️ 备份提醒**：本次产出文档量较大（3 份 PRD 合计 ~2000 行、11 份原型 HTML），**建议立即备份** `各种prd_m8/` + `原型_V1/m8增量/` 到移动硬盘或上传 GitHub（开 Clash 7890 代理）。
+
+#### 🔁 2026-04-22 补丁：M8.3 社区路径反转（保留病种分区）
+
+用户对 M8.3 社区部分做了**路径反转**，PRD + 原型已同步回炉：
+
+**废止**：原"去分区 + 时间流 + 三类标签（病种/话题/身份）"设计
+**新方案**：**保留 M5 的 6 个病种分区**，机制改为"注册症状 → 推荐分区 → 加入前补症状 → 回写账号"闭环
+
+**PRD 改动**（`M8.3_账号体系_社区重做_PRD.md`）：
+- §3.1/3.2：页面清单换掉"时间流/标签栏"语言，换成分区首页 v2 三段式 + 新增"加入前补症状弹窗"入口
+- §4 数据模型：`UserGroupMembership` 补 `joinSymptoms` / `joinIcdCodes` 快照字段；`CommunityGroup` 补 `recommendedIcdCodes` / `allowAiComment` / `allowDoctorComment`；删除 `tagType` 字段
+- §5.5/5.6 全文重写：分区首页 v2 三段布局 + 推荐算法（`matchScore = |user.icdCodes ∩ group.recommendedIcdCodes|`）+ 加入补症状 + 回写账号（累加不覆盖）
+- §5.9 AI 回复账号改名"九泰 AI 助理"，新增分区级 `allowAiComment` 开关
+- §7.3 合规文案增强（强调"不作诊断、仅分区内参考、不对外公开"）
+- §9 决策 11 反转："社区保留病种分区"
+- §8.2 / §11 / §12 验收清单与任务表同步更新
+
+**原型改动**：
+- `community-feed.html`：整文件重写为"分区首页 v2"（我加入 + 推荐加入 + 其他三段）
+- `register-symptoms.html`：追加"推荐分区"弹窗态（第 5 种预览态）
+- 新增 `join-group-prompt.html`：加入分区前的补症状表单（4 态）
+- `m8增量/index.html` 子导览：M8.3 段加入新卡片 + 更新文案
+
+**总 PRD 骨架改动**：
+- §二·二追加决策 11
+- §三 M8.3 "社区重做"子段改为"保留病种分区 + 三段布局"
+- §二·二末尾新增"【2026-04-22 补丁】M8.3 社区部分范围调整"段
+
+**原型总数**：11 → **12 份**（10 原 + 1 子导览 + 1 新增）
+**PRD 正文状态**：M8.3 正文约改动 8 处 ~150 行；M8.1 / M8.2 不受影响
+**账号/AI 审核/反爬/封号 / 匹配助手**：不动，原设计沿用
+
+#### 🔁 2026-04-22 第二补丁：决策 7 反转（废止 ICD-10，改用 DeepSeek AI 动态分析）
+
+用户在 M8.1 开发完成 + M8.3 社区路径反转后，又反转决策 7：**废止 ICD-10 词典路线，疾病识别改为调 DeepSeek 实时分析**。PRD + 原型同步去 ICD 化。
+
+**PRD 改动**（`M8.3_账号体系_社区重做_PRD.md`）：
+- 头部 meta：追加"决策 7 反转"声明
+- §1 范围一览：模块 1 描述由"ICD-10 标准化"改为"AI 疾病分析"；模块 10"ICD-10 词典接入"**整条删除**
+- §2 用户故事：注册流症状故事改为"AI 返回标准疾病名 + 建议标签"
+- §3.1 / §3.2：`/admin/icd10` 路由**删除**；各页描述去 ICD 化，改为调 `disease-matcher.ts`
+- §4 数据模型：`User.icdCodes` → `User.aiDiseaseTags`（JSON 数组 `[{label,keyword,confidence}]`）；`UserGroupMembership.joinIcdCodes` → `joinDiseaseTagsJson`；`CommunityGroup.recommendedIcdCodes` → `recommendedDiseaseKeywords`（自然语言关键词）；**删除 `Icd10Term` 模型**
+- §5.1 注册流：流程从"输入 → ICD 联想"改为"输入 → 点'AI 分析' → loading → 标签 chips 可删"
+- §5.2 **整章重写**：标题从"ICD-10 词典接入"改为"疾病匹配服务（`disease-matcher.ts`）"；给出接口签名 + prompt 模板 + Mock fallback
+- §5.3 匹配助手：删"查 recommendedIcdCodes"，改为按疾病关键词 + 自然语言模糊匹配
+- §5.5.1 推荐算法：从"ICD 码集合交集"改为"AI 语义匹配"（轻量档字符串包含 + 重档 DeepSeek）
+- §5.6 加入闭环**两态流**：态 1 输入自由文本 → 提交 → 态 2 AI 分析返回标签（可删）→ 确认加入 → 回写 symptomsText + aiDiseaseTags
+- §6 异常流：新增 `disease-matcher` 超时/非 JSON/缓存命中/未配 key 4 种降级；删 ICD 词典未导入相关
+- §8 验收：删"ICD-10 条数 ≥ 20000"；改为"disease-matcher 抽检 5 例 ≥ 4 例合理"
+- §9 决策 11 之下追加"决策 7 反转"条目，原 ICD 卡点标 `废止`
+- §10 外部依赖：划掉 ICD-10 数据下载
+- §11 任务：T2 从 "ICD-10 导入脚本" 改为"`disease-matcher.ts` + DeepSeek 接入"；T8 补"AI 分析两态流"；工期净 +1h
+- §12 产品验收清单：ICD 相关条全删，替换为 AI 分析/Mock fallback 相关抽检
+
+**总 PRD 改动**（`M8_产品优化轮_总PRD_2026-04-22.md`）：
+- §4.2 **整段重写**：标题"ICD-10/11 词典"改为"疾病匹配服务（disease-matcher）"；数据源/导入脚本/查询 API 全废止
+- §3 M8.3 范围：`User.icdCodes` → `aiDiseaseTags`；`disease-matcher.ts` 接入取代"ICD-10 词典导入"
+- §3 M8.3 验收硬门槛：删"ICD-10 词典 ≥ 2 万条"，改为"`disease-matcher` 抽检 ≥ 4/5"
+- §"2026-04-22 补丁"段：追加决策 7 反转细节（字段改名/模型删除/lib 新增清单）
+
+**原型改动**：
+- `register-symptoms.html`（14.3 KB → ~22 KB）：删"ICD chips + 预选"；新增"AI 帮我分析"按钮 → loading 1.5s → 标签 chips（`conf 0.XX` + × 可删）；预览条 5 态（空/分析中/完成/未识别/推荐分区弹窗）
+- `join-group-prompt.html`（17.1 KB → ~22 KB）：删"ICD chips 预选 + 预选徽章"；改为**两态流**——输入态（提交→AI 分析）+ 结果态（展示 AI 标签 + 用户可删 + 确认/跳过 AI 双按钮）；成功态文案去 ICD；预览条 5 态
+- `trial-match-assistant.html`：零改动（原本就是纯 LLM 驱动，无 ICD 引用）
+- `m8增量/index.html`：M8.3 段 4 处 ICD 文案替换为 AI 分析；头部范围速览更新
+
+**代码侧**：
+- M8.1 已落盘的 3 个模型（UserBehaviorLog / AccountLock / MediaAsset）**与 ICD 无关**，**零改动保留**
+- M8.3 开发时新增 `src/lib/disease-matcher.ts`（仍未落盘，等开发阶段）
+
+**外部事项变化**：
+- ✅ **移除**卡点"ICD-10 中文版数据下载"——M8.3 启动**无前置外部依赖**
+- 其他外部事项（医生账号、图片素材、免责声明终版）保留
+
+**PRD + 原型 + LOG 全量同步完成时间**：2026-04-22
+
+---
 
 ### M6 · 运营完善（第二阶段：KPI 看板、导出、后台配置，2026-04-20）
 

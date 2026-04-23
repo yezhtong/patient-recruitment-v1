@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES · 2026-04-22 决策 7 反转（去 ICD 化）
+- 核心目标：加入分区前 1 分钟内完成的两态补症状流——①输入自由文本 → ②AI 分析返回标签 → 用户确认/删 → 加入并回写账号
+- 视觉权重分布：① 分区名 + 封面色块（让用户明确"加入的是哪个"）② 自由文本输入（主输入）③ AI 分析标签结果 chips（每个带 × 删除）④ 合规同意勾选 + 两段式 CTA
+- 移动端适配：375px 下单列，AI chips 自动换行；textarea 最小高度 120px；CTA 固定底部便于单手
+- 可访问性：所有 input/chip 带 label；合规勾选必勾；AI 分析 loading 用 aria-busy；成功态给键盘可达焦点
+- 反转说明：废止"ICD 预选 chips"（从 recommendedIcdCodes 里筛交集）；改为提交后实时调 DeepSeek 分析返回标签；支持"AI 分析失败 → 跳过直接加入"降级
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>加入【糖尿病】分区 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  body { background: var(--cream-50); min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar {
+    border-bottom: var(--border);
+    padding: 14px 0;
+    background: var(--cream-0);
+  }
+  .topbar .container {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .logo {
+    font-family: var(--font-serif);
+    font-size: var(--fs-xl);
+    color: var(--ink-900);
+  }
+  .logo em { font-style: italic; color: var(--ink-700); }
+  .topbar a.back {
+    color: var(--gray-600);
+    font-size: var(--fs-sm);
+    text-decoration: none;
+  }
+
+  main { flex: 1; padding: 40px 0 80px; }
+
+  .wrap {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 0 var(--container-pad);
+  }
+
+  .group-header {
+    background: var(--cream-0);
+    border: var(--border-strong);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .group-header__cover {
+    aspect-ratio: 8 / 2;
+    background: linear-gradient(135deg, #5a8d72, var(--ink-700));
+    color: var(--lime);
+    display: grid; place-items: center;
+    font-family: var(--font-serif);
+    font-size: 42px;
+    position: relative;
+  }
+  .group-header__badge {
+    position: absolute;
+    top: 12px; left: 14px;
+    background: var(--lime);
+    color: var(--ink-900);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    letter-spacing: .1em;
+  }
+  .group-header__body {
+    padding: 20px 24px;
+  }
+  .group-header__name {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-3xl);
+    margin: 0 0 6px;
+    line-height: 1.2;
+  }
+  .group-header__meta {
+    display: flex; gap: 16px;
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+
+  .form-card {
+    background: var(--cream-0);
+    border: var(--border-strong);
+    border-radius: var(--r-lg);
+    padding: 28px 32px;
+  }
+  @media (max-width: 480px) {
+    .form-card { padding: 24px 20px; }
+  }
+
+  .form-card__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .form-card__title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-2xl);
+    margin: 0 0 12px;
+    line-height: 1.25;
+  }
+  .form-card__sub {
+    color: var(--gray-600);
+    font-size: var(--fs-sm);
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
+
+  .field-label {
+    display: block;
+    font-size: var(--fs-md);
+    font-weight: 600;
+    color: var(--ink-900);
+    margin-bottom: 4px;
+  }
+  .field-label .req { color: var(--accent); margin-left: 4px; }
+  .field-hint {
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-bottom: 10px;
+    line-height: 1.55;
+  }
+
+  textarea.note-input {
+    width: 100%;
+    min-height: 120px;
+    border: 1.5px solid var(--ink-200);
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    line-height: 1.65;
+    resize: vertical;
+    background: var(--cream-0);
+  }
+  textarea.note-input:focus {
+    outline: none;
+    border-color: var(--ink-900);
+    box-shadow: 0 0 0 3px rgba(42,113,99,.15);
+  }
+  textarea.note-input[aria-invalid="true"] {
+    border-color: var(--danger-500);
+  }
+  .textarea-meta {
+    display: flex; justify-content: space-between;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+  .field-error {
+    color: var(--danger-500);
+    font-size: 13px;
+    margin-top: 6px;
+    display: none;
+  }
+  .field-error[data-show="true"] { display: block; }
+
+  .chips-block {
+    margin-top: 22px;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1.5px solid var(--ink-200);
+    background: var(--cream-50);
+    border-radius: var(--r-pill);
+    font-size: var(--fs-sm);
+    color: var(--ink-900);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .chip:hover { border-color: var(--ink-500); }
+  .chip.--selected {
+    background: var(--ink-900);
+    color: var(--lime);
+    border-color: var(--ink-900);
+  }
+  .chip.--preselected::after {
+    content: '预选';
+    background: var(--lime);
+    color: var(--ink-900);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: var(--r-sm);
+    margin-left: 4px;
+    letter-spacing: .05em;
+  }
+  .chip.--selected.--preselected::after {
+    background: var(--accent);
+    color: white;
+  }
+  .chip__code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gray-500);
+    background: var(--ink-100);
+    padding: 1px 6px;
+    border-radius: var(--r-sm);
+  }
+  .chip.--selected .chip__code { background: var(--ink-700); color: var(--cream-50); }
+
+  .chips-add {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--accent);
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    padding: 0;
+  }
+  .chips-add:hover { text-decoration: underline; }
+
+  .agree-block {
+    margin-top: 24px;
+    background: var(--cream-100);
+    border-left: 3px solid var(--info-500);
+    padding: 14px 18px;
+    border-radius: var(--r-sm);
+    display: flex; gap: 12px;
+    align-items: flex-start;
+  }
+  .agree-block input {
+    width: 20px; height: 20px;
+    margin-top: 2px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .agree-block label {
+    font-size: 13px;
+    color: var(--gray-700);
+    line-height: 1.7;
+    cursor: pointer;
+  }
+  .agree-block strong { color: var(--ink-900); }
+
+  .actions {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 24px;
+    min-height: 52px;
+    border-radius: var(--r-md);
+    font-size: var(--fs-md);
+    font-weight: 600;
+    cursor: pointer;
+    border: 0;
+    font-family: var(--font-sans);
+    text-decoration: none;
+  }
+  .btn--primary { background: var(--accent); color: white; }
+  .btn--primary:hover { background: var(--accent-dark); }
+  .btn--primary:disabled {
+    background: var(--gray-200);
+    color: var(--gray-500);
+    cursor: not-allowed;
+  }
+  .btn--ghost {
+    background: transparent;
+    border: 1.5px solid var(--ink-200);
+    color: var(--ink-900);
+  }
+
+  /* 成功态 */
+  .success-card {
+    background: var(--cream-0);
+    border: var(--border-strong);
+    border-radius: var(--r-lg);
+    padding: 48px 32px;
+    text-align: center;
+  }
+  .success-card__icon {
+    width: 72px; height: 72px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: var(--success-50);
+    color: var(--success-700);
+    display: grid; place-items: center;
+    font-size: 32px;
+  }
+  .success-card h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-3xl);
+    margin: 0 0 12px;
+  }
+  .success-card p {
+    color: var(--gray-600);
+    font-size: var(--fs-md);
+    line-height: 1.7;
+    max-width: 48ch;
+    margin: 0 auto 10px;
+  }
+  .success-card .writeback-note {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--lime-soft);
+    border-radius: var(--r-md);
+    font-size: 13px;
+    color: var(--ink-700);
+    line-height: 1.6;
+  }
+  .success-card .cta {
+    margin-top: 24px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* 错误 + loading */
+  .loading-strip {
+    background: var(--info-50);
+    color: var(--info-700);
+    padding: 14px 18px;
+    border-radius: var(--r-md);
+    border-left: 3px solid var(--info-500);
+    font-size: var(--fs-sm);
+    margin-bottom: 16px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+  .loading-strip[data-show="true"] { display: flex; }
+
+  .error-strip {
+    background: var(--danger-50);
+    color: var(--danger-700);
+    padding: 14px 18px;
+    border-radius: var(--r-md);
+    border-left: 3px solid var(--danger-500);
+    font-size: var(--fs-sm);
+    margin-bottom: 16px;
+    display: none;
+  }
+  .error-strip[data-show="true"] { display: block; }
+
+  /* 预览条 */
+  .preview-bar {
+    background: var(--ink-100);
+    padding: 10px 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-700);
+    border-bottom: var(--border);
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .preview-bar strong { color: var(--ink-900); }
+  .preview-bar button {
+    background: var(--ink-900); color: var(--cream-50);
+    border: 0; padding: 4px 10px;
+    border-radius: var(--r-sm);
+    font-size: 10px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="preview-bar" role="note">
+  <strong>原型预览 · 决策 7 反转</strong>·
+  <button onclick="showView('form')">① 输入态（自由文本）</button>
+  <button onclick="showView('ai-done')" style="background:var(--accent);">② AI 分析完成（标签+确认）</button>
+  <button onclick="showView('loading')">加入中 (回写)</button>
+  <button onclick="showView('error')">AI 分析失败 · 可跳过</button>
+  <button onclick="showView('success')">加入成功 · 含账号回写提示</button>
+</div>
+
+<header class="topbar">
+  <div class="container">
+    <a href="community-feed.html" class="back">← 返回社区首页</a>
+    <a href="../public/home.html" class="logo">九泰<em>临研</em></a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- 表单态 -->
+    <div id="formView">
+
+      <div class="group-header">
+        <div class="group-header__cover">
+          <span class="group-header__badge">🎯 推荐加入</span>
+          糖
+        </div>
+        <div class="group-header__body">
+          <h1 class="group-header__name">糖尿病 · 病友分区</h1>
+          <div class="group-header__meta">
+            <span>👥 1,284 成员</span>
+            <span>💬 本周 31 帖</span>
+            <span>🤖 AI 助理活跃</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-strip" id="loadingStrip">
+        <span>⏳</span> 加入中，正在回写你的账号信息…
+      </div>
+
+      <div class="error-strip" id="errorStrip">
+        ⚠ 加入失败：网络异常或请求超时，请重试。
+      </div>
+
+      <form class="form-card" id="joinForm" onsubmit="handleJoin(event)">
+        <div class="form-card__eyebrow">Join Group · 加入前补充信息</div>
+        <h2 class="form-card__title">加入前，请用一两句话告诉同分区病友</h2>
+        <p class="form-card__sub">
+          "你和糖尿病的关系是什么样的"——确诊多久、目前怎么治、最关心什么。
+          <br/>这些信息<strong>只在本分区内作参考</strong>，不构成诊断，也不会公开到你的主页。
+        </p>
+
+        <label class="field-label" for="noteTa">
+          你和糖尿病的情况 <span class="req">*</span>
+        </label>
+        <p class="field-hint">10-200 字。例如："2024 年 3 月确诊 2 型糖尿病，目前二甲双胍 500mg/天，空腹血糖控制在 6.5 左右。最关心饮食调整。"</p>
+        <textarea class="note-input" id="noteTa" maxlength="200"
+                  placeholder="简单描述就行" oninput="updateCount()" aria-describedby="noteMeta noteErr"></textarea>
+        <div class="textarea-meta" id="noteMeta">
+          <span>至少 10 字</span>
+          <span><span id="noteCount">0</span> / 200</span>
+        </div>
+        <p class="field-error" id="noteErr">请至少填写 10 个字说清楚情况</p>
+
+        <!-- 决策 7 反转：删除"ICD-10 chips 预选"，改为"AI 分析两态流" -->
+
+        <!-- AI 分析结果区（submit 后由 JS 填入；默认隐藏） -->
+        <div class="chips-block" id="aiTagsBlock" hidden>
+          <label class="field-label">AI 识别的疾病标签</label>
+          <p class="field-hint">
+            下面是 AI 根据你的描述识别出的相关疾病标签。
+            <strong>如果有不准的，点每个标签旁的 × 删掉即可。</strong>
+            保留的标签会累加到你的账号资料里，下次匹配试验更精准。
+          </p>
+          <div class="chips" id="aiTagList">
+            <!-- 由 simulateAiAnalyze() 动态填充 -->
+          </div>
+          <p style="font-size:11px;color:var(--gray-500);margin-top:10px;font-family:var(--font-mono);">
+            🤖 DeepSeek 动态分析 · 不调用本地 ICD 词典 · 仅作分区内参考，不构成医疗诊断
+          </p>
+        </div>
+
+        <div class="agree-block">
+          <input type="checkbox" id="agreeBox" />
+          <label for="agreeBox">
+            我知晓 <strong>本分区讨论内容不构成医疗建议</strong>，所有医疗决定请咨询执业医师。<br/>
+            我同意把以上信息累加到我的账号资料里（不会覆盖之前填的）。
+          </label>
+        </div>
+
+        <div class="actions">
+          <!-- 态 1 输入态：提交后走 AI 分析（而非直接加入） -->
+          <button type="submit" class="btn btn--primary" id="submitBtn">
+            🪄 提交并让 AI 分析
+          </button>
+          <!-- 态 2 AI 分析完：二次提交确认加入 -->
+          <button type="button" class="btn btn--primary" id="confirmBtn" hidden onclick="handleConfirm()">
+            ✓ 确认加入糖尿病分区
+          </button>
+          <button type="button" class="btn btn--ghost" id="skipAiBtn" hidden onclick="handleConfirm(true)">
+            跳过 AI 标签，只带症状文本加入
+          </button>
+          <a href="community-feed.html" class="btn btn--ghost">暂不加入，返回社区首页</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- 成功态 -->
+    <div id="successView" hidden>
+      <div class="success-card">
+        <div class="success-card__icon" aria-hidden="true">✓</div>
+        <h2>你已加入糖尿病分区</h2>
+        <p>现在你可以在这里发帖、评论、和同样在控糖路上的病友交流。</p>
+
+        <div class="writeback-note">
+          <strong>🔁 已同步到你的账号：</strong>
+          本次补充的症状文本已**累加**到「我的 · 症状」里（不覆盖之前填的），
+          同时 AI 分析保留的标签已**并入**你的 aiDiseaseTags——下次"试验匹配助手"推荐会更精准。
+        </div>
+
+        <div class="cta">
+          <a href="../public/community.html" class="btn btn--primary">进入糖尿病分区 →</a>
+          <a href="community-feed.html" class="btn btn--ghost">返回社区首页</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  // 决策 7 反转：两态流
+  // 态 1 · 输入 → 用户点"提交并让 AI 分析"
+  // 态 2 · AI loading → 结果态（展示标签 chips + 可删）
+  // 最终确认 → 成功态（回写 symptomsText + aiDiseaseTags）
+
+  const AI_FIXTURE = [
+    { label: '2 型糖尿病', keyword: 'type2_diabetes', confidence: 0.94 },
+    { label: '糖化血红蛋白', keyword: 'hba1c', confidence: 0.81 },
+    { label: '二甲双胍用药', keyword: 'metformin', confidence: 0.78 },
+    { label: '饮食管理相关', keyword: 'diet_management', confidence: 0.65 },
+  ];
+
+  function updateCount() {
+    document.getElementById('noteCount').textContent = document.getElementById('noteTa').value.length;
+  }
+  function removeAiTag(btn) {
+    btn.parentElement.remove();
+  }
+  function renderAiTags() {
+    const list = document.getElementById('aiTagList');
+    list.innerHTML = AI_FIXTURE.map(t => `
+      <span class="chip --selected" style="display:inline-flex;align-items:center;">
+        ${t.label}
+        <span class="chip__code" style="margin-left:4px;">conf ${t.confidence.toFixed(2)}</span>
+        <button type="button" onclick="removeAiTag(this)" aria-label="删除 ${t.label}"
+                style="background:transparent;border:0;margin-left:8px;color:var(--danger-500);font-weight:700;cursor:pointer;font-size:14px;">×</button>
+      </span>
+    `).join('');
+  }
+  function handleJoin(e) {
+    e.preventDefault();
+    // 态 1 · 用户提交自由文本 → loading（AI 分析中，约 1.5s 模拟） → 态 2
+    const loadingStrip = document.getElementById('loadingStrip');
+    const submitBtn = document.getElementById('submitBtn');
+    loadingStrip.textContent = '⏳ AI 正在分析你描述的症状，约 3-5 秒…';
+    loadingStrip.dataset.show = 'true';
+    submitBtn.disabled = true;
+    submitBtn.textContent = '分析中…';
+    setTimeout(() => {
+      // 展示态 2 · AI 结果
+      loadingStrip.dataset.show = 'false';
+      submitBtn.hidden = true;
+      document.getElementById('aiTagsBlock').hidden = false;
+      document.getElementById('confirmBtn').hidden = false;
+      document.getElementById('skipAiBtn').hidden = false;
+      renderAiTags();
+    }, 1200);
+  }
+  function handleConfirm(skipAi) {
+    // 态 2 · 确认加入 → loading（写库回写账号，约 0.8s） → 成功态
+    const loadingStrip = document.getElementById('loadingStrip');
+    loadingStrip.textContent = skipAi
+      ? '⏳ 正在加入（跳过 AI 标签，只回写症状文本）…'
+      : '⏳ 正在加入并回写 AI 标签到你的账号…';
+    loadingStrip.dataset.show = 'true';
+    setTimeout(() => showView('success'), 900);
+  }
+  function showView(v) {
+    const formView = document.getElementById('formView');
+    const successView = document.getElementById('successView');
+    const loadingStrip = document.getElementById('loadingStrip');
+    const errorStrip = document.getElementById('errorStrip');
+    const noteErr = document.getElementById('noteErr');
+    const noteTa = document.getElementById('noteTa');
+    const submitBtn = document.getElementById('submitBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const skipAiBtn = document.getElementById('skipAiBtn');
+    const aiBlock = document.getElementById('aiTagsBlock');
+
+    formView.hidden = false;
+    successView.hidden = true;
+    loadingStrip.dataset.show = 'false';
+    errorStrip.dataset.show = 'false';
+    noteErr.dataset.show = 'false';
+    noteTa.setAttribute('aria-invalid', 'false');
+    submitBtn.disabled = false;
+    submitBtn.hidden = false;
+    submitBtn.textContent = '🪄 提交并让 AI 分析';
+    confirmBtn.hidden = true;
+    skipAiBtn.hidden = true;
+    aiBlock.hidden = true;
+
+    if (v === 'loading') {
+      loadingStrip.textContent = '⏳ 加入中，正在回写你的账号信息…';
+      loadingStrip.dataset.show = 'true';
+      submitBtn.disabled = true;
+      submitBtn.textContent = '处理中…';
+    } else if (v === 'error') {
+      errorStrip.textContent = '⚠ AI 分析失败：网络超时，请重试，或点"跳过 AI 标签"直接加入。';
+      errorStrip.dataset.show = 'true';
+      noteErr.dataset.show = 'true';
+      noteTa.setAttribute('aria-invalid', 'true');
+      noteTa.value = '啊';
+      updateCount();
+    } else if (v === 'success') {
+      formView.hidden = true;
+      successView.hidden = false;
+    } else if (v === 'form') {
+      noteTa.value = '';
+      updateCount();
+    } else if (v === 'ai-done') {
+      // 快速跳到"AI 分析完成"态（预览用）
+      noteTa.value = '2024 年 3 月确诊 2 型糖尿病，目前二甲双胍 500mg/天，空腹血糖控制在 6.5 左右。';
+      updateCount();
+      submitBtn.hidden = true;
+      confirmBtn.hidden = false;
+      skipAiBtn.hidden = false;
+      aiBlock.hidden = false;
+      renderAiTags();
+    }
+  }
+</script>
+</body>
+</html>

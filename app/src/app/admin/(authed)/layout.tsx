@@ -15,15 +15,29 @@ export default async function AdminAuthedLayout({
     redirect("/admin/login");
   }
 
-  const [submittedLeadCount, trialCount, pendingPostCount, faqCount, groupCount, swCount] =
-    await Promise.all([
-      prisma.lead.count({ where: { status: "submitted" } }),
-      prisma.clinicalTrial.count(),
-      prisma.communityPost.count({ where: { reviewStatus: "pending" } }),
-      prisma.faqArticle.count(),
-      prisma.communityGroup.count(),
-      prisma.sensitiveWord.count({ where: { isEnabled: true } }),
-    ]);
+  const [
+    submittedLeadCount,
+    trialCount,
+    pendingPostCount,
+    faqCount,
+    groupCount,
+    swCount,
+    pendingAppealCount,
+    mediaCount,
+  ] = await Promise.all([
+    prisma.lead.count({ where: { status: "submitted" } }),
+    prisma.clinicalTrial.count(),
+    prisma.communityPost.count({ where: { reviewStatus: "pending" } }),
+    prisma.faqArticle.count(),
+    prisma.communityGroup.count(),
+    prisma.sensitiveWord.count({ where: { isEnabled: true } }),
+    // M8.1 · 待处理申诉数
+    prisma.accountLock.count({
+      where: { appealStatus: "pending", unlockedAt: null },
+    }),
+    // M8.1 · 素材库条数
+    prisma.mediaAsset.count({ where: { isEnabled: true } }),
+  ]);
 
   return (
     <div className="admin-shell">
@@ -46,6 +60,16 @@ export default async function AdminAuthedLayout({
             {submittedLeadCount > 0 ? (
               <span className="count">{submittedLeadCount} 待跟进</span>
             ) : null}
+          </Link>
+          <Link href="/admin/locks">
+            <span>封锁管理</span>
+            {pendingAppealCount > 0 ? (
+              <span className="count">{pendingAppealCount} 待处理</span>
+            ) : null}
+          </Link>
+          <Link href="/admin/media">
+            <span>图片素材</span>
+            <span className="count">{mediaCount}</span>
           </Link>
           <Link href="/admin/community/posts">
             <span>社区审核</span>

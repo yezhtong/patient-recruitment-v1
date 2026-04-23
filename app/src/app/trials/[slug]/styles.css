@@ -153,14 +153,12 @@
   details p { color: var(--gray-600); margin-top: 12px; }
   details summary::-webkit-details-marker { display: none; }
 
-  /* Sticky CTA */
+  /* CTA（原 sticky，M8.1 后 aside 信息量增加导致粘性覆盖下方 side-block，改为静态流） */
   .sticky-cta {
     background: var(--ink-900);
     color: var(--cream-50);
     border-radius: var(--r-2xl);
     padding: 32px;
-    position: sticky;
-    top: 100px;
   }
   .sticky-cta__pill {
     display: inline-flex;

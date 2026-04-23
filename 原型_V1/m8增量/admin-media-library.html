@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES
+- 核心目标：骨架版素材库——上传、浏览、复制 URL，占位色块策略随时可视
+- 视觉权重分布：① 上传区（主要行动）② 分类页签（结构化浏览）③ 素材墙（网格缩略图）
+- 移动端适配：网格自适应；上传区在 < 720px 降为单列
+- 可访问性：上传区 `role="button"` + `aria-label`；缩略图带 alt；URL 复制按钮带 aria-label
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>图片素材 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+<style>
+  .upload-zone {
+    border: 2px dashed var(--ink-300);
+    background: var(--cream-50);
+    border-radius: var(--r-lg);
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 28px;
+    transition: all .15s;
+    cursor: pointer;
+  }
+  .upload-zone:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .upload-zone__icon { font-size: 40px; margin-bottom: 10px; opacity: .6; }
+  .upload-zone h3 { font-family: var(--font-serif); font-weight: 400; font-size: var(--fs-2xl); margin: 8px 0; }
+  .upload-zone p { color: var(--gray-600); font-size: var(--fs-sm); line-height: 1.6; }
+  .upload-zone .constraints {
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+
+  .category-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: var(--border);
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 1px;
+  }
+  .cat-tab {
+    padding: 10px 16px;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--gray-600);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .cat-tab.--active { color: var(--ink-900); border-bottom-color: var(--accent); font-weight: 600; }
+  .cat-tab .count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--ink-100);
+    padding: 1px 6px;
+    border-radius: var(--r-sm);
+  }
+
+  .media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .media-card {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .media-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+  .media-card__thumb {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: linear-gradient(135deg, var(--ink-200), var(--ink-300));
+    display: grid; place-items: center;
+    color: var(--ink-700);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .media-card__thumb.--placeholder {
+    background: repeating-linear-gradient(45deg,
+      var(--cream-100), var(--cream-100) 12px,
+      var(--cream-200) 12px, var(--cream-200) 24px);
+    color: var(--gray-600);
+  }
+  .media-card__thumb.--hero1 {
+    background: linear-gradient(135deg, var(--ink-500), var(--ink-700));
+    color: var(--lime);
+  }
+  .media-card__thumb.--community1 {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: white;
+  }
+  .media-card__thumb.--trial1 {
+    background: linear-gradient(135deg, var(--info-500), var(--ink-700));
+    color: white;
+  }
+
+  .media-card__body {
+    padding: 12px 14px;
+  }
+  .media-card__name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+  .media-card__meta {
+    font-size: 11px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+    display: flex; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .media-card__url {
+    display: flex; gap: 4px; align-items: center;
+    font-size: 11px;
+    background: var(--ink-100);
+    padding: 5px 8px;
+    border-radius: var(--r-sm);
+  }
+  .media-card__url code {
+    font-family: var(--font-mono);
+    color: var(--ink-700);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .media-card__url button {
+    background: var(--ink-700);
+    color: var(--cream-50);
+    border: 0;
+    padding: 3px 8px;
+    border-radius: var(--r-sm);
+    font-size: 10px;
+    cursor: pointer;
+  }
+
+  .placeholder-banner {
+    background: var(--info-50);
+    border-left: 3px solid var(--info-500);
+    padding: 14px 18px;
+    border-radius: var(--r-md);
+    font-size: var(--fs-sm);
+    color: var(--info-700);
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
+</style>
+</head>
+<body class="admin">
+<div class="admin-shell">
+  <aside class="admin-side" aria-label="后台主导航">
+    <div class="admin-side__brand"><div class="brand__logo">JT</div><span translate="no">临研运营台</span></div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="../admin/dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="../admin/leads.html"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="admin-lock-management.html"><span class="admin-nav__icon">⊘</span>封锁管理</a>
+      <div class="admin-nav__group">内容管理</div>
+      <a href="../admin/trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="admin-form-manager.html"><span class="admin-nav__icon">▤</span>表单管理器</a>
+      <a href="admin-media-library.html" aria-current="page" style="background:var(--ink-100);color:var(--ink-900);font-weight:600;"><span class="admin-nav__icon">▦</span>图片素材</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb"><strong>图片素材库</strong></div>
+      <div class="admin-topbar__right"><div class="admin-avatar" title="张运营">Z</div></div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--ink-700);text-transform:uppercase;">◩ Media Library</span>
+          <h2 style="margin-top:14px;">图片素材库</h2>
+          <p class="page-head__sub">运营上传的图片素材按场景分类管理，供前台首页、社区、试验详情引用。未上传时走占位色块。</p>
+        </div>
+      </div>
+
+      <div class="placeholder-banner">
+        <strong>说明：</strong>
+        本里程碑只做骨架 · 目前仅支持 JPG/PNG/WebP/GIF · 单文件 ≤ 2MB · 前台未引用或素材失效时会自动走"色块 + 文字"占位，不暴露破图。
+      </div>
+
+      <div class="upload-zone" tabindex="0" role="button" aria-label="点击或拖拽上传图片">
+        <div class="upload-zone__icon" aria-hidden="true">⬆</div>
+        <h3>把图片拖到这里</h3>
+        <p>或者 <u style="color:var(--accent);">点击选择文件</u> · 支持批量上传</p>
+        <div class="constraints">JPG / PNG / WebP / GIF · 单文件 ≤ 2MB · 上传后自动压缩成 webp</div>
+      </div>
+
+      <div class="category-tabs" role="tablist">
+        <button class="cat-tab --active" role="tab">全部 <span class="count">24</span></button>
+        <button class="cat-tab" role="tab">首页 Hero <span class="count">3</span></button>
+        <button class="cat-tab" role="tab">社区头图 <span class="count">6</span></button>
+        <button class="cat-tab" role="tab">试验默认配图 <span class="count">12</span></button>
+        <button class="cat-tab" role="tab">FAQ <span class="count">2</span></button>
+        <button class="cat-tab" role="tab">头像占位 <span class="count">1</span></button>
+      </div>
+
+      <div class="media-grid">
+
+        <div class="media-card">
+          <div class="media-card__thumb --hero1">HERO · 1920×1080</div>
+          <div class="media-card__body">
+            <div class="media-card__name">home-hero-medical-lab.webp</div>
+            <div class="media-card__meta"><span>1920×1080</span><span>218 KB</span></div>
+            <div class="media-card__url">
+              <code>/media/hero/xxx.webp</code>
+              <button aria-label="复制 URL">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="media-card">
+          <div class="media-card__thumb --community1">COMMUNITY · 1200×600</div>
+          <div class="media-card__body">
+            <div class="media-card__name">breast-cancer-group.webp</div>
+            <div class="media-card__meta"><span>1200×600</span><span>142 KB</span></div>
+            <div class="media-card__url">
+              <code>/media/community/xxx.webp</code>
+              <button aria-label="复制 URL">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="media-card">
+          <div class="media-card__thumb --trial1">TRIAL · 800×600</div>
+          <div class="media-card__body">
+            <div class="media-card__name">trial-default-cardio.webp</div>
+            <div class="media-card__meta"><span>800×600</span><span>96 KB</span></div>
+            <div class="media-card__url">
+              <code>/media/trials/xxx.webp</code>
+              <button aria-label="复制 URL">📋</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 占位态示例 -->
+        <div class="media-card">
+          <div class="media-card__thumb --placeholder">（占位色块）<br/>无素材时前台渲染</div>
+          <div class="media-card__body">
+            <div class="media-card__name" style="color:var(--gray-500);">尚无素材 · 占位预览</div>
+            <div class="media-card__meta"><span>fallback</span><span>—</span></div>
+            <div class="media-card__url">
+              <code style="color:var(--gray-500);">无图片引用时走此样式</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="media-card">
+          <div class="media-card__thumb" style="background:var(--warning-50);color:var(--warning-700);">WIP</div>
+          <div class="media-card__body">
+            <div class="media-card__name">hero-v2-draft.jpg</div>
+            <div class="media-card__meta"><span>1920×1080</span><span>1.8 MB</span></div>
+            <div class="media-card__url">
+              <code>/media/hero/draft-2.webp</code>
+              <button aria-label="复制 URL">📋</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

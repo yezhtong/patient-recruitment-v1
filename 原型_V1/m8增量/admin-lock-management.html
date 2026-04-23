@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES
+- 核心目标：让运营 60 秒内看清"谁被封了/为什么/申诉说了啥"，并能两步完成解锁或驳回
+- 视觉权重分布：① 申诉状态徽章（最重，决定运营优先级）② 行为日志时间线（解锁判断依据）③ 操作区（解锁/驳回按钮）
+- 移动端适配：后台页默认桌面优先，但表格 ≥ 1280px 无横向滚动；< 960px 侧栏折叠为汉堡
+- 可访问性：表格 <th scope="col">；抽屉用 role="dialog" + aria-labelledby；状态徽章带 visually-hidden 文本
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#fdfaf3" />
+<title>封锁管理 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+<style>
+  .lock-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--ink-200);
+    border: var(--border-strong);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 900px) { .lock-stats { grid-template-columns: repeat(2, 1fr); } }
+  .lock-stats__cell {
+    background: var(--cream-0);
+    padding: 18px 20px;
+  }
+  .lock-stats__cell .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    color: var(--gray-600);
+    text-transform: uppercase;
+  }
+  .lock-stats__cell .value {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--ink-900);
+    margin-top: 4px;
+  }
+  .lock-stats__cell .value.--warn { color: var(--warning-700); }
+  .lock-stats__cell .value.--success { color: var(--success-700); }
+
+  .filter-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .chip {
+    padding: 6px 14px;
+    border-radius: var(--r-pill);
+    background: var(--cream-0);
+    border: 1px solid var(--ink-200);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .chip.--active {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    border-color: var(--ink-900);
+  }
+  .chip .count { opacity: .7; margin-left: 4px; }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--cream-0);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+  }
+  .table th, .table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--ink-100);
+    font-size: var(--fs-sm);
+  }
+  .table th {
+    background: var(--cream-100);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    font-weight: 600;
+  }
+  .table tbody tr:hover { background: var(--cream-100); cursor: pointer; }
+  .table tbody tr.--active { background: var(--ink-100); }
+
+  .user-cell {
+    display: flex; gap: 10px; align-items: center;
+  }
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--ink-200);
+    color: var(--ink-700);
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .user-cell .meta {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .user-cell .phone {
+    font-family: var(--font-mono);
+    color: var(--gray-700);
+    font-size: 13px;
+  }
+  .user-cell .nick { color: var(--ink-900); font-weight: 500; }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .pill.--pending { background: var(--warning-50); color: var(--warning-700); }
+  .pill.--approved { background: var(--success-50); color: var(--success-700); }
+  .pill.--rejected { background: var(--danger-50); color: var(--danger-700); }
+  .pill.--none { background: var(--gray-100); color: var(--gray-600); }
+  .pill.--locked { background: var(--ink-900); color: var(--lime); }
+  .pill.--unlocked { background: var(--success-500); color: var(--cream-0); }
+
+  .rule-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent-dark);
+    background: var(--accent-soft);
+    padding: 2px 8px;
+    border-radius: var(--r-sm);
+  }
+
+  /* 详情抽屉 */
+  .drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(13, 12, 10, 0.5);
+    z-index: 50;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  .drawer-overlay.--open { opacity: 1; pointer-events: auto; }
+  .drawer {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(640px, 100vw);
+    background: var(--cream-0);
+    box-shadow: var(--shadow-lg);
+    z-index: 60;
+    transform: translateX(100%);
+    transition: transform .25s var(--ease-out);
+    overflow-y: auto;
+  }
+  .drawer.--open { transform: translateX(0); }
+  .drawer__header {
+    position: sticky; top: 0;
+    background: var(--cream-0);
+    padding: 20px 28px;
+    border-bottom: var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 1;
+  }
+  .drawer__header h3 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-2xl);
+    margin: 0;
+  }
+  .drawer__body { padding: 24px 28px 48px; }
+
+  .drawer__section {
+    margin-bottom: 28px;
+  }
+  .drawer__section > h4 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--ink-200);
+  }
+
+  .kv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .kv {
+    background: var(--cream-100);
+    padding: 10px 14px;
+    border-radius: var(--r-sm);
+  }
+  .kv strong {
+    display: block;
+    font-size: 11px;
+    color: var(--gray-600);
+    font-family: var(--font-mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .kv span { color: var(--ink-900); font-size: var(--fs-sm); }
+
+  .timeline {
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  .timeline__item {
+    display: flex; gap: 12px;
+    padding: 10px 14px;
+    background: var(--cream-100);
+    border-radius: var(--r-sm);
+    border-left: 3px solid var(--ink-300);
+    font-size: var(--fs-sm);
+  }
+  .timeline__time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gray-600);
+    min-width: 80px;
+  }
+  .timeline__desc { color: var(--ink-900); flex: 1; }
+  .timeline__trial {
+    display: block;
+    color: var(--gray-500);
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  .appeal-box {
+    background: var(--cream-100);
+    border-left: 3px solid var(--accent);
+    padding: 16px 18px;
+    border-radius: var(--r-sm);
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+    color: var(--ink-900);
+  }
+  .appeal-box strong {
+    display: block;
+    font-size: 11px;
+    color: var(--gray-600);
+    font-family: var(--font-mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .action-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: var(--border);
+    margin-bottom: 16px;
+  }
+  .action-tab {
+    padding: 10px 16px;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--gray-600);
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: -1px;
+  }
+  .action-tab.--active {
+    color: var(--ink-900);
+    border-bottom-color: var(--accent);
+  }
+
+  .action-panel textarea {
+    width: 100%;
+    border: 1.5px solid var(--ink-200);
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .action-panel textarea:focus {
+    outline: none;
+    border-color: var(--ink-900);
+  }
+
+  .template-row {
+    display: flex; gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .template-chip {
+    padding: 4px 10px;
+    background: var(--ink-100);
+    color: var(--ink-700);
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    cursor: pointer;
+    border: 0;
+  }
+  .template-chip:hover { background: var(--ink-200); }
+
+  .drawer__footer {
+    position: sticky; bottom: 0;
+    background: var(--cream-0);
+    border-top: var(--border);
+    padding: 16px 28px;
+    display: flex; gap: 10px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0 20px;
+    height: 44px;
+    border-radius: var(--r-md);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    border: 0;
+    font-family: var(--font-sans);
+  }
+  .btn--primary { background: var(--success-500); color: var(--cream-0); }
+  .btn--primary:hover { background: var(--success-700); }
+  .btn--danger { background: var(--danger-500); color: var(--cream-0); }
+  .btn--danger:hover { background: var(--danger-700); }
+  .btn--ghost { background: transparent; border: 1px solid var(--ink-200); color: var(--ink-900); }
+</style>
+</head>
+<body class="admin">
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="admin-shell">
+  <aside class="admin-side" aria-label="后台主导航">
+    <div class="admin-side__brand">
+      <div class="brand__logo">JT</div>
+      <span translate="no">临研运营台</span>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="../admin/dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="../admin/leads.html"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="admin-lock-management.html" aria-current="page" style="background:var(--ink-100);color:var(--ink-900);font-weight:600;"><span class="admin-nav__icon">⊘</span>封锁管理 <span style="background:var(--accent);color:var(--cream-0);padding:1px 6px;border-radius:10px;font-size:10px;margin-left:4px;">12</span></a>
+
+      <div class="admin-nav__group">内容管理</div>
+      <a href="../admin/trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="admin-form-manager.html"><span class="admin-nav__icon">▤</span>表单管理器</a>
+      <a href="admin-media-library.html"><span class="admin-nav__icon">▦</span>图片素材</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb">
+        <strong>封锁管理</strong>
+      </div>
+      <div class="admin-topbar__right">
+        <div class="admin-avatar" title="张运营 · operator">Z</div>
+      </div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--ink-700);text-transform:uppercase;">★ Account Lock</span>
+          <h2 style="margin-top:14px;">封锁管理</h2>
+          <p class="page-head__sub">2026-04-22 · 当前有 12 个账号被系统暂停，其中 <strong style="color:var(--warning-700);">5 个</strong>有待处理申诉</p>
+        </div>
+      </div>
+
+      <div class="lock-stats">
+        <div class="lock-stats__cell">
+          <div class="label">当前锁定</div>
+          <div class="value">12</div>
+        </div>
+        <div class="lock-stats__cell">
+          <div class="label">待处理申诉</div>
+          <div class="value --warn">5</div>
+        </div>
+        <div class="lock-stats__cell">
+          <div class="label">今日新增封锁</div>
+          <div class="value">3</div>
+        </div>
+        <div class="lock-stats__cell">
+          <div class="label">累计解锁（30d）</div>
+          <div class="value --success">28</div>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="chip --active">全部 <span class="count">12</span></button>
+        <button class="chip">有申诉待处理 <span class="count">5</span></button>
+        <button class="chip">申诉已驳回 <span class="count">2</span></button>
+        <button class="chip">已解锁（近 7 天）<span class="count">14</span></button>
+        <div style="margin-left:auto;">
+          <input type="search" placeholder="搜手机号 / 昵称 / 工单号"
+                 style="padding:8px 14px;border:1px solid var(--ink-200);border-radius:var(--r-md);font-size:var(--fs-sm);min-width:260px;" />
+        </div>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">用户</th>
+            <th scope="col">封锁时间</th>
+            <th scope="col">触发规则</th>
+            <th scope="col">申诉状态</th>
+            <th scope="col">工单号</th>
+            <th scope="col">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="--active" onclick="openDrawer()">
+            <td>
+              <div class="user-cell">
+                <div class="avatar">W</div>
+                <div class="meta">
+                  <span class="nick">王阿姨</span>
+                  <span class="phone">138****1234</span>
+                </div>
+              </div>
+            </td>
+            <td>04-22 14:32</td>
+            <td><span class="rule-tag">rate_limit · trial_detail</span></td>
+            <td><span class="pill --pending">⏳ 处理中</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">LCK-9F2A87</code></td>
+            <td><a href="#" style="color:var(--accent);">查看 →</a></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar">L</div>
+                <div class="meta">
+                  <span class="nick">李先生</span>
+                  <span class="phone">139****5678</span>
+                </div>
+              </div>
+            </td>
+            <td>04-22 11:05</td>
+            <td><span class="rule-tag">rate_limit · trial_detail</span></td>
+            <td><span class="pill --pending">⏳ 处理中</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">LCK-7C1B22</code></td>
+            <td><a href="#" style="color:var(--accent);">查看 →</a></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar">Z</div>
+                <div class="meta">
+                  <span class="nick">张同学</span>
+                  <span class="phone">135****9988</span>
+                </div>
+              </div>
+            </td>
+            <td>04-21 22:47</td>
+            <td><span class="rule-tag">rate_limit · trial_detail</span></td>
+            <td><span class="pill --none">— 未申诉</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">LCK-44A918</code></td>
+            <td><a href="#" style="color:var(--accent);">查看 →</a></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar">C</div>
+                <div class="meta">
+                  <span class="nick">陈女士</span>
+                  <span class="phone">136****3344</span>
+                </div>
+              </div>
+            </td>
+            <td>04-20 16:20</td>
+            <td><span class="rule-tag">rate_limit · trial_detail</span></td>
+            <td><span class="pill --rejected">⊘ 已驳回</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">LCK-2D8E06</code></td>
+            <td><a href="#" style="color:var(--accent);">查看 →</a></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="avatar">H</div>
+                <div class="meta">
+                  <span class="nick">黄叔叔</span>
+                  <span class="phone">137****0010</span>
+                </div>
+              </div>
+            </td>
+            <td>04-19 09:13</td>
+            <td><span class="rule-tag">rate_limit · trial_detail</span></td>
+            <td><span class="pill --approved">✓ 已解锁</span></td>
+            <td><code style="font-family:var(--font-mono);font-size:12px;">LCK-018EF3</code></td>
+            <td><a href="#" style="color:var(--gray-500);">查看</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;color:var(--gray-600);font-size:var(--fs-sm);">
+        <span>共 12 条 · 每页 20</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn--ghost" disabled style="opacity:.5;">上一页</button>
+          <button class="btn btn--ghost" disabled style="opacity:.5;">下一页</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- 详情抽屉 -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-labelledby="drawerTitle">
+  <div class="drawer__header">
+    <div>
+      <div style="font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;color:var(--gray-600);text-transform:uppercase;">LCK-9F2A87 · 待处理</div>
+      <h3 id="drawerTitle">王阿姨 · 138****1234</h3>
+    </div>
+    <button onclick="closeDrawer()" style="background:transparent;border:0;font-size:24px;cursor:pointer;color:var(--gray-600);" aria-label="关闭">×</button>
+  </div>
+  <div class="drawer__body">
+
+    <div class="drawer__section">
+      <h4>基本信息</h4>
+      <div class="kv-grid">
+        <div class="kv"><strong>注册时间</strong><span>2025-11-12</span></div>
+        <div class="kv"><strong>最近登录</strong><span>2026-04-22 14:25</span></div>
+        <div class="kv"><strong>累计报名</strong><span>1 次（已成功）</span></div>
+        <div class="kv"><strong>累计发帖</strong><span>3 篇（均已通过）</span></div>
+        <div class="kv"><strong>封锁时间</strong><span>2026-04-22 14:32</span></div>
+        <div class="kv"><strong>封锁原因</strong><span>30 min 内查看 20 条试验</span></div>
+      </div>
+    </div>
+
+    <div class="drawer__section">
+      <h4>近 30 分钟行为日志（去重 20 条）</h4>
+      <div class="timeline">
+        <div class="timeline__item">
+          <div class="timeline__time">14:32:01</div>
+          <div class="timeline__desc">查看试验详情<span class="timeline__trial">HER2+ 早期乳腺癌靶向药研究 · /trials/her2-breast-2024</span></div>
+        </div>
+        <div class="timeline__item">
+          <div class="timeline__time">14:31:45</div>
+          <div class="timeline__desc">查看试验详情<span class="timeline__trial">转移性乳腺癌 PD-L1 免疫联合用药 · /trials/mbc-pdl1-2024</span></div>
+        </div>
+        <div class="timeline__item">
+          <div class="timeline__time">14:30:22</div>
+          <div class="timeline__desc">查看试验详情<span class="timeline__trial">HR+/HER2- 晚期乳腺癌 CDK4/6 · /trials/hrpos-cdk-2024</span></div>
+        </div>
+        <div class="timeline__item">
+          <div class="timeline__time">14:28:58</div>
+          <div class="timeline__desc">查看试验详情<span class="timeline__trial">三阴乳腺癌新辅助治疗 · /trials/tnbc-neoadj-2024</span></div>
+        </div>
+        <div class="timeline__item" style="border-left-color:var(--gray-300);">
+          <div class="timeline__time">…</div>
+          <div class="timeline__desc">（省略 16 条，均为乳腺癌相关试验）</div>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:var(--fs-xs);color:var(--gray-500);font-family:var(--font-mono);">
+        IP 哈希：<code>sha256:3f4a…b9e1</code> · UA：Chrome 122 / Android 13
+      </p>
+    </div>
+
+    <div class="drawer__section">
+      <h4>用户申诉内容</h4>
+      <div class="appeal-box">
+        <strong>提交时间 · 04-22 14:58</strong>
+        <p style="margin:0;">我是乳腺癌术后的家属，陪老人在做康复期的随访。最近在帮她对比全国多地的临床试验方案，希望找一个离北京近、二期以上的研究。不是机器也不是爬虫，希望能早点恢复访问，谢谢。</p>
+      </div>
+    </div>
+
+    <div class="drawer__section">
+      <h4>处理操作</h4>
+      <div class="action-tabs">
+        <button class="action-tab --active" onclick="switchTab('approve', this)">✓ 解锁并通过</button>
+        <button class="action-tab" onclick="switchTab('reject', this)">⊘ 驳回申诉</button>
+        <button class="action-tab" onclick="switchTab('contact', this)">📞 仅留言不放行</button>
+      </div>
+
+      <div class="action-panel" id="actionPanel">
+        <div class="template-row">
+          <button class="template-chip" onclick="useTemplate(this)">✓ 标准通过语</button>
+          <button class="template-chip" onclick="useTemplate(this)">感谢配合 · 已解锁</button>
+          <button class="template-chip" onclick="useTemplate(this)">核实属实 · 解除限制</button>
+        </div>
+        <textarea id="replyText">你好，经核实，你的账号浏览行为属于正常对比，现已解除限制。感谢你的配合，欢迎继续使用九泰临研。</textarea>
+        <p style="font-size:var(--fs-xs);color:var(--gray-500);">* 回复将发送至用户端（短信 + 站内），操作会写入审计日志。</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="drawer__footer">
+    <button class="btn btn--primary" style="flex:1;">✓ 确认解锁并发送回复</button>
+    <button class="btn btn--ghost" onclick="closeDrawer()">取消</button>
+  </div>
+</aside>
+
+<script>
+  function openDrawer() {
+    document.getElementById('drawer').classList.add('--open');
+    document.getElementById('drawerOverlay').classList.add('--open');
+  }
+  function closeDrawer() {
+    document.getElementById('drawer').classList.remove('--open');
+    document.getElementById('drawerOverlay').classList.remove('--open');
+  }
+  function switchTab(tab, el) {
+    document.querySelectorAll('.action-tab').forEach(t => t.classList.remove('--active'));
+    el.classList.add('--active');
+    const t = document.getElementById('replyText');
+    const footer = document.querySelector('.drawer__footer .btn--primary');
+    if (tab === 'approve') {
+      t.value = '你好，经核实，你的账号浏览行为属于正常对比，现已解除限制。感谢你的配合，欢迎继续使用九泰临研。';
+      footer.textContent = '✓ 确认解锁并发送回复';
+      footer.className = 'btn btn--primary';
+      footer.style.flex = '1';
+    } else if (tab === 'reject') {
+      t.value = '你好，经核实，你的账号在短时间内访问了大量内容，暂不符合正常浏览模式。如有补充信息，可再次拨打客服电话 400-888-8888。';
+      footer.textContent = '⊘ 确认驳回申诉（保持锁定）';
+      footer.className = 'btn btn--danger';
+      footer.style.flex = '1';
+    } else if (tab === 'contact') {
+      t.value = '你好，感谢你的说明。为了进一步核实，请先拨打客服电话 400-888-8888，验证身份后再为你解除限制。';
+      footer.textContent = '📩 发送留言（暂不解锁）';
+      footer.className = 'btn btn--ghost';
+      footer.style.flex = '1';
+    }
+  }
+  function useTemplate(el) {
+    document.getElementById('replyText').value = el.textContent.trim();
+  }
+</script>
+</body>
+</html>

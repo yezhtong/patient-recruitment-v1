@@ -1,0 +1,210 @@
+/* M8.1 · 申诉表单页 */
+
+.appeal-shell {
+  padding: 40px 0 80px;
+}
+
+.appeal-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.appeal-head {
+  margin-bottom: 32px;
+}
+
+.appeal-head__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.appeal-head h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(32px, 4vw, 44px);
+  line-height: 1.2;
+  margin: 0 0 12px;
+}
+
+.appeal-head p {
+  color: var(--gray-600);
+  font-size: var(--fs-md);
+  line-height: 1.7;
+}
+
+.appeal-panel {
+  background: var(--cream-0);
+  border: var(--border-strong);
+  border-radius: var(--r-lg);
+  padding: 32px;
+}
+
+@media (max-width: 480px) {
+  .appeal-panel { padding: 24px 20px; }
+}
+
+.appeal-field {
+  margin-bottom: 24px;
+}
+
+.appeal-field__label {
+  display: block;
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--ink-900);
+  margin-bottom: 8px;
+}
+.appeal-field__label .req { color: var(--accent); margin-left: 4px; }
+
+.appeal-field__hint {
+  font-size: var(--fs-sm);
+  color: var(--gray-500);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+.appeal-input {
+  width: 100%;
+  border: 1.5px solid var(--ink-200);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  color: var(--ink-900);
+  background: var(--cream-0);
+  line-height: 1.5;
+}
+.appeal-input:focus {
+  outline: none;
+  border-color: var(--ink-900);
+  box-shadow: 0 0 0 3px rgba(42, 113, 99, .15);
+}
+.appeal-input.--phone {
+  font-family: var(--font-mono);
+  letter-spacing: .2em;
+  font-size: 20px;
+  text-align: center;
+  max-width: 200px;
+}
+
+.appeal-textarea {
+  width: 100%;
+  border: 1.5px solid var(--ink-200);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-md);
+  color: var(--ink-900);
+  background: var(--cream-0);
+  line-height: 1.65;
+  min-height: 160px;
+  resize: vertical;
+}
+.appeal-textarea:focus {
+  outline: none;
+  border-color: var(--ink-900);
+  box-shadow: 0 0 0 3px rgba(42, 113, 99, .15);
+}
+
+.appeal-error {
+  margin-top: 10px;
+  background: var(--danger-50);
+  color: var(--danger-700);
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  border-left: 3px solid var(--danger-500);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+
+.appeal-agree {
+  background: var(--gray-50);
+  border-radius: var(--r-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.appeal-agree input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.appeal-agree label {
+  font-size: var(--fs-sm);
+  color: var(--gray-700);
+  line-height: 1.7;
+  cursor: pointer;
+}
+.appeal-agree label a { color: var(--accent); text-decoration: underline; }
+
+.appeal-submit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.appeal-submit .btn { min-height: 52px; justify-content: center; }
+
+.appeal-pending-box {
+  padding: 20px 24px;
+  background: var(--warning-50);
+  border-left: 3px solid var(--warning-500);
+  border-radius: var(--r-md);
+  color: var(--warning-700);
+  font-size: var(--fs-md);
+  line-height: 1.7;
+}
+
+/* submitted success */
+.appeal-success {
+  background: var(--cream-0);
+  border: var(--border-strong);
+  border-radius: var(--r-lg);
+  padding: 48px 32px;
+  text-align: center;
+}
+.appeal-success__icon {
+  width: 72px;
+  height: 72px;
+  background: var(--success-50);
+  color: var(--success-700);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  margin: 0 auto 20px;
+}
+.appeal-success h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--fs-3xl);
+  margin: 0 0 12px;
+}
+.appeal-success p {
+  color: var(--gray-600);
+  font-size: var(--fs-md);
+  line-height: 1.7;
+  max-width: 48ch;
+  margin: 0 auto 12px;
+}
+.appeal-success code {
+  font-family: var(--font-mono);
+  background: var(--ink-100);
+  padding: 4px 10px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-sm);
+}
+.appeal-success__cta {
+  margin-top: 28px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}

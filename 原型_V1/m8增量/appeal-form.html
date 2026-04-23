@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES
+- 核心目标：给被误封用户一条清晰、温和、5 分钟内能完成的申诉通路
+- 视觉权重分布：① 表单主体（最重）② 身份校验和字数计数（中等）③ 提交按钮（高对比度吸引点击）
+- 移动端适配：375px 下单列布局，label 置于 input 上方，textarea 最小高度 160px
+- 可访问性：所有 input 带 `aria-describedby` 指向错误文案；提交禁用态明确；错误 Toast 5 秒后自动消失但保留滚动定位
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>提交申诉 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  body { background: var(--cream-50); }
+
+  .topbar {
+    border-bottom: var(--border);
+    padding: 16px 0;
+  }
+  .topbar .container {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: var(--font-serif);
+    font-size: var(--fs-xl);
+    color: var(--ink-900);
+  }
+  .logo em { font-style: italic; color: var(--ink-700); }
+  .topbar a.back {
+    color: var(--gray-600);
+    text-decoration: none;
+    font-size: var(--fs-sm);
+  }
+
+  main { padding: 40px 0 80px; }
+
+  .wrap {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 0 var(--container-pad);
+  }
+
+  .page-head {
+    margin-bottom: 32px;
+  }
+  .page-head__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .page-head h1 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(32px, 4vw, 44px);
+    line-height: 1.2;
+    margin: 0 0 12px;
+  }
+  .page-head p {
+    color: var(--gray-600);
+    font-size: var(--fs-md);
+    line-height: 1.7;
+  }
+
+  .panel {
+    background: var(--cream-0);
+    border: var(--border-strong);
+    border-radius: var(--r-lg);
+    padding: 32px;
+  }
+  @media (max-width: 480px) {
+    .panel { padding: 24px 20px; }
+  }
+
+  .field {
+    margin-bottom: 24px;
+  }
+  .field__label {
+    display: block;
+    font-size: var(--fs-md);
+    font-weight: 600;
+    color: var(--ink-900);
+    margin-bottom: 8px;
+  }
+  .field__label .req { color: var(--accent); margin-left: 4px; }
+  .field__hint {
+    font-size: var(--fs-sm);
+    color: var(--gray-500);
+    line-height: 1.55;
+    margin-bottom: 10px;
+  }
+  .input, .textarea {
+    width: 100%;
+    border: 1.5px solid var(--ink-200);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    color: var(--ink-900);
+    background: var(--cream-0);
+    line-height: 1.5;
+    transition: border-color .15s;
+  }
+  .input:focus, .textarea:focus {
+    outline: none;
+    border-color: var(--ink-900);
+    box-shadow: 0 0 0 3px rgba(42, 113, 99, .15);
+  }
+  .input[aria-invalid="true"], .textarea[aria-invalid="true"] {
+    border-color: var(--danger-500);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, .1);
+  }
+  .input.--phone {
+    font-family: var(--font-mono);
+    letter-spacing: .2em;
+    font-size: 20px;
+    text-align: center;
+    max-width: 200px;
+  }
+  .textarea {
+    min-height: 160px;
+    resize: vertical;
+    line-height: 1.65;
+  }
+  .field__meta {
+    display: flex; justify-content: space-between;
+    margin-top: 6px;
+    font-size: var(--fs-xs);
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+  .field__error {
+    color: var(--danger-500);
+    font-size: var(--fs-sm);
+    margin-top: 6px;
+    display: none;
+  }
+  .field__error[data-show="true"] { display: block; }
+
+  .agree-block {
+    background: var(--gray-50);
+    border-radius: var(--r-md);
+    padding: 16px 20px;
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 28px;
+  }
+  .agree-block input[type="checkbox"] {
+    width: 20px; height: 20px; margin-top: 2px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .agree-block label {
+    font-size: var(--fs-sm);
+    color: var(--gray-700);
+    line-height: 1.7;
+    cursor: pointer;
+  }
+  .agree-block label a { color: var(--accent); text-decoration: underline; }
+
+  .submit-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 28px;
+    border-radius: var(--r-md);
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all .15s var(--ease-out);
+  }
+  .btn--primary { background: var(--accent); color: var(--cream-0); }
+  .btn--primary:hover { background: var(--accent-dark); }
+  .btn--primary:disabled {
+    background: var(--gray-200);
+    color: var(--gray-500);
+    cursor: not-allowed;
+  }
+  .btn--ghost {
+    background: transparent;
+    color: var(--ink-900);
+    border: 1.5px solid var(--ink-200);
+  }
+
+  /* 成功态（/appeal/submitted） */
+  .success-card {
+    background: var(--cream-0);
+    border: var(--border-strong);
+    border-radius: var(--r-lg);
+    padding: 48px 32px;
+    text-align: center;
+  }
+  .success-card__icon {
+    width: 72px; height: 72px;
+    background: var(--success-50);
+    color: var(--success-700);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 32px;
+    margin: 0 auto 20px;
+  }
+  .success-card h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-3xl);
+    margin: 0 0 12px;
+  }
+  .success-card p {
+    color: var(--gray-600);
+    font-size: var(--fs-md);
+    line-height: 1.7;
+    max-width: 48ch;
+    margin: 0 auto 12px;
+  }
+  .success-card code {
+    font-family: var(--font-mono);
+    background: var(--ink-100);
+    padding: 4px 10px;
+    border-radius: var(--r-sm);
+    font-size: var(--fs-sm);
+  }
+  .success-card .cta {
+    margin-top: 28px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* 状态预览 */
+  .preview-bar {
+    background: var(--ink-100);
+    padding: 10px 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-700);
+    border-bottom: var(--border);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .preview-bar strong { color: var(--ink-900); }
+  .preview-bar button {
+    background: var(--ink-900); color: var(--cream-50);
+    border: 0;
+    padding: 4px 10px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="preview-bar" role="note">
+  <strong>原型预览</strong>·
+  <button onclick="showView('form')">空表单（初始态）</button>
+  <button onclick="showView('error')">校验错误</button>
+  <button onclick="showView('submitting')">提交中</button>
+  <button onclick="showView('success')">已提交成功态</button>
+</div>
+
+<header class="topbar">
+  <div class="container">
+    <a href="account-lock.html" class="back">← 返回封锁页</a>
+    <a href="../public/home.html" class="logo">九泰<em>临研</em></a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <!-- 表单态 -->
+    <div id="formView">
+      <div class="page-head">
+        <div class="page-head__eyebrow">Submit Appeal</div>
+        <h1>说明你的情况</h1>
+        <p>填写完毕后，运营会在 24 小时内（工作日）人工核实。我们建议你尽量说清楚"当时在做什么、为什么要查这么多试验"。</p>
+      </div>
+
+      <form class="panel" id="appealForm" onsubmit="handleSubmit(event)">
+        <div class="field">
+          <label class="field__label" for="phoneSuffix">
+            手机号后 4 位 <span class="req">*</span>
+          </label>
+          <p class="field__hint">用来确认是你本人操作。我们不会短信发送验证码。</p>
+          <input class="input --phone" id="phoneSuffix" type="text" inputmode="numeric" maxlength="4"
+                 placeholder="1234" aria-describedby="phoneErr" aria-invalid="false" />
+          <p class="field__error" id="phoneErr">这 4 位和你注册时用的手机号对不上</p>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="appealText">
+            申诉理由 <span class="req">*</span>
+          </label>
+          <p class="field__hint">例如：我是多发性硬化患者，最近在对比全国多地的试验方案，希望了解更多信息。</p>
+          <textarea class="textarea" id="appealText" maxlength="200"
+                    placeholder="把你的情况说清楚（5-200 字）" aria-describedby="textMeta textErr" aria-invalid="false"
+                    oninput="updateCount()"></textarea>
+          <div class="field__meta" id="textMeta">
+            <span>至少 5 字</span>
+            <span><span id="countNum">0</span> / 200</span>
+          </div>
+          <p class="field__error" id="textErr">请至少说明 5 个字的情况</p>
+        </div>
+
+        <div class="agree-block">
+          <input type="checkbox" id="agreeBox" />
+          <label for="agreeBox">
+            我已阅读并同意 <a href="../public/terms.html">《用户服务协议》</a>
+            和 <a href="../public/privacy.html">《隐私政策》</a>，并确认以上陈述属实。
+          </label>
+        </div>
+
+        <div class="submit-row">
+          <button type="submit" class="btn btn--primary" id="submitBtn">
+            <span id="submitText">提交申诉</span>
+          </button>
+          <a href="account-lock.html" class="btn btn--ghost">取消，返回上一页</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- 成功态 -->
+    <div id="successView" hidden>
+      <div class="success-card">
+        <div class="success-card__icon" aria-hidden="true">✓</div>
+        <h2>申诉已提交</h2>
+        <p>我们已收到你的申诉，工单号 <code>LCK-9F2A87</code>。</p>
+        <p>运营会在 <strong>24 小时内</strong>（工作日）人工核实，处理结果会在你登录时直接展示，也可能通过短信提醒你。</p>
+        <p style="color:var(--gray-500);font-size:var(--fs-sm);">在处理期间，你可以继续浏览常见问题或拨打客服电话。</p>
+        <div class="cta">
+          <a href="../public/faq.html" class="btn btn--ghost">查看常见问题</a>
+          <a href="tel:4008888888" class="btn btn--primary">📞 拨打客服</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function updateCount() {
+    const ta = document.getElementById('appealText');
+    document.getElementById('countNum').textContent = ta.value.length;
+  }
+  function handleSubmit(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const txt = document.getElementById('submitText');
+    btn.disabled = true;
+    txt.textContent = '提交中…';
+    setTimeout(() => {
+      showView('success');
+    }, 800);
+  }
+  function showView(v) {
+    document.getElementById('formView').hidden = (v !== 'form' && v !== 'error' && v !== 'submitting');
+    document.getElementById('successView').hidden = (v !== 'success');
+    const btn = document.getElementById('submitBtn');
+    const txt = document.getElementById('submitText');
+    const phoneErr = document.getElementById('phoneErr');
+    const textErr = document.getElementById('textErr');
+    const phoneInput = document.getElementById('phoneSuffix');
+    const textArea = document.getElementById('appealText');
+
+    btn.disabled = false;
+    txt.textContent = '提交申诉';
+    phoneErr.dataset.show = 'false';
+    textErr.dataset.show = 'false';
+    phoneInput.setAttribute('aria-invalid', 'false');
+    textArea.setAttribute('aria-invalid', 'false');
+
+    if (v === 'error') {
+      phoneErr.dataset.show = 'true';
+      textErr.dataset.show = 'true';
+      phoneInput.setAttribute('aria-invalid', 'true');
+      textArea.setAttribute('aria-invalid', 'true');
+      phoneInput.value = '9999';
+      textArea.value = '啊';
+      updateCount();
+    }
+    if (v === 'submitting') {
+      btn.disabled = true;
+      txt.textContent = '提交中…';
+    }
+  }
+</script>
+</body>
+</html>

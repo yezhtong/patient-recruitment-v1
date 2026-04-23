@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES
+- 核心目标：把"封号"这件让人紧张的事翻译成"系统限制 + 有通道解决"，维护用户情绪
+- 视觉权重分布：① 暂停图标 + headline（最重）② 原因说明（次重，但不指责）③ 申诉 CTA（明确可行动）
+- 移动端适配：375px 下 Hero 上下堆叠，CTA 保持 ≥ 52px 便于单手点击
+- 可访问性：avoid-red-fg，红色仅用作装饰边框；文案语气中性；`button` + `aria-label` 兼容屏幕阅读器
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>账号已被暂停使用 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  body { background: var(--cream-50); min-height: 100vh; display: flex; flex-direction: column; }
+
+  .topbar {
+    border-bottom: var(--border);
+    padding: 16px 0;
+  }
+  .topbar .container {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    font-family: var(--font-serif);
+    font-size: var(--fs-xl);
+    letter-spacing: .02em;
+    color: var(--ink-900);
+  }
+  .logo em { font-style: italic; color: var(--ink-700); }
+
+  main { flex: 1; display: flex; align-items: center; padding: 48px 0; }
+
+  .card-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 var(--container-pad);
+    width: 100%;
+  }
+  .lock-card {
+    background: var(--cream-0);
+    border: 2px solid var(--ink-900);
+    border-radius: var(--r-2xl);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+  .lock-card__top {
+    padding: 40px 40px 32px;
+    background: var(--ink-900);
+    color: var(--cream-50);
+    position: relative;
+  }
+  .lock-card__icon {
+    width: 72px; height: 72px;
+    background: var(--warning-50);
+    color: var(--warning-700);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+  .lock-card__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 10px;
+  }
+  .lock-card__title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.2;
+    margin: 0;
+  }
+  .lock-card__body {
+    padding: 32px 40px;
+  }
+  .lock-card__reason {
+    background: var(--cream-100);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    border-radius: var(--r-md);
+    margin-bottom: 24px;
+  }
+  .lock-card__reason strong {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--gray-600);
+    font-family: var(--font-mono);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .lock-card__reason p {
+    font-size: var(--fs-md);
+    line-height: 1.65;
+    color: var(--ink-900);
+    margin: 0;
+  }
+
+  .lock-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 480px) {
+    .lock-meta { grid-template-columns: 1fr; }
+  }
+  .lock-meta__item {
+    background: var(--gray-50);
+    padding: 14px 16px;
+    border-radius: var(--r-md);
+  }
+  .lock-meta__item strong {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+  }
+  .lock-meta__item span {
+    font-size: var(--fs-md);
+    color: var(--ink-900);
+    font-weight: 500;
+  }
+
+  .lock-intro {
+    font-size: var(--fs-md);
+    line-height: 1.7;
+    color: var(--gray-700);
+    margin-bottom: 28px;
+  }
+
+  .lock-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 28px;
+    border-radius: var(--r-md);
+    font-family: var(--font-sans);
+    font-size: var(--fs-md);
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: transform .15s var(--ease-out), box-shadow .15s var(--ease-out);
+  }
+  .btn:focus-visible { box-shadow: var(--shadow-focus); outline: none; }
+  .btn--primary {
+    background: var(--accent);
+    color: var(--cream-0);
+  }
+  .btn--primary:hover { background: var(--accent-dark); }
+  .btn--ghost {
+    background: transparent;
+    color: var(--ink-900);
+    border: 1.5px solid var(--ink-200);
+  }
+  .btn--ghost:hover { border-color: var(--ink-900); }
+
+  .help-hint {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--gray-200);
+    font-size: var(--fs-sm);
+    color: var(--gray-500);
+    line-height: 1.65;
+  }
+  .help-hint a { color: var(--accent); text-decoration: underline; }
+
+  /* 已申诉状态态 */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: var(--r-pill);
+    font-size: var(--fs-xs);
+    font-family: var(--font-mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .status-pill.--pending { background: var(--warning-50); color: var(--warning-700); }
+  .status-pill.--approved { background: var(--success-50); color: var(--success-700); }
+  .status-pill.--rejected { background: var(--danger-50); color: var(--danger-700); }
+
+  /* 状态预览栏（仅原型，真环境删除） */
+  .preview-bar {
+    background: var(--ink-100);
+    padding: 10px 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-700);
+    border-bottom: var(--border);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .preview-bar strong { color: var(--ink-900); }
+  .preview-bar button {
+    background: var(--ink-900); color: var(--cream-50);
+    border: 0;
+    padding: 4px 10px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<!-- 仅原型：展示"4 态"切换工具 -->
+<div class="preview-bar" role="note">
+  <strong>原型预览</strong>·
+  状态：<span id="stateLabel">初次查看 · 未申诉</span>
+  <button onclick="toggleState('initial')">初次查看</button>
+  <button onclick="toggleState('pending')">申诉处理中</button>
+  <button onclick="toggleState('rejected')">申诉被驳回</button>
+</div>
+
+<header class="topbar">
+  <div class="container">
+    <a href="../public/home.html" class="logo">九泰<em>临研</em></a>
+  </div>
+</header>
+
+<main>
+  <div class="card-wrap">
+    <section class="lock-card">
+      <div class="lock-card__top">
+        <div class="lock-card__icon" aria-hidden="true">⏸</div>
+        <div class="lock-card__eyebrow">Account Paused</div>
+        <h1 class="lock-card__title">你的账号被暂停使用了</h1>
+      </div>
+
+      <div class="lock-card__body">
+
+        <div class="lock-card__reason">
+          <strong>暂停原因</strong>
+          <p id="reasonText">系统检测到你的账号在 30 分钟内查看了异常数量的试验详情。为了保证每位真实患者都能公平看到招募信息，我们暂时限制了你的账号。</p>
+        </div>
+
+        <div class="lock-meta">
+          <div class="lock-meta__item">
+            <strong>暂停时间</strong>
+            <span>2026-04-22 14:32</span>
+          </div>
+          <div class="lock-meta__item">
+            <strong>工单号</strong>
+            <span>LCK-9F2A87</span>
+          </div>
+        </div>
+
+        <p class="lock-intro" id="introText">
+          如果你是正常浏览被误伤，请点下方按钮说明情况。运营会在 <strong>24 小时内</strong>（工作日）人工核实并回复你。
+        </p>
+
+        <div id="statusArea" hidden>
+          <div style="margin-bottom:20px;">
+            <span class="status-pill --pending" id="statusPill">
+              <span aria-hidden="true">⏳</span> 申诉处理中
+            </span>
+            <p style="margin-top:12px;color:var(--gray-600);font-size:var(--fs-sm);line-height:1.6;" id="statusDetail">
+              你的申诉已于 2026-04-22 14:58 提交。我们会在 24 小时内（工作日）给你答复。
+            </p>
+          </div>
+        </div>
+
+        <div class="lock-actions" id="actionArea">
+          <a href="appeal-form.html" class="btn btn--primary" id="primaryBtn">
+            我要申诉 →
+          </a>
+          <a href="tel:4008888888" class="btn btn--ghost">
+            📞 拨打客服电话 400-888-8888
+          </a>
+        </div>
+
+        <div class="help-hint">
+          <strong style="color:var(--ink-900);">贴心提示：</strong>
+          暂停期间你仍可以<a href="../public/faq.html">查看常见问题</a>和<a href="../public/contact.html">联系客服</a>。未处理完毕前，其他页面暂时无法访问。
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+  function toggleState(state) {
+    const label = document.getElementById('stateLabel');
+    const statusArea = document.getElementById('statusArea');
+    const actionArea = document.getElementById('actionArea');
+    const statusPill = document.getElementById('statusPill');
+    const statusDetail = document.getElementById('statusDetail');
+    const introText = document.getElementById('introText');
+    const primaryBtn = document.getElementById('primaryBtn');
+
+    if (state === 'initial') {
+      label.textContent = '初次查看 · 未申诉';
+      statusArea.hidden = true;
+      actionArea.hidden = false;
+      introText.hidden = false;
+    } else if (state === 'pending') {
+      label.textContent = '申诉处理中';
+      statusArea.hidden = false;
+      actionArea.hidden = true;
+      introText.hidden = true;
+      statusPill.className = 'status-pill --pending';
+      statusPill.innerHTML = '<span aria-hidden="true">⏳</span> 申诉处理中';
+      statusDetail.textContent = '你的申诉已于 2026-04-22 14:58 提交。我们会在 24 小时内（工作日）给你答复。';
+    } else if (state === 'rejected') {
+      label.textContent = '申诉被驳回';
+      statusArea.hidden = false;
+      actionArea.hidden = false;
+      introText.hidden = true;
+      statusPill.className = 'status-pill --rejected';
+      statusPill.innerHTML = '<span aria-hidden="true">⊘</span> 申诉未通过';
+      statusDetail.textContent = '运营回复：经核实，你的账号在短时间内访问了大量内容，暂不符合正常浏览模式。如有补充信息，可拨打客服电话。';
+      primaryBtn.textContent = '拨打客服电话';
+      primaryBtn.href = 'tel:4008888888';
+    }
+  }
+</script>
+</body>
+</html>

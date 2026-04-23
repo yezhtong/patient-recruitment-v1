@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES
+- 核心目标：在 M5 已有审核队列上增强 AI 预判显示，把"低置信度"顶到最前面，避免运营逐条点
+- 视觉权重分布：① AI 判断列（引导目光）② 置信度滑块/数值（决定是否相信）③ 一键认同/覆盖操作
+- 移动端适配：后台页主桌面端；< 1100px 关键列保留，次要列隐藏
+- 可访问性：置信度带数字 + 进度条双通道（不仅依靠颜色）；覆盖理由必填
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>社区审核队列 v2 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+<style>
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--ink-200);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 900px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+  .stats-bar__cell { background: var(--cream-0); padding: 14px 16px; }
+  .stats-bar__cell .label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; color: var(--gray-600); text-transform: uppercase; }
+  .stats-bar__cell .value { font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--ink-900); }
+  .stats-bar__cell .value.--warn { color: var(--warning-700); }
+
+  .filter-bar {
+    display: flex; gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .chip {
+    padding: 6px 14px;
+    border-radius: var(--r-pill);
+    background: var(--cream-0);
+    border: 1px solid var(--ink-200);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+  }
+  .chip.--active { background: var(--ink-900); color: var(--cream-50); border-color: var(--ink-900); }
+
+  .conf-slider {
+    display: flex; gap: 10px; align-items: center;
+    background: var(--cream-0); padding: 8px 14px;
+    border-radius: var(--r-pill); border: 1px solid var(--ink-200);
+    font-size: 13px; color: var(--gray-700);
+    font-family: var(--font-mono);
+  }
+  .conf-slider input { accent-color: var(--accent); }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--cream-0);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+  }
+  .table th, .table td {
+    padding: 12px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--ink-100);
+    font-size: 13px;
+    vertical-align: top;
+  }
+  .table th {
+    background: var(--cream-100);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    font-weight: 600;
+  }
+
+  .post-preview .title {
+    font-weight: 600;
+    color: var(--ink-900);
+    margin-bottom: 4px;
+  }
+  .post-preview .excerpt {
+    color: var(--gray-600);
+    font-size: 12px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 420px;
+  }
+  .post-preview .author {
+    font-size: 11px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+    margin-top: 4px;
+  }
+
+  .ai-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: var(--r-pill);
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .ai-badge.--pass { background: var(--success-50); color: var(--success-700); }
+  .ai-badge.--reject { background: var(--danger-50); color: var(--danger-700); }
+  .ai-badge.--review { background: var(--warning-50); color: var(--warning-700); }
+
+  .conf-bar {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .conf-bar__track {
+    flex: 1; height: 6px;
+    background: var(--ink-100);
+    border-radius: var(--r-pill);
+    overflow: hidden;
+    min-width: 80px;
+  }
+  .conf-bar__fill {
+    height: 100%; border-radius: var(--r-pill);
+    background: var(--success-500);
+  }
+  .conf-bar__fill.--low { background: var(--warning-500); }
+  .conf-bar__fill.--vlow { background: var(--danger-500); }
+  .conf-bar__num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-900);
+    font-weight: 600;
+    min-width: 44px;
+  }
+
+  .ai-reason {
+    font-size: 12px;
+    color: var(--gray-600);
+    font-style: italic;
+    line-height: 1.5;
+    max-width: 280px;
+  }
+
+  .action-cluster {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .btn-mini {
+    padding: 5px 10px;
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    cursor: pointer;
+    border: 0;
+    font-weight: 500;
+  }
+  .btn-mini.--agree {
+    background: var(--ink-900); color: var(--lime);
+  }
+  .btn-mini.--override {
+    background: var(--accent-soft); color: var(--accent-dark);
+    border: 1px solid var(--accent);
+  }
+  .btn-mini.--view {
+    background: transparent; color: var(--gray-600);
+    border: 1px solid var(--ink-200);
+  }
+
+  .override-indicator {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: var(--r-sm);
+    background: var(--accent); color: white;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+</style>
+</head>
+<body class="admin">
+<div class="admin-shell">
+  <aside class="admin-side" aria-label="后台主导航">
+    <div class="admin-side__brand"><div class="brand__logo">JT</div><span translate="no">临研运营台</span></div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="../admin/dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="../admin/leads.html"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="admin-lock-management.html"><span class="admin-nav__icon">⊘</span>封锁管理</a>
+      <div class="admin-nav__group">内容管理</div>
+      <a href="../admin/trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="admin-form-manager.html"><span class="admin-nav__icon">▤</span>表单管理器</a>
+      <a href="admin-media-library.html"><span class="admin-nav__icon">▦</span>图片素材</a>
+      <div class="admin-nav__group">社区</div>
+      <a href="#" aria-current="page" style="background:var(--ink-100);color:var(--ink-900);font-weight:600;"><span class="admin-nav__icon">◈</span>审核队列 v2 <span style="background:var(--warning-500);color:white;padding:1px 6px;border-radius:10px;font-size:10px;margin-left:4px;">7</span></a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb"><strong>社区审核队列（AI 增强版）</strong></div>
+      <div class="admin-topbar__right"><div class="admin-avatar">Z</div></div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="page-head">
+        <div>
+          <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:.15em;color:var(--ink-700);text-transform:uppercase;">⬡ Moderation · AI Assist</span>
+          <h2 style="margin-top:14px;">社区审核队列</h2>
+          <p class="page-head__sub">AI 先判断 → 你复核。建议优先处理**低置信度**条目。</p>
+        </div>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stats-bar__cell"><div class="label">待审 · 今日</div><div class="value --warn">7</div></div>
+        <div class="stats-bar__cell"><div class="label">AI 秒过率 · 7d</div><div class="value">82%</div></div>
+        <div class="stats-bar__cell"><div class="label">人工覆盖率 · 7d</div><div class="value">12%</div></div>
+        <div class="stats-bar__cell"><div class="label">抽检误杀率</div><div class="value">6.2%</div></div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="chip --active">全部 <span style="opacity:.7;">7</span></button>
+        <button class="chip">低置信度 <span style="opacity:.7;">3</span></button>
+        <button class="chip">AI 建议人工 <span style="opacity:.7;">2</span></button>
+        <button class="chip">已被覆盖 <span style="opacity:.7;">1</span></button>
+        <div class="conf-slider">
+          置信度 ≥ <input type="range" min="0" max="100" value="50" style="width:100px;" /> 50%
+        </div>
+        <div style="margin-left:auto;">
+          <button class="chip" style="background:var(--ink-900);color:white;border-color:var(--ink-900);">⚡ 批量认同 AI（2）</button>
+        </div>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>帖子预览</th>
+            <th>AI 判断</th>
+            <th>置信度</th>
+            <th>AI 理由</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- 低置信度 review_needed -->
+          <tr>
+            <td>
+              <div class="post-preview">
+                <div class="title">喝中药调理了 3 个月，血糖真的下来了</div>
+                <div class="excerpt">我之前空腹 9.2，吃了朋友推荐的中药方子 3 个月，现在 6.8，比降糖药还管用。推荐给各位糖友…</div>
+                <div class="author">匿名 · 今天 14:08 · 来自「糖尿病」</div>
+              </div>
+            </td>
+            <td><span class="ai-badge --review">? 建议人工</span></td>
+            <td>
+              <div class="conf-bar">
+                <div class="conf-bar__track"><div class="conf-bar__fill --vlow" style="width:42%;"></div></div>
+                <span class="conf-bar__num">0.42</span>
+              </div>
+            </td>
+            <td><div class="ai-reason">提及中药疗效并推荐他人，可能属于无资质医疗建议，但语境偏向个人经验，需人工判断。</div></td>
+            <td>
+              <div class="action-cluster">
+                <button class="btn-mini --override">⊘ 拒绝</button>
+                <button class="btn-mini --agree">✓ 放行</button>
+                <button class="btn-mini --view">详情</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 高置信度 reject -->
+          <tr>
+            <td>
+              <div class="post-preview">
+                <div class="title">【招募】全网最便宜的 CAR-T 治疗，只要 XX 万</div>
+                <div class="excerpt">本人代理国外某机构 CAR-T 项目，正规合作医院。有需要的朋友加微信 xxx，额度有限先到先得…</div>
+                <div class="author">新注册用户 · 13:52 · 来自「乳腺癌」</div>
+              </div>
+            </td>
+            <td><span class="ai-badge --reject">⊘ 拒绝</span></td>
+            <td>
+              <div class="conf-bar">
+                <div class="conf-bar__track"><div class="conf-bar__fill" style="width:97%;"></div></div>
+                <span class="conf-bar__num">0.97</span>
+              </div>
+            </td>
+            <td><div class="ai-reason">典型医疗推销内容：留微信、强调价格、引流个人联系方式，命中多条推销特征。</div></td>
+            <td>
+              <div class="action-cluster">
+                <button class="btn-mini --agree">✓ 认同拒绝</button>
+                <button class="btn-mini --override">覆盖放行</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 中等置信度 pass -->
+          <tr>
+            <td>
+              <div class="post-preview">
+                <div class="title">想问问大家术后脱发严重怎么办</div>
+                <div class="excerpt">我妈乳腺癌化疗后头发掉得厉害，医生说这是正常反应。但她情绪特别低落，有没有什么能帮助的…</div>
+                <div class="author">王阿姨的女儿 · 13:30 · 来自「乳腺癌」</div>
+              </div>
+            </td>
+            <td><span class="ai-badge --pass">✓ 通过</span></td>
+            <td>
+              <div class="conf-bar">
+                <div class="conf-bar__track"><div class="conf-bar__fill --low" style="width:71%;"></div></div>
+                <span class="conf-bar__num">0.71</span>
+              </div>
+            </td>
+            <td><div class="ai-reason">正常的病友互助分享和求助，无推销/诊断建议。置信度略低，建议二次确认。</div></td>
+            <td>
+              <div class="action-cluster">
+                <button class="btn-mini --agree">✓ 认同通过</button>
+                <button class="btn-mini --override">覆盖拒绝</button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- 已覆盖的 -->
+          <tr style="background:var(--cream-100);">
+            <td>
+              <div class="post-preview">
+                <div class="title">分享一下我的靶向药用药笔记</div>
+                <div class="excerpt">把过去半年吃赫赛汀的副作用、剂量调整都记了下来，希望对同路人有帮助…</div>
+                <div class="author">陈女士 · 11:04 · 来自「乳腺癌」 <span class="override-indicator">已覆盖</span></div>
+              </div>
+            </td>
+            <td><span class="ai-badge --reject">⊘ 拒绝</span></td>
+            <td>
+              <div class="conf-bar">
+                <div class="conf-bar__track"><div class="conf-bar__fill" style="width:88%;"></div></div>
+                <span class="conf-bar__num">0.88</span>
+              </div>
+            </td>
+            <td>
+              <div class="ai-reason" style="text-decoration:line-through;color:var(--gray-400);">疑似处方药剂量细节分享，可能违反医疗规范。</div>
+              <div style="margin-top:4px;font-size:11px;color:var(--success-700);font-weight:600;">
+                ✓ 运营覆盖为通过：用户只是记录个人就医经历，未推荐他人改药，属于合理分享。
+              </div>
+            </td>
+            <td>
+              <span style="color:var(--success-700);font-size:12px;">已放行</span>
+            </td>
+          </tr>
+
+          <!-- 高置信度 pass -->
+          <tr>
+            <td>
+              <div class="post-preview">
+                <div class="title">北京有哪家医院的心内科夜间门诊？</div>
+                <div class="excerpt">我爸最近血压忽高忽低，白天要工作没时间陪他去，想问问大家有没有夜间也能看的心内科…</div>
+                <div class="author">匿名 · 10:20 · 来自「高血压」</div>
+              </div>
+            </td>
+            <td><span class="ai-badge --pass">✓ 通过</span></td>
+            <td>
+              <div class="conf-bar">
+                <div class="conf-bar__track"><div class="conf-bar__fill" style="width:93%;"></div></div>
+                <span class="conf-bar__num">0.93</span>
+              </div>
+            </td>
+            <td><div class="ai-reason">普通求助问题，无任何敏感或推销内容。</div></td>
+            <td>
+              <div class="action-cluster">
+                <button class="btn-mini --agree">✓ 认同通过</button>
+                <button class="btn-mini --override">覆盖拒绝</button>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <div style="margin-top:20px;padding:16px 20px;background:var(--info-50);border-left:3px solid var(--info-500);border-radius:var(--r-md);font-size:13px;color:var(--info-700);line-height:1.65;">
+        <strong>抽检提示：</strong>本周累计抽检 20 条 rejected 条目，其中误杀 1 条（5%），在 &lt; 10% 的目标范围内。
+        <a href="#" style="color:var(--info-500);margin-left:8px;">查看抽检报告 →</a>
+      </div>
+
+    </main>
+  </div>
+</div>
+</body>
+</html>

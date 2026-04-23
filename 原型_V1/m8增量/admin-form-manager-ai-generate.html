@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES
+- 核心目标：运营贴广告原文 → AI 抽字段 → 预览 → 二次编辑入口，把 AI 生成的不确定性视觉化（成本/时长/准确率提示）
+- 视觉权重分布：① 广告原文输入（主要动作）② loading 可视状态（约束耐心）③ 结果字段预览（便于人工复核）
+- 移动端适配：后台页主桌面端；< 960px 上下堆叠
+- 可访问性：loading 态 `aria-busy="true"`；模态遮罩 `role="dialog" aria-modal="true"`；字段预览用 `<ol>` 保留语义
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI 生成预筛表单 — 九泰临研运营后台</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+<style>
+  body.admin { background: rgba(13,12,10,.6); }
+  .modal-shell {
+    min-height: 100vh;
+    display: grid; place-items: center;
+    padding: 40px 20px;
+  }
+  .modal {
+    background: var(--cream-0);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    width: min(900px, 100%);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+  }
+  .modal__header {
+    padding: 20px 28px;
+    border-bottom: var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal__header h2 {
+    font-family: var(--font-serif); font-weight: 400;
+    font-size: var(--fs-2xl); margin: 0;
+  }
+  .modal__header .subtitle {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: .12em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .modal__header button.close {
+    background: transparent; border: 0;
+    font-size: 24px; cursor: pointer;
+    color: var(--gray-600);
+  }
+  .modal__body {
+    padding: 24px 28px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .modal__footer {
+    padding: 16px 28px;
+    border-top: var(--border);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 20px; height: 44px;
+    border-radius: var(--r-md);
+    font-size: var(--fs-sm); font-weight: 600;
+    cursor: pointer; border: 0;
+    font-family: var(--font-sans);
+  }
+  .btn--primary { background: var(--accent); color: white; }
+  .btn--primary:hover { background: var(--accent-dark); }
+  .btn--primary:disabled { background: var(--gray-300); color: var(--gray-600); cursor: not-allowed; }
+  .btn--ghost { background: transparent; border: 1px solid var(--ink-200); color: var(--ink-900); }
+
+  .notice {
+    background: linear-gradient(135deg, var(--accent-soft), var(--lime-soft));
+    border-radius: var(--r-md);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--ink-900);
+    line-height: 1.65;
+  }
+  .notice strong { color: var(--accent-dark); }
+
+  .field-label {
+    display: block;
+    font-size: var(--fs-md);
+    font-weight: 600;
+    color: var(--ink-900);
+    margin-bottom: 6px;
+  }
+  .field-hint {
+    font-size: 13px;
+    color: var(--gray-600);
+    margin-bottom: 10px;
+  }
+
+  textarea.ad-input {
+    width: 100%;
+    min-height: 220px;
+    border: 1.5px solid var(--ink-200);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    line-height: 1.65;
+    resize: vertical;
+  }
+  textarea.ad-input:focus { outline: none; border-color: var(--ink-900); }
+  .textarea-meta {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--gray-500); font-family: var(--font-mono);
+    margin-top: 6px;
+  }
+
+  /* Loading view */
+  .loading-view {
+    padding: 60px 20px;
+    text-align: center;
+  }
+  .loading-orb {
+    width: 80px; height: 80px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--accent), var(--lime), var(--ink-500), var(--accent));
+    animation: spin 2s linear infinite;
+    position: relative;
+  }
+  .loading-orb::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    background: var(--cream-0);
+    border-radius: 50%;
+  }
+  .loading-orb span {
+    position: absolute;
+    inset: 0;
+    display: grid; place-items: center;
+    font-size: 28px;
+    z-index: 1;
+    animation: spinBack 2s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spinBack { to { transform: rotate(-360deg); } }
+  .loading-view h3 {
+    font-family: var(--font-serif); font-weight: 400;
+    font-size: var(--fs-2xl); margin-bottom: 10px;
+  }
+  .loading-view p { color: var(--gray-600); font-size: var(--fs-md); line-height: 1.65; max-width: 44ch; margin: 0 auto; }
+  .loading-view .progress {
+    margin-top: 24px;
+    max-width: 360px;
+    margin-left: auto; margin-right: auto;
+    background: var(--ink-100);
+    border-radius: var(--r-pill);
+    height: 4px;
+    overflow: hidden;
+  }
+  .loading-view .progress__bar {
+    width: 70%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+    animation: progress 2s ease-in-out infinite;
+  }
+  @keyframes progress {
+    0% { width: 20%; } 50% { width: 85%; } 100% { width: 20%; }
+  }
+  .loading-view .meta-stats {
+    margin-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--gray-500);
+    display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+  }
+
+  /* Result view */
+  .result-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--ink-200);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 720px) { .result-summary { grid-template-columns: repeat(2, 1fr); } }
+  .result-summary__cell { background: var(--cream-0); padding: 14px 16px; }
+  .result-summary__cell .label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; color: var(--gray-600); text-transform: uppercase; }
+  .result-summary__cell .value { font-family: var(--font-mono); font-size: 24px; font-weight: 700; color: var(--ink-900); margin-top: 2px; }
+
+  .fields-list {
+    list-style: none;
+    padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .fields-list li {
+    background: var(--cream-50);
+    border-left: 3px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: var(--r-sm);
+    font-size: var(--fs-sm);
+  }
+  .fields-list li .top {
+    display: flex; gap: 10px; align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .fields-list li .num {
+    font-family: var(--font-mono); font-weight: 700;
+    color: var(--accent);
+  }
+  .fields-list li .label { font-weight: 600; color: var(--ink-900); font-size: var(--fs-md); }
+  .fields-list li .tag {
+    background: var(--ink-100); color: var(--ink-700);
+    padding: 1px 8px; border-radius: var(--r-sm);
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .fields-list li .tag.--req { background: var(--accent-soft); color: var(--accent-dark); }
+  .fields-list li .bottom {
+    font-size: 12px; color: var(--gray-600);
+    font-family: var(--font-mono);
+  }
+  .fields-list li .options {
+    margin-top: 6px;
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .fields-list li .options span {
+    background: var(--cream-0);
+    border: 1px solid var(--ink-100);
+    padding: 2px 10px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+  }
+
+  .preview-bar {
+    background: var(--ink-100);
+    padding: 10px 20px;
+    font-family: var(--font-mono);
+    font-size: 11px; color: var(--ink-700);
+    display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  }
+  .preview-bar strong { color: var(--ink-900); }
+  .preview-bar button {
+    background: var(--ink-900); color: var(--cream-50);
+    border: 0; padding: 4px 10px;
+    border-radius: var(--r-sm);
+    font-size: 10px; cursor: pointer;
+  }
+</style>
+</head>
+<body class="admin">
+
+<div class="preview-bar" role="note">
+  <strong>原型预览</strong>·
+  <button onclick="showView('input')">①贴广告</button>
+  <button onclick="showView('loading')">②AI 处理中</button>
+  <button onclick="showView('result')">③结果预览</button>
+  <button onclick="showView('error')">④错误态</button>
+</div>
+
+<div class="modal-shell" style="padding-top:60px;">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+
+    <header class="modal__header">
+      <div>
+        <div class="subtitle">AI Generation · DeepSeek</div>
+        <h2 id="modalTitle">🪄 由招募广告生成预筛表单</h2>
+      </div>
+      <button class="close" aria-label="关闭">×</button>
+    </header>
+
+    <div class="modal__body" id="modalBody">
+
+      <!-- 输入态 -->
+      <div id="inputView">
+        <div class="notice">
+          <strong>AI 结果仅供参考。</strong>
+          所有字段必须经过运营人工复核再发布。**AI 看不到入排标准之外的业务规则**，请重点检查题目的完整性和表述。
+        </div>
+
+        <label class="field-label" for="adText">贴入招募广告全文</label>
+        <p class="field-hint">支持纯文本（≤ 4000 字）。DeepSeek 会从中抽取与入排标准直接相关的问题。</p>
+        <textarea class="ad-input" id="adText" maxlength="4000" oninput="updateAdMeta()">一、项目名称：HER2 阳性早期乳腺癌术后靶向药 ABC-102 III 期临床研究
+
+二、招募对象：
+1. 年龄 18-75 岁的女性
+2. 病理学确诊 HER2 阳性（IHC 3+ 或 FISH 扩增阳性）
+3. 已完成根治性手术（距手术 < 18 周）
+4. 心功能正常（LVEF ≥ 55%）
+5. 能口服药物并配合随访
+
+三、排除标准：
+1. IV 期或局部晚期不可切除
+2. 既往使用过 HER2 靶向治疗
+3. 严重心血管疾病
+4. 妊娠或哺乳期
+5. 已知对试验药物过敏
+
+……
+        </textarea>
+        <div class="textarea-meta">
+          <span>建议贴入完整招募广告（含入排标准）</span>
+          <span><span id="adCount">398</span> / 4000</span>
+        </div>
+      </div>
+
+      <!-- Loading 态 -->
+      <div id="loadingView" hidden aria-busy="true">
+        <div class="loading-view">
+          <div class="loading-orb" aria-hidden="true"><span>🪄</span></div>
+          <h3>AI 正在读广告…</h3>
+          <p>DeepSeek 在识别入排标准、抽取预筛问题并转成字段。通常需要 <strong>20-30 秒</strong>。</p>
+          <div class="progress" aria-hidden="true"><div class="progress__bar"></div></div>
+          <div class="meta-stats">
+            <span>📄 已读入 398 字</span>
+            <span>⏱ 已用时 14.3s</span>
+            <span>🔌 DeepSeek Chat</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 结果态 -->
+      <div id="resultView" hidden>
+        <div class="notice">
+          ✓ <strong>AI 成功抽取出 6 个字段。</strong>
+          请点击下方每一项复核，确认无误后再一键导入到表单管理器进行二次编辑。
+        </div>
+
+        <div class="result-summary">
+          <div class="result-summary__cell"><div class="label">抽取字段</div><div class="value">6</div></div>
+          <div class="result-summary__cell"><div class="label">耗时</div><div class="value">22.4s</div></div>
+          <div class="result-summary__cell"><div class="label">Token 用量</div><div class="value">1,284</div></div>
+          <div class="result-summary__cell"><div class="label">估算费用</div><div class="value">¥0.012</div></div>
+        </div>
+
+        <ol class="fields-list">
+          <li>
+            <div class="top">
+              <span class="num">1.</span>
+              <span class="label">你的年龄</span>
+              <span class="tag">number</span>
+              <span class="tag --req">必填</span>
+            </div>
+            <div class="bottom">key: <code>age</code> · 范围 18-75</div>
+          </li>
+          <li>
+            <div class="top">
+              <span class="num">2.</span>
+              <span class="label">你的生理性别</span>
+              <span class="tag">single</span>
+              <span class="tag --req">必填</span>
+            </div>
+            <div class="bottom">key: <code>gender</code></div>
+            <div class="options"><span>女</span><span>男</span></div>
+          </li>
+          <li>
+            <div class="top">
+              <span class="num">3.</span>
+              <span class="label">是否已确诊 HER2 阳性</span>
+              <span class="tag">single</span>
+              <span class="tag --req">必填</span>
+            </div>
+            <div class="bottom">key: <code>her2_confirmed</code></div>
+            <div class="options"><span>是</span><span>否</span><span>不清楚</span></div>
+          </li>
+          <li>
+            <div class="top">
+              <span class="num">4.</span>
+              <span class="label">是否已完成根治性手术</span>
+              <span class="tag">single</span>
+              <span class="tag --req">必填</span>
+            </div>
+            <div class="bottom">key: <code>surgery_done</code></div>
+          </li>
+          <li>
+            <div class="top">
+              <span class="num">5.</span>
+              <span class="label">手术距今时间</span>
+              <span class="tag">single</span>
+            </div>
+            <div class="bottom">key: <code>surgery_since</code> · 跳题依赖 surgery_done=是</div>
+            <div class="options"><span>&lt; 4 周</span><span>4-12 周</span><span>12-18 周</span><span>&gt; 18 周</span></div>
+          </li>
+          <li>
+            <div class="top">
+              <span class="num">6.</span>
+              <span class="label">既往过敏史</span>
+              <span class="tag">multi</span>
+            </div>
+            <div class="bottom">key: <code>allergy_history</code></div>
+            <div class="options"><span>药物过敏</span><span>食物过敏</span><span>花粉 / 尘螨</span><span>无</span></div>
+          </li>
+        </ol>
+      </div>
+
+      <!-- 错误态 -->
+      <div id="errorView" hidden>
+        <div style="padding:60px 20px;text-align:center;">
+          <div style="font-size:48px;margin-bottom:16px;">⚠</div>
+          <h3 style="font-family:var(--font-serif);font-weight:400;font-size:var(--fs-2xl);margin-bottom:10px;">AI 响应格式异常</h3>
+          <p style="color:var(--gray-600);font-size:var(--fs-md);line-height:1.7;max-width:48ch;margin:0 auto 16px;">
+            DeepSeek 返回的内容无法解析为字段结构。你可以重新尝试，或者手动创建字段。
+          </p>
+          <p style="font-family:var(--font-mono);font-size:11px;color:var(--gray-500);">
+            Error: LLM_RESPONSE_PARSE_FAILED · trace_id: llm-9f2a87
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="modal__footer" id="modalFooter">
+      <button class="btn btn--ghost">取消</button>
+      <button class="btn btn--primary">🪄 开始生成</button>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+  function updateAdMeta() {
+    document.getElementById('adCount').textContent = document.getElementById('adText').value.length;
+  }
+  function showView(v) {
+    ['input', 'loading', 'result', 'error'].forEach(k => {
+      document.getElementById(k + 'View').hidden = (k !== v);
+    });
+    const footer = document.getElementById('modalFooter');
+    if (v === 'input') {
+      footer.innerHTML = '<button class="btn btn--ghost">取消</button><button class="btn btn--primary">🪄 开始生成</button>';
+    } else if (v === 'loading') {
+      footer.innerHTML = '<button class="btn btn--ghost">取消生成</button><button class="btn btn--primary" disabled>生成中…</button>';
+    } else if (v === 'result') {
+      footer.innerHTML = '<button class="btn btn--ghost">重新生成</button><button class="btn btn--primary">✓ 导入到表单管理器</button>';
+    } else if (v === 'error') {
+      footer.innerHTML = '<button class="btn btn--ghost">关闭</button><button class="btn btn--primary">↻ 重新尝试</button>';
+    }
+  }
+</script>
+</body>
+</html>

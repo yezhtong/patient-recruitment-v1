@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES
+- 核心目标：让运营把一条招募广告原文转成可发布的预筛表单，AI 生成初版 + 可视化拖拽编辑 + 二次复核
+- 视觉权重分布：① 顶部 AI 生成按钮（行动起点）② 中央字段列表（主编辑区）③ 右侧字段详情面板（调整参数）
+- 移动端适配：本页后台主要桌面端用，< 1100px 降级为"上下堆叠"——字段列表和编辑面板串联
+- 可访问性：拖拽手柄带 `aria-grabbed`；字段 label 与 input 用 `for/id`；必填用 `<abbr title="必填">*</abbr>`
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#fdfaf3" />
+<title>表单管理器 — HER2+ 早期乳腺癌靶向药研究</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<link rel="stylesheet" href="../assets/admin.css" />
+<style>
+  .fm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: var(--border-strong);
+    flex-wrap: wrap;
+  }
+  .fm-header__title h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-3xl);
+    margin: 4px 0 6px;
+    line-height: 1.2;
+  }
+  .fm-header__title .meta {
+    font-size: var(--fs-sm);
+    color: var(--gray-600);
+  }
+  .fm-header__title .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .15em;
+    color: var(--ink-700);
+    text-transform: uppercase;
+  }
+  .fm-header__actions {
+    display: flex; gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 18px;
+    height: 44px;
+    border-radius: var(--r-md);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    border: 0;
+    font-family: var(--font-sans);
+    transition: all .15s;
+  }
+  .btn--primary { background: var(--ink-900); color: var(--cream-50); }
+  .btn--primary:hover { background: var(--ink-800); }
+  .btn--accent { background: var(--accent); color: var(--cream-0); }
+  .btn--accent:hover { background: var(--accent-dark); }
+  .btn--ghost { background: transparent; border: 1px solid var(--ink-200); color: var(--ink-900); }
+  .btn--sm { height: 34px; padding: 0 12px; font-size: 13px; }
+
+  .status-pill {
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .status-pill.--draft { background: var(--warning-50); color: var(--warning-700); }
+  .status-pill.--published { background: var(--success-50); color: var(--success-700); }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    min-height: 640px;
+  }
+  @media (max-width: 1100px) {
+    .workspace { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .panel__header {
+    padding: 14px 18px;
+    background: var(--cream-100);
+    border-bottom: var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .panel__header h3 {
+    font-size: var(--fs-md);
+    font-weight: 600;
+    margin: 0;
+    color: var(--ink-900);
+  }
+  .panel__body { padding: 16px; }
+
+  /* 字段列表 */
+  .field-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .field-item {
+    background: var(--cream-50);
+    border: 1.5px solid transparent;
+    border-radius: var(--r-md);
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    cursor: grab;
+    transition: all .15s;
+  }
+  .field-item:hover {
+    border-color: var(--ink-200);
+    background: var(--cream-0);
+  }
+  .field-item.--active {
+    border-color: var(--ink-900);
+    background: var(--cream-0);
+    box-shadow: var(--shadow-xs);
+  }
+  .field-item.--ai-generated {
+    border-left: 3px solid var(--accent);
+  }
+  .field-item__drag {
+    color: var(--gray-400);
+    font-size: 16px;
+    line-height: 1;
+    cursor: grab;
+  }
+  .field-item__main .label {
+    font-size: var(--fs-sm);
+    color: var(--ink-900);
+    font-weight: 500;
+    line-height: 1.4;
+    margin-bottom: 2px;
+  }
+  .field-item__main .meta {
+    display: flex; gap: 8px; align-items: center;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--gray-500);
+  }
+  .field-item__type {
+    background: var(--ink-100);
+    color: var(--ink-700);
+    padding: 1px 6px;
+    border-radius: var(--r-sm);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .field-item__req {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .field-item__remove {
+    opacity: 0;
+    background: transparent;
+    border: 0;
+    font-size: 16px;
+    color: var(--gray-500);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--r-sm);
+    transition: opacity .15s;
+  }
+  .field-item:hover .field-item__remove { opacity: 1; }
+  .field-item__remove:hover { background: var(--danger-50); color: var(--danger-500); }
+
+  .add-field-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1.5px dashed var(--ink-200);
+    border-radius: var(--r-md);
+    color: var(--gray-600);
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .add-field-btn:hover {
+    border-color: var(--ink-900);
+    color: var(--ink-900);
+    background: var(--cream-100);
+  }
+
+  /* 右侧编辑面板 */
+  .editor-body {
+    padding: 24px;
+  }
+  .editor-title {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-2xl);
+    margin: 0 0 6px;
+  }
+  .editor-sub {
+    font-size: var(--fs-sm);
+    color: var(--gray-600);
+    margin-bottom: 24px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .form-grid.--full { grid-template-columns: 1fr; }
+
+  .form-field label {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--ink-900);
+    margin-bottom: 6px;
+  }
+  .form-field label .hint {
+    color: var(--gray-500);
+    font-weight: 400;
+    font-size: 12px;
+  }
+  .form-field input[type="text"],
+  .form-field input[type="number"],
+  .form-field select,
+  .form-field textarea {
+    width: 100%;
+    border: 1.5px solid var(--ink-200);
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    color: var(--ink-900);
+    background: var(--cream-0);
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    outline: none;
+    border-color: var(--ink-900);
+  }
+  .form-field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+
+  .toggle-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: var(--cream-50);
+    border-radius: var(--r-md);
+    margin-bottom: 16px;
+  }
+  .toggle-row label { font-weight: 500; margin: 0; cursor: pointer; }
+
+  .toggle {
+    position: relative;
+    width: 44px; height: 24px;
+    background: var(--gray-300);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .toggle.--on { background: var(--accent); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 20px; height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform .15s;
+  }
+  .toggle.--on::after { transform: translateX(20px); }
+
+  /* 选项编辑 */
+  .options-list {
+    display: flex; flex-direction: column;
+    gap: 8px;
+  }
+  .option-row {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    background: var(--cream-50);
+    padding: 8px;
+    border-radius: var(--r-sm);
+  }
+  .option-row input {
+    border: 1px solid var(--ink-100);
+    background: var(--cream-0);
+    padding: 8px 10px;
+    border-radius: var(--r-sm);
+    font-size: 13px;
+  }
+  .option-row button {
+    background: transparent; border: 0;
+    color: var(--gray-500);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 6px;
+  }
+  .option-row button:hover { color: var(--danger-500); }
+
+  /* 跳题规则 */
+  .rule-builder {
+    background: var(--cream-50);
+    border-radius: var(--r-md);
+    padding: 14px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: var(--fs-sm);
+  }
+  .rule-builder span { color: var(--gray-600); }
+  .rule-builder select, .rule-builder input {
+    border: 1px solid var(--ink-200);
+    padding: 6px 10px;
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    background: var(--cream-0);
+  }
+
+  .section-divider {
+    margin: 24px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--ink-200);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+  }
+
+  /* AI 生成 badge */
+  .ai-notice {
+    background: linear-gradient(135deg, var(--accent-soft), var(--lime-soft));
+    border-radius: var(--r-md);
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--ink-900);
+    display: flex; gap: 10px; align-items: center;
+  }
+  .ai-notice strong { color: var(--accent-dark); }
+</style>
+</head>
+<body class="admin">
+<a href="#main" class="skip-link">跳转到主内容</a>
+
+<div class="admin-shell">
+  <aside class="admin-side" aria-label="后台主导航">
+    <div class="admin-side__brand">
+      <div class="brand__logo">JT</div>
+      <span translate="no">临研运营台</span>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav__group">运营</div>
+      <a href="../admin/dashboard.html"><span class="admin-nav__icon">◎</span>工作台</a>
+      <a href="../admin/leads.html"><span class="admin-nav__icon">☎</span>线索池</a>
+      <a href="admin-lock-management.html"><span class="admin-nav__icon">⊘</span>封锁管理</a>
+
+      <div class="admin-nav__group">内容管理</div>
+      <a href="../admin/trials.html"><span class="admin-nav__icon">⚛</span>试验管理</a>
+      <a href="admin-form-manager.html" aria-current="page" style="background:var(--ink-100);color:var(--ink-900);font-weight:600;"><span class="admin-nav__icon">▤</span>表单管理器</a>
+      <a href="admin-media-library.html"><span class="admin-nav__icon">▦</span>图片素材</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div class="admin-topbar__crumb">
+        <a href="../admin/trials.html" style="color:var(--gray-600);">试验管理</a> ›
+        <a href="#" style="color:var(--gray-600);">HER2+ 早期乳腺癌靶向药研究</a> ›
+        <strong>预筛表单</strong>
+      </div>
+      <div class="admin-topbar__right">
+        <div class="admin-avatar" title="张运营 · operator">Z</div>
+      </div>
+    </header>
+
+    <main id="main" class="admin-content">
+      <div class="fm-header">
+        <div class="fm-header__title">
+          <div class="eyebrow">Prescreen Form · v2 · Draft</div>
+          <h2>HER2+ 早期乳腺癌靶向药研究</h2>
+          <p class="meta">
+            <span class="status-pill --draft">⚠ 草稿未发布</span>
+            <span style="margin-left:10px;">已有字段 9 个 · 上次保存 2 分钟前 · 由 AI 生成后人工编辑</span>
+          </p>
+        </div>
+        <div class="fm-header__actions">
+          <button class="btn btn--ghost btn--sm">📋 预览</button>
+          <button class="btn btn--accent">🪄 AI 重新生成</button>
+          <button class="btn btn--ghost">保存草稿</button>
+          <button class="btn btn--primary">✓ 发布新版本</button>
+        </div>
+      </div>
+
+      <div class="ai-notice">
+        <span style="font-size:20px;">🪄</span>
+        <div>
+          <strong>AI 初稿提示</strong>：本表单由 AI 从招募广告原文抽取生成（14:08），标注橙边的字段为 AI 直出，尚未人工复核。请二次确认后发布。
+          <span style="margin-left:8px;"><a href="admin-form-manager-ai-generate.html" style="color:var(--accent-dark);font-weight:600;">查看原始广告 →</a></span>
+        </div>
+      </div>
+
+      <div class="workspace">
+
+        <!-- 左侧字段列表 -->
+        <section class="panel" aria-label="字段列表">
+          <div class="panel__header">
+            <h3>字段列表（9）</h3>
+            <button class="btn btn--ghost btn--sm">↕ 按顺序排序</button>
+          </div>
+          <div class="panel__body">
+            <div class="field-list">
+
+              <div class="field-item --active --ai-generated" draggable="true" aria-grabbed="false">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">1. 你的年龄</div>
+                  <div class="meta">
+                    <span class="field-item__type">number</span>
+                    <span class="field-item__req">必填 *</span>
+                    <span>key: age</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+              <div class="field-item --ai-generated" draggable="true">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">2. 你的生理性别</div>
+                  <div class="meta">
+                    <span class="field-item__type">single</span>
+                    <span class="field-item__req">必填 *</span>
+                    <span>key: gender</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+              <div class="field-item --ai-generated" draggable="true">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">3. 是否已确诊 HER2 阳性</div>
+                  <div class="meta">
+                    <span class="field-item__type">single</span>
+                    <span class="field-item__req">必填 *</span>
+                    <span>key: her2_confirmed</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+              <div class="field-item --ai-generated" draggable="true">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">4. 是否已完成手术治疗</div>
+                  <div class="meta">
+                    <span class="field-item__type">single</span>
+                    <span class="field-item__req">必填 *</span>
+                    <span>key: surgery_done</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+              <div class="field-item --ai-generated" draggable="true">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">5. 手术距今时间</div>
+                  <div class="meta">
+                    <span class="field-item__type">single</span>
+                    <span>key: surgery_since</span>
+                    <span style="color:var(--accent);">有跳题</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+              <div class="field-item --ai-generated" draggable="true">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">6. 既往过敏史</div>
+                  <div class="meta">
+                    <span class="field-item__type">multi</span>
+                    <span>key: allergy_history</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+              <div class="field-item" draggable="true">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">7. 目前服用的药物（人工补）</div>
+                  <div class="meta">
+                    <span class="field-item__type">textarea</span>
+                    <span>key: current_meds</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+              <div class="field-item" draggable="true">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">8. 所在城市（人工补）</div>
+                  <div class="meta">
+                    <span class="field-item__type">text</span>
+                    <span class="field-item__req">必填 *</span>
+                    <span>key: city</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+              <div class="field-item" draggable="true">
+                <div class="field-item__drag" aria-hidden="true">⋮⋮</div>
+                <div class="field-item__main">
+                  <div class="label">9. 同意隐私政策</div>
+                  <div class="meta">
+                    <span class="field-item__type">agree</span>
+                    <span class="field-item__req">必填 *</span>
+                    <span>key: agree_privacy</span>
+                  </div>
+                </div>
+                <button class="field-item__remove" aria-label="删除">×</button>
+              </div>
+
+            </div>
+
+            <button class="add-field-btn">+ 添加字段</button>
+          </div>
+        </section>
+
+        <!-- 右侧编辑面板 -->
+        <section class="panel" aria-label="字段编辑">
+          <div class="panel__header">
+            <h3>字段详情 · 第 1 项</h3>
+            <span class="status-pill --draft">🪄 AI 生成 · 已修改</span>
+          </div>
+
+          <div class="editor-body">
+
+            <h4 class="editor-title">你的年龄</h4>
+            <p class="editor-sub">field key: <code style="font-family:var(--font-mono);">age</code> · 必填 · 题型 number</p>
+
+            <div class="section-divider">基础设置</div>
+
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="fKey">字段 key <span class="hint">(英文 snake_case)</span></label>
+                <input type="text" id="fKey" value="age" />
+              </div>
+              <div class="form-field">
+                <label for="fType">题型</label>
+                <select id="fType">
+                  <option>number （数字）</option>
+                  <option>single （单选）</option>
+                  <option>multi （多选）</option>
+                  <option>text （单行文本）</option>
+                  <option>textarea （多行文本）</option>
+                  <option>date （日期）</option>
+                  <option>agree （同意勾选）</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid --full">
+              <div class="form-field">
+                <label for="fLabel">问题文案 <span class="hint">（患者看到的）</span></label>
+                <input type="text" id="fLabel" value="你的年龄" />
+              </div>
+            </div>
+
+            <div class="form-grid --full">
+              <div class="form-field">
+                <label for="fHint">辅助说明 <span class="hint">（可选，展示在 label 下方）</span></label>
+                <input type="text" id="fHint" value="请填写 18-80 之间的整数" />
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <label for="fReq">必填字段</label>
+              <div class="toggle --on" id="fReq" role="switch" aria-checked="true"></div>
+            </div>
+
+            <div class="section-divider">数值范围</div>
+
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="fMin">最小值</label>
+                <input type="number" id="fMin" value="18" />
+              </div>
+              <div class="form-field">
+                <label for="fMax">最大值</label>
+                <input type="number" id="fMax" value="80" />
+              </div>
+            </div>
+
+            <div class="form-grid --full">
+              <div class="form-field">
+                <label for="fErr">校验失败提示</label>
+                <input type="text" id="fErr" value="请填写 18-80 之间的整数" />
+              </div>
+            </div>
+
+            <div class="section-divider">跳题规则（可选）</div>
+
+            <div class="rule-builder">
+              <span>当</span>
+              <select><option>（不设置跳题）</option><option>her2_confirmed</option><option>surgery_done</option></select>
+              <select><option>等于</option><option>不等于</option><option>在…中</option></select>
+              <input type="text" placeholder="值" style="width:100px;" />
+              <span>时</span>
+              <select><option>显示此题</option><option>隐藏此题</option></select>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // 简化示例：点击字段切换 active
+  document.querySelectorAll('.field-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.field-item__remove')) return;
+      document.querySelectorAll('.field-item').forEach(x => x.classList.remove('--active'));
+      el.classList.add('--active');
+    });
+  });
+  // 切换 toggle
+  document.querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => {
+      t.classList.toggle('--on');
+      t.setAttribute('aria-checked', t.classList.contains('--on') ? 'true' : 'false');
+    });
+  });
+</script>
+</body>
+</html>

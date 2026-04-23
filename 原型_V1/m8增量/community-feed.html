@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<!--
+DESIGN NOTES · v2 · 2026-04-22 路径反转（保留病种分区）
+- 核心目标：首屏三段式——我加入的 N 个分区 / 推荐加入（基于用户 aiDiseaseTags 与分区关键词的 AI 语义匹配，决策 7 反转）/ 其他可加入——让用户能快速"加入、发帖、讨论"
+- 视觉权重分布：① 我加入的分区 chip 条（复访主路径）② 推荐加入卡片（带匹配理由，引导补症状）③ 其他分区列表
+- 移动端适配：375px 下 chip 条横向滚动；推荐卡片单列；"加入"按钮 ≥ 44px
+- 可访问性：chip 用 `<a>` 带 aria-label；"加入"按钮区分 primary 与 ghost；未加入任何分区时占位提示清晰
+- 变更说明：废止原时间流 + 标签栏版；M5 分区模型沿用，只换首页布局
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>病友社区 · v2 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  body { background: var(--cream-50); }
+
+  .topbar {
+    border-bottom: var(--border);
+    padding: 14px 0;
+    background: var(--cream-0);
+    position: sticky;
+    top: 0;
+    z-index: 8;
+  }
+  .topbar .container {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .logo {
+    font-family: var(--font-serif);
+    font-size: var(--fs-xl);
+    color: var(--ink-900);
+  }
+  .logo em { font-style: italic; color: var(--ink-700); }
+  .topnav a {
+    color: var(--gray-600);
+    text-decoration: none;
+    font-size: var(--fs-sm);
+    margin-left: 24px;
+  }
+  .topnav a.--active { color: var(--ink-900); font-weight: 600; }
+
+  .page-hero {
+    padding: 36px 0 24px;
+    background: var(--cream-0);
+    border-bottom: var(--border);
+  }
+  .page-hero h1 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(32px, 4.5vw, 52px);
+    margin: 4px 0;
+    line-height: 1.15;
+  }
+  .page-hero h1 em { font-style: italic; color: var(--ink-700); }
+  .page-hero p {
+    color: var(--gray-600);
+    font-size: var(--fs-md);
+    line-height: 1.65;
+    max-width: 56ch;
+  }
+  .page-hero__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .15em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .page-hero__action {
+    display: flex; gap: 12px; margin-top: 20px;
+  }
+
+  main {
+    padding: 32px 0 80px;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 var(--container-pad);
+  }
+
+  section {
+    margin-bottom: 56px;
+  }
+  .section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: var(--border-strong);
+  }
+  .section__head h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-2xl);
+    margin: 0;
+    line-height: 1.25;
+  }
+  .section__head em {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gray-500);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  /* 我加入的分区：chip 条 */
+  .joined-chips {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 4px 0 8px;
+    scrollbar-width: none;
+  }
+  .joined-chips::-webkit-scrollbar { display: none; }
+
+  .joined-chip {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 20px;
+    background: var(--cream-0);
+    border: 1.5px solid var(--ink-200);
+    border-radius: var(--r-xl);
+    min-width: 200px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform .15s, border-color .15s;
+    position: relative;
+  }
+  .joined-chip:hover {
+    border-color: var(--ink-700);
+    transform: translateY(-2px);
+  }
+  .joined-chip__tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--gray-500);
+    text-transform: uppercase;
+  }
+  .joined-chip__name {
+    font-family: var(--font-serif);
+    font-size: var(--fs-lg);
+    color: var(--ink-900);
+  }
+  .joined-chip__stats {
+    display: flex; gap: 10px; align-items: center;
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-top: 4px;
+  }
+  .joined-chip__badge {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: var(--accent);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+  }
+  .joined-chip--add {
+    border-style: dashed;
+    color: var(--gray-500);
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .joined-chip--add .joined-chip__name {
+    font-family: var(--font-sans);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--gray-600);
+  }
+
+  /* 推荐加入 */
+  .recommend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .group-card {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .15s, transform .15s;
+  }
+  .group-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  .group-card__cover {
+    aspect-ratio: 5 / 2;
+    background: linear-gradient(135deg, var(--ink-500), var(--ink-700));
+    color: var(--lime);
+    display: grid; place-items: center;
+    font-family: var(--font-serif);
+    font-size: 28px;
+    position: relative;
+  }
+  .group-card__cover.--breast { background: linear-gradient(135deg, #9d5b76, var(--ink-700)); }
+  .group-card__cover.--hypertension { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); }
+  .group-card__cover.--diabetes { background: linear-gradient(135deg, #5a8d72, var(--ink-700)); }
+  .group-card__cover.--skin { background: linear-gradient(135deg, #a0738b, var(--ink-500)); }
+  .group-card__cover.--copd { background: linear-gradient(135deg, var(--info-500), var(--ink-800)); }
+  .group-card__cover.--heart { background: linear-gradient(135deg, var(--danger-500), var(--ink-700)); }
+  .group-card__match {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: var(--lime);
+    color: var(--ink-900);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .08em;
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    font-weight: 700;
+  }
+  .group-card__body {
+    padding: 18px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .group-card__name {
+    font-family: var(--font-serif);
+    font-size: var(--fs-xl);
+    color: var(--ink-900);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .group-card__meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+  }
+  .group-card__meta span { display: inline-flex; align-items: center; gap: 4px; }
+  .group-card__intro {
+    color: var(--gray-700);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .group-card__reason {
+    background: var(--lime-soft);
+    color: var(--ink-700);
+    padding: 8px 12px;
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    line-height: 1.5;
+    display: flex;
+    gap: 6px;
+    border-left: 3px solid var(--lime);
+  }
+  .group-card__footer {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--ink-100);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    height: 44px;
+    border-radius: var(--r-md);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+    border: 0;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    flex: 1;
+  }
+  .btn--primary { background: var(--accent); color: white; }
+  .btn--primary:hover { background: var(--accent-dark); }
+  .btn--ghost {
+    background: transparent;
+    border: 1.5px solid var(--ink-200);
+    color: var(--ink-900);
+    flex: 0 0 auto;
+    padding: 0 14px;
+  }
+  .btn--ghost:hover { border-color: var(--ink-700); }
+  .btn--disabled {
+    background: var(--gray-200);
+    color: var(--gray-500);
+    cursor: not-allowed;
+  }
+
+  /* 其他分区：列表 */
+  .other-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .group-mini {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-md);
+    transition: border-color .15s;
+  }
+  .group-mini:hover { border-color: var(--ink-400); }
+  .group-mini__icon {
+    width: 48px; height: 48px;
+    border-radius: var(--r-md);
+    background: var(--ink-200);
+    color: var(--ink-700);
+    display: grid; place-items: center;
+    font-family: var(--font-serif);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .group-mini__icon.--diabetes { background: #5a8d72; color: var(--cream-50); }
+  .group-mini__icon.--skin { background: #a0738b; color: var(--cream-50); }
+  .group-mini__icon.--copd { background: var(--info-500); color: var(--cream-50); }
+  .group-mini__icon.--heart { background: var(--danger-500); color: white; }
+  .group-mini__main {
+    flex: 1; min-width: 0;
+  }
+  .group-mini__name {
+    font-weight: 600;
+    color: var(--ink-900);
+    font-size: var(--fs-md);
+    line-height: 1.3;
+  }
+  .group-mini__stats {
+    font-size: 11px;
+    color: var(--gray-500);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+  .group-mini__btn {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--ink-200);
+    border-radius: var(--r-sm);
+    font-size: 13px;
+    color: var(--ink-900);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .group-mini__btn:hover {
+    background: var(--ink-900);
+    color: var(--lime);
+    border-color: var(--ink-900);
+  }
+
+  /* 空态 + 上限态 */
+  .empty-hint {
+    background: var(--cream-100);
+    border: 1.5px dashed var(--ink-200);
+    border-radius: var(--r-md);
+    padding: 20px 24px;
+    text-align: center;
+    color: var(--gray-600);
+    font-size: var(--fs-sm);
+    line-height: 1.65;
+  }
+  .empty-hint strong { color: var(--ink-900); }
+
+  .limit-banner {
+    background: var(--warning-50);
+    border-left: 3px solid var(--warning-500);
+    padding: 12px 16px;
+    border-radius: var(--r-sm);
+    color: var(--warning-700);
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  /* 发帖 CTA */
+  .post-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 22px;
+    height: 48px;
+    background: var(--ink-900);
+    color: var(--lime);
+    border: 0;
+    border-radius: var(--r-md);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: var(--fs-md);
+  }
+  .post-cta:hover { background: var(--ink-800); }
+  .post-cta.--disabled {
+    background: var(--gray-200);
+    color: var(--gray-500);
+    cursor: not-allowed;
+  }
+
+  /* 预览条 */
+  .preview-bar {
+    background: var(--ink-100);
+    padding: 10px 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-700);
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .preview-bar strong { color: var(--ink-900); }
+  .preview-bar button {
+    background: var(--ink-900); color: var(--cream-50);
+    border: 0; padding: 4px 10px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-mono);
+    font-size: 10px; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="preview-bar" role="note">
+  <strong>原型预览 · v2（保留分区）</strong>·
+  <button onclick="showState('normal')">常规（已加入 2 个）</button>
+  <button onclick="showState('empty')">首次进入（未加入任何分区）</button>
+  <button onclick="showState('full')">已满 3 个（上限）</button>
+</div>
+
+<header class="topbar">
+  <div class="container">
+    <a href="../public/home.html" class="logo">九泰<em>临研</em></a>
+    <nav class="topnav">
+      <a href="../public/home.html">首页</a>
+      <a href="../public/trials.html">看试验</a>
+      <a href="#" class="--active">病友社区</a>
+      <a href="../public/my-applications.html">我的</a>
+    </nav>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="wrap">
+    <span class="page-hero__eyebrow">Community · 分区首页 v2</span>
+    <h1>加入你的<em>病种社区</em>，找到同路人</h1>
+    <p>九泰临研社区按病种分区，每个分区独立讨论。加入前只需简单说明自己的情况，这些信息只在分区内作参考，不作诊断。<br/>每个用户最多加入 3 个分区，让讨论更聚焦。</p>
+    <div class="page-hero__action">
+      <a href="#" class="post-cta" id="postCta">✎ 发帖到我加入的分区</a>
+    </div>
+  </div>
+</section>
+
+<main>
+  <div class="wrap">
+
+    <div class="limit-banner" id="limitBanner" hidden>
+      ⚠ <strong>你已加入 3 个分区（上限）</strong>——想加入新分区请先在
+      <a href="#" style="color:var(--warning-700);font-weight:600;">「我的 · 我的分区」</a>
+      退出一个。
+    </div>
+
+    <!-- 第一段：我加入的分区 -->
+    <section>
+      <div class="section__head">
+        <h2>我加入的分区</h2>
+        <em id="joinedCountLabel">已加入 2 / 3</em>
+      </div>
+
+      <div class="joined-chips" id="joinedChips">
+        <a href="../public/community.html" class="joined-chip">
+          <span class="joined-chip__badge">3</span>
+          <span class="joined-chip__tag">Disease · 循环</span>
+          <span class="joined-chip__name">高血压</span>
+          <span class="joined-chip__stats">💬 62 帖 · 本周 +4</span>
+        </a>
+        <a href="../public/community.html" class="joined-chip">
+          <span class="joined-chip__tag">Disease · 肿瘤</span>
+          <span class="joined-chip__name">乳腺癌</span>
+          <span class="joined-chip__stats">💬 48 帖 · 本周 +7</span>
+        </a>
+        <a href="#other" class="joined-chip joined-chip--add">
+          <span style="font-size:22px;color:var(--gray-400);">+</span>
+          <span class="joined-chip__name">再加入一个（剩 1 席）</span>
+        </a>
+      </div>
+
+      <div class="empty-hint" id="emptyJoined" hidden style="margin-top:8px;">
+        <strong>还没加入任何分区</strong><br/>
+        看看下面的推荐——我们根据你注册时填的症状，为你找了几个合适的分区。
+      </div>
+    </section>
+
+    <!-- 第二段：推荐加入 -->
+    <section>
+      <div class="section__head">
+        <h2>推荐加入</h2>
+        <em>基于你填的症状 · AI 标签语义匹配</em>
+      </div>
+
+      <div class="recommend-grid">
+
+        <article class="group-card">
+          <div class="group-card__cover --diabetes">糖</div>
+          <div class="group-card__body">
+            <h3 class="group-card__name">糖尿病</h3>
+            <div class="group-card__meta">
+              <span>👥 1,284 成员</span>
+              <span>💬 31 本周</span>
+            </div>
+            <p class="group-card__intro">糖友病友互助分区：日常血糖管理、用药经验、饮食运动调整、并发症筛查等。</p>
+            <div class="group-card__reason">
+              <span>🎯</span>
+              <div><strong>为什么推荐：</strong>因为你填写了「E11 · 2 型糖尿病」</div>
+            </div>
+            <div class="group-card__footer">
+              <a href="join-group-prompt.html" class="btn btn--primary">加入</a>
+              <a href="../public/community.html" class="btn btn--ghost">先看看</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="group-card">
+          <div class="group-card__cover --heart">心</div>
+          <div class="group-card__body">
+            <h3 class="group-card__name">心衰</h3>
+            <div class="group-card__meta">
+              <span>👥 412 成员</span>
+              <span>💬 7 本周</span>
+            </div>
+            <p class="group-card__intro">心力衰竭病友支持分区：病程管理、用药、家庭护理与急诊预案等话题。</p>
+            <div class="group-card__reason">
+              <span>🎯</span>
+              <div><strong>为什么推荐：</strong>你填了"偶尔心悸、气促"，建议关注心血管系统</div>
+            </div>
+            <div class="group-card__footer">
+              <a href="join-group-prompt.html" class="btn btn--primary">加入</a>
+              <a href="../public/community.html" class="btn btn--ghost">先看看</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- 第三段：其他可加入分区 -->
+    <section id="other">
+      <div class="section__head">
+        <h2>其他可加入分区</h2>
+        <em>M5 6 个分区 · 沿用</em>
+      </div>
+
+      <div class="other-grid">
+        <div class="group-mini">
+          <div class="group-mini__icon --skin">皮</div>
+          <div class="group-mini__main">
+            <div class="group-mini__name">皮肤病</div>
+            <div class="group-mini__stats">👥 892 · 💬 19 本周</div>
+          </div>
+          <button class="group-mini__btn" onclick="location.href='join-group-prompt.html'">加入</button>
+        </div>
+
+        <div class="group-mini">
+          <div class="group-mini__icon --copd">肺</div>
+          <div class="group-mini__main">
+            <div class="group-mini__name">慢阻肺</div>
+            <div class="group-mini__stats">👥 320 · 💬 11 本周</div>
+          </div>
+          <button class="group-mini__btn" onclick="location.href='join-group-prompt.html'">加入</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 底部提示 -->
+    <div class="empty-hint" style="margin-top:48px;">
+      <strong>没找到合适的分区？</strong><br/>
+      目前 V1 阶段只有 6 个病种分区。如果你关心的疾病暂未覆盖，欢迎
+      <a href="../public/contact.html" style="color:var(--accent);">联系我们</a>
+      告诉我们，后续版本会根据大家需求增加。
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function showState(s) {
+    const joinedChips = document.getElementById('joinedChips');
+    const emptyJoined = document.getElementById('emptyJoined');
+    const joinedCountLabel = document.getElementById('joinedCountLabel');
+    const limitBanner = document.getElementById('limitBanner');
+    const postCta = document.getElementById('postCta');
+
+    // Grab the first two real chips and the "+" chip
+    const chips = joinedChips.querySelectorAll('.joined-chip');
+    const bp = chips[0];
+    const breast = chips[1];
+    const add = chips[chips.length - 1];
+
+    // Reset: remove any extra chips beyond the original 3
+    Array.from(chips).forEach((el, idx) => {
+      if (idx > 2) el.remove();
+    });
+    bp.style.display = '';
+    breast.style.display = '';
+    add.style.display = '';
+    emptyJoined.hidden = true;
+    limitBanner.hidden = true;
+    postCta.classList.remove('--disabled');
+    postCta.textContent = '✎ 发帖到我加入的分区';
+
+    if (s === 'normal') {
+      joinedCountLabel.textContent = '已加入 2 / 3';
+      add.querySelector('.joined-chip__name').textContent = '再加入一个（剩 1 席）';
+    } else if (s === 'empty') {
+      bp.style.display = 'none';
+      breast.style.display = 'none';
+      add.style.display = 'none';
+      emptyJoined.hidden = false;
+      joinedCountLabel.textContent = '已加入 0 / 3';
+      postCta.classList.add('--disabled');
+      postCta.textContent = '✎ 请先加入一个分区再发帖';
+    } else if (s === 'full') {
+      const third = breast.cloneNode(true);
+      third.querySelector('.joined-chip__tag').textContent = 'Disease · 内分泌';
+      third.querySelector('.joined-chip__name').textContent = '糖尿病';
+      third.querySelector('.joined-chip__stats').textContent = '💬 31 本周新增';
+      const extraBadge = third.querySelector('.joined-chip__badge');
+      if (extraBadge) extraBadge.remove();
+      joinedChips.insertBefore(third, add);
+      add.style.display = 'none';
+      joinedCountLabel.textContent = '已加入 3 / 3（已满）';
+      limitBanner.hidden = false;
+    }
+  }
+</script>
+</body>
+</html>

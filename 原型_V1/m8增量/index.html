@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0a1411" />
+<title>M8 原型增量 — 九泰临研</title>
+<link rel="stylesheet" href="../assets/design-system.css" />
+<style>
+  body { background: var(--cream-50); }
+  .shell { padding: 64px 0 96px; }
+  .head { max-width: 62ch; margin-bottom: 48px; }
+  .head h1 { font-size: clamp(36px, 5vw, 64px); margin: 14px 0; }
+  .head p { color: var(--gray-600); font-size: var(--fs-xl); line-height: 1.5; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: .15em;
+    color: var(--ink-700);
+    text-transform: uppercase;
+  }
+  .group { margin-bottom: 56px; }
+  .group__title {
+    display: flex; align-items: baseline; gap: 16px;
+    border-bottom: var(--border-strong);
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+  }
+  .group__title h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: var(--fs-3xl);
+    margin: 0;
+  }
+  .group__title em {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--gray-500);
+    letter-spacing: .1em;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--cream-0);
+    border: var(--border);
+    border-radius: var(--r-lg);
+    padding: 24px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform .2s var(--ease-out), box-shadow .2s var(--ease-out);
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--ink-300);
+  }
+  .card__tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    background: var(--ink-100);
+    color: var(--ink-700);
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    text-transform: uppercase;
+    align-self: flex-start;
+  }
+  .card__tag.--m81 { background: var(--ink-100); color: var(--ink-700); }
+  .card__tag.--m82 { background: var(--accent-soft); color: var(--accent-dark); }
+  .card__tag.--m83 { background: var(--lime-soft); color: var(--ink-700); }
+  .card h3 {
+    font-size: var(--fs-lg);
+    margin: 0;
+    line-height: 1.35;
+  }
+  .card p {
+    color: var(--gray-600);
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+    margin: 0;
+  }
+  .card__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed var(--gray-200);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--gray-500);
+  }
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--gray-600);
+    text-decoration: none;
+    font-size: var(--fs-sm);
+    margin-bottom: 32px;
+  }
+  .back:hover { color: var(--accent); }
+  .banner {
+    background: var(--ink-900);
+    color: var(--cream-50);
+    border-radius: var(--r-2xl);
+    padding: 32px 36px;
+    margin-bottom: 56px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 24px;
+    align-items: flex-start;
+  }
+  .banner__icon {
+    width: 52px; height: 52px;
+    background: var(--lime);
+    color: var(--ink-900);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .banner h3 { color: var(--cream-50); font-family: var(--font-serif); font-weight: 400; font-size: 24px; margin-bottom: 10px; }
+  .banner p { color: rgba(253,250,243,.85); font-size: var(--fs-md); line-height: 1.65; }
+  .banner code { font-family: var(--font-mono); background: rgba(253,250,243,.1); padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<section class="shell">
+  <div class="container">
+    <a class="back" href="../index.html">← 返回原型总导览</a>
+
+    <div class="head">
+      <span class="eyebrow">M8 · 产品优化轮</span>
+      <h1>原型<em style="font-family:var(--font-serif);font-style:italic;color:var(--ink-700);">增量</em></h1>
+      <p>基于 2026-04-22 用户拍板的 5 项决策，本轮新增 7 张必需原型 + 4 张选配原型。仅展示新增/改造部分，不重做整站。</p>
+    </div>
+
+    <div class="banner">
+      <div class="banner__icon">M8</div>
+      <div>
+        <h3>本轮范围速览</h3>
+        <p>
+          <strong>M8.1</strong> 基础增强（反爬+封号申诉+伦理批件+图片库骨架）·
+          <strong>M8.2</strong> 表单管理器（DeepSeek AI 生成预筛）·
+          <strong>M8.3</strong> 账号体系+社区重做（症状+**AI 疾病分析（DeepSeek）**+匹配助手+分区首页 v2+AI 审核）。
+          所有原型沿用现有 <code>design-system.css</code> token，零第三方 UI 库。
+        </p>
+      </div>
+    </div>
+
+    <section class="group">
+      <div class="group__title">
+        <h2>M8.1 · 基础增强</h2>
+        <em>反爬 · 封号 · 申诉 · 伦理 · UI 债</em>
+      </div>
+      <div class="grid">
+        <a class="card" href="account-lock.html">
+          <span class="card__tag --m81">患者端</span>
+          <h3>账号封锁页</h3>
+          <p>系统检测到异常频次后，向用户解释原因并提供申诉入口。严守"不指责"文案。</p>
+          <div class="card__meta"><span>account-lock.html</span><span>→</span></div>
+        </a>
+        <a class="card" href="appeal-form.html">
+          <span class="card__tag --m81">患者端</span>
+          <h3>申诉表单</h3>
+          <p>手机号后 4 位校验 + 申诉理由输入 + 协议勾选 + 已提交等待态。</p>
+          <div class="card__meta"><span>appeal-form.html</span><span>→</span></div>
+        </a>
+        <a class="card" href="admin-lock-management.html">
+          <span class="card__tag --m81">管理端</span>
+          <h3>封锁管理</h3>
+          <p>封号列表 + 行为日志详情 + 解锁/驳回操作 + 回复申诉。</p>
+          <div class="card__meta"><span>admin-lock-management.html</span><span>→</span></div>
+        </a>
+        <a class="card" href="admin-media-library.html">
+          <span class="card__tag --m81">管理端 · 选配</span>
+          <h3>图片素材库骨架</h3>
+          <p>运营上传 / 分类浏览 / 占位色块策略预览。</p>
+          <div class="card__meta"><span>admin-media-library.html</span><span>→</span></div>
+        </a>
+      </div>
+    </section>
+
+    <section class="group">
+      <div class="group__title">
+        <h2>M8.2 · 表单管理器 + AI 预筛</h2>
+        <em>DeepSeek · 可视化表单 · LLM 日志</em>
+      </div>
+      <div class="grid">
+        <a class="card" href="admin-form-manager.html">
+          <span class="card__tag --m82">管理端</span>
+          <h3>后台表单管理器</h3>
+          <p>左侧字段拖拽 / 中央题型编辑 / 右侧跳题规则 / 顶部 AI 生成入口。</p>
+          <div class="card__meta"><span>admin-form-manager.html</span><span>→</span></div>
+        </a>
+        <a class="card" href="admin-form-manager-ai-generate.html">
+          <span class="card__tag --m82">管理端 · 选配</span>
+          <h3>AI 生成弹窗</h3>
+          <p>贴广告原文 → loading → 结果预览（二次编辑入口）。</p>
+          <div class="card__meta"><span>admin-form-manager-ai-generate.html</span><span>→</span></div>
+        </a>
+      </div>
+    </section>
+
+    <section class="group">
+      <div class="group__title">
+        <h2>M8.3 · 账号体系 + 社区重做（2026-04-22 路径反转 · 保留分区）</h2>
+        <em>AI 疾病分析（DeepSeek）· 匹配助手 · 分区首页 v2 · 加入前补症状（两态）· AI 审核</em>
+      </div>
+      <div class="grid">
+        <a class="card" href="register-symptoms.html">
+          <span class="card__tag --m83">患者端 · 含补丁</span>
+          <h3>注册症状填写</h3>
+          <p>自由文本 + **DeepSeek AI 分析返回标签 chips**（可删）+ 可跳过；含"推荐分区"弹窗态。</p>
+          <div class="card__meta"><span>register-symptoms.html</span><span>→</span></div>
+        </a>
+        <a class="card" href="trial-match-assistant.html">
+          <span class="card__tag --m83">患者端</span>
+          <h3>试验匹配助手</h3>
+          <p>顶部红底免责 · 对话式问答 · 固定模板卡片（症状方向 + 科室 + 试验 N 条）。</p>
+          <div class="card__meta"><span>trial-match-assistant.html</span><span>→</span></div>
+        </a>
+        <a class="card" href="community-feed.html">
+          <span class="card__tag --m83">患者端 · v2</span>
+          <h3>社区首页 v2（保留分区）</h3>
+          <p><strong>2026-04-22 路径反转</strong>：三段式——我加入的 / 推荐加入（**AI 标签语义匹配**）/ 其他可加入；废止原时间流设计。</p>
+          <div class="card__meta"><span>community-feed.html</span><span>→</span></div>
+        </a>
+        <a class="card" href="join-group-prompt.html">
+          <span class="card__tag --m83">患者端 · 新增</span>
+          <h3>加入分区前补症状</h3>
+          <p><strong>2026-04-22 新增 + 决策 7 反转</strong>：自由文本 → **AI 分析返回标签 chips（可删）** → 确认加入；支持"AI 失败→跳过"降级；提交后症状 + 标签累加回写账号。</p>
+          <div class="card__meta"><span>join-group-prompt.html</span><span>→</span></div>
+        </a>
+        <a class="card" href="admin-moderation-queue-v2.html">
+          <span class="card__tag --m83">管理端 · 选配</span>
+          <h3>审核队列 v2</h3>
+          <p>新增 AI 判断 · 置信度 · 人工覆盖理由列 · 批量认同 AI 操作。</p>
+          <div class="card__meta"><span>admin-moderation-queue-v2.html</span><span>→</span></div>
+        </a>
+      </div>
+    </section>
+
+    <section class="group">
+      <div class="group__title">
+        <h2>设计元规范</h2>
+        <em>所有原型必须遵守</em>
+      </div>
+      <div class="card" style="max-width:720px;">
+        <h3>硬约束</h3>
+        <p style="color:var(--gray-700);line-height:1.7;">
+          1. 全部颜色用 <code>design-system.css</code> 变量，禁用 hardcode hex<br/>
+          2. 正文字号 ≥ 16px；按钮高度 ≥ 44px；对比度 ≥ 4.5:1<br/>
+          3. 375px 宽度先做对，再放大到桌面<br/>
+          4. 禁用第三方 UI 库（纯 HTML+CSS+轻量 JS）<br/>
+          5. 图标用 inline SVG 或 emoji<br/>
+          6. 所有涉及用户数据的页面标注**加载 / 空 / 错 / 成功**四态<br/>
+          7. 合规文案严守："不诊断""不处方""仅供参考"醒目常驻
+        </p>
+      </div>
+    </section>
+  </div>
+</section>
+</body>
+</html>

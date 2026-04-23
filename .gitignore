@@ -29,3 +29,6 @@ Thumbs.db
 
 # graphify 输出（可重新生成）
 graphify-out/
+
+# Brainstorming visual companion (临时 mockup 文件)
+.superpowers/
