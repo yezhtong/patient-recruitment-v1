@@ -124,3 +124,159 @@
     max-width: 20ch;
   }
 }
+
+/* ============================================================
+   Hero Carousel — M8.4
+   ============================================================ */
+.hero-carousel {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-2xl);
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--accent-soft), var(--ink-100));
+  box-shadow: var(--shadow-md);
+  /* contain paint so arrows don't bleed outside */
+  contain: layout paint;
+}
+
+/* Viewport layer that carries aria-live */
+.hero-carousel__viewport {
+  position: absolute;
+  inset: 0;
+}
+
+/* Individual slides stacked on top of each other */
+.hero-carousel__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.02);
+  transition:
+    opacity 480ms var(--ease-in-out),
+    transform 600ms var(--ease-out);
+  pointer-events: none;
+}
+.hero-carousel__slide--active {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.hero-carousel__slide--inactive {
+  opacity: 0;
+  transform: scale(1.02);
+}
+.hero-carousel__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Dot indicators */
+.hero-carousel__dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  z-index: 10;
+}
+.hero-carousel__dot {
+  /* clickable padding for ≥24×24 target */
+  padding: 10px 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-carousel__dot::after {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(253, 250, 243, 0.45);
+  transition: width 300ms var(--ease-out), background 300ms var(--ease-out);
+}
+.hero-carousel__dot--active::after {
+  width: 18px;
+  background: var(--lime);
+}
+
+/* Arrows */
+.hero-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(253, 250, 243, 0.88);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(10, 20, 17, 0.08);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out), background 200ms var(--ease-out);
+}
+.hero-carousel__arrow--prev {
+  left: 12px;
+}
+.hero-carousel__arrow--next {
+  right: 12px;
+}
+.hero-carousel:hover .hero-carousel__arrow,
+.hero-carousel:focus-within .hero-carousel__arrow {
+  opacity: 0.85;
+}
+.hero-carousel__arrow:hover {
+  background: var(--cream-0);
+  opacity: 1 !important;
+}
+
+/* Mobile: arrows always visible at ≤960 */
+@media (max-width: 960px) {
+  .hero-carousel__arrow {
+    opacity: 0.85;
+  }
+}
+
+/* ≤640: hide arrows per task spec (task says <640, design says ≤960 — keep task spec override) */
+@media (max-width: 640px) {
+  .hero-carousel__arrow {
+    display: none;
+  }
+}
+
+/* Overlay lives inside each slide, inherits opacity crossfade */
+/* (styles reuse .hero-photo__overlay, .hero-photo__overlay-label, .hero-photo__overlay-text) */
+
+/* Aspect-ratio responsive tweaks (mirrors §1.1 of design spec) */
+@media (min-width: 641px) and (max-width: 959px) {
+  .hero-carousel {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* prefers-reduced-motion: disable all transitions + transforms */
+@media (prefers-reduced-motion: reduce) {
+  .hero-carousel__slide {
+    transition: none !important;
+    transform: none !important;
+  }
+  .hero-carousel__dot::after {
+    transition: none !important;
+  }
+  .hero-carousel__arrow {
+    transition: none !important;
+  }
+}

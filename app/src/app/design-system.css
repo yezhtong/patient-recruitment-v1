@@ -1355,3 +1355,32 @@ details.q .answer ul { padding-left: 22px; line-height: 1.85; margin: 0; }
     scroll-behavior: auto !important;
   }
 }
+
+/* ─── Role badges ──────────────────────────────────────────── */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.role-badge--sm {
+  font-size: 12px;
+  padding: 2px 8px;
+}
+.role-badge--md {
+  font-size: 14px;
+  padding: 4px 10px;
+}
+.role-badge--doctor {
+  background: var(--success-50);
+  color: var(--success-700);
+  border: 1px solid var(--success-500);
+}
+.role-badge--ai {
+  background: #f0f2f5;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+}

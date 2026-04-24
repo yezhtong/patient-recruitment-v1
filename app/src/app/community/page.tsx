@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { SiteShell } from "@/components/SiteShell";
 import { prisma } from "@/lib/prisma";
-import { PostCard } from "./PostCard";
+import { getUserSession, isLoggedIn } from "@/lib/user-session";
+import { recommendGroups } from "@/lib/disease-matcher";
+import type { DiseaseTag } from "@/lib/disease-matcher";
 import "./community.css";
 
 export const metadata: Metadata = {
@@ -18,56 +21,76 @@ export const metadata: Metadata = {
 };
 
 export default async function CommunityHomePage() {
-  const [groups, featured, latest] = await Promise.all([
+  const session = await getUserSession();
+  if (!isLoggedIn(session)) {
+    redirect("/auth?next=/community");
+  }
+
+  const [user, memberships, allGroups] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { aiDiseaseTags: true },
+    }),
+    prisma.userGroupMembership.findMany({
+      where: { userId: session.userId, leftAt: null },
+      include: { group: true },
+    }),
     prisma.communityGroup.findMany({
       where: { isEnabled: true },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      include: { _count: { select: { posts: true } } },
-    }),
-    prisma.communityPost.findMany({
-      where: {
-        OR: [{ isFeatured: true }, { authorRole: "operator" }],
-        reviewStatus: { in: ["approved", "featured"] },
-      },
-      orderBy: { createdAt: "desc" },
-      include: {
-        group: { select: { id: true, slug: true, name: true } },
-        _count: { select: { comments: true } },
-      },
-      take: 3,
-    }),
-    prisma.communityPost.findMany({
-      where: { reviewStatus: { in: ["approved", "featured"] } },
-      orderBy: { createdAt: "desc" },
-      include: {
-        group: { select: { id: true, slug: true, name: true } },
-        _count: { select: { comments: true } },
-      },
-      take: 10,
+      orderBy: { sortOrder: "asc" },
     }),
   ]);
+
+  const userTags: DiseaseTag[] = (() => {
+    if (!user?.aiDiseaseTags) return [];
+    try {
+      const parsed: unknown = JSON.parse(user.aiDiseaseTags);
+      return Array.isArray(parsed) ? (parsed as DiseaseTag[]) : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  const joinedIds = new Set(memberships.map((m) => m.groupId));
+  const joinedGroups = memberships.map((m) => m.group);
+  const candidates = allGroups.filter((g) => !joinedIds.has(g.id));
+
+  const recommended =
+    userTags.length > 0
+      ? (await recommendGroups(userTags, candidates, "string")).slice(0, 3)
+      : [];
+
+  const recommendedIds = new Set(recommended.map((r) => r.group.id));
+  const others = candidates.filter((g) => !recommendedIds.has(g.id));
+
+  const hasJoined = joinedGroups.length > 0;
+  const atLimit = joinedGroups.length >= 3;
+  const canPost = hasJoined;
 
   return (
     <SiteShell current="community">
       <main className="cm-shell">
         <div className="container">
-          <section className="cm-hero">
-            <span className="eyebrow">★ 病友互助</span>
-            <h1>
-              病友讨论 <em>/ 经验分享</em>
-            </h1>
-            <p className="lead">
-              和你有相同经历的人在这里分享故事、提出疑问、互相鼓励。运营会把高频问题沉淀到官方 FAQ。
-            </p>
-            <div className="cta-row">
-              <Link href="/community/new" className="btn btn--ink btn--lg">
-                发布新帖 <span className="arrow">→</span>
-              </Link>
-              <Link href="/faq" className="btn btn--text">
-                浏览官方 FAQ →
-              </Link>
+          {/* 顶部 header */}
+          <div className="cm-v2-header">
+            <div>
+              <span className="eyebrow">★ 病友互助</span>
+              <h1 className="cm-v2-title">
+                病友社区 <em>/ 我的分区</em>
+              </h1>
             </div>
-          </section>
+            <div className="cm-v2-header-actions">
+              {canPost ? (
+                <Link href="/community/new" className="btn btn--ink">
+                  发帖 <span className="arrow">→</span>
+                </Link>
+              ) : (
+                <button className="btn btn--ink" disabled title="先加入一个分区再发帖">
+                  发帖（先加入分区）
+                </button>
+              )}
+            </div>
+          </div>
 
           <div className="cm-disclaimer">
             <span className="prefix">★ 提醒</span>
@@ -75,61 +98,117 @@ export default async function CommunityHomePage() {
             。遇到紧急不适请直接就医或拨打 120。
           </div>
 
-          <h2 className="cm-section-title">
-            <span className="num">/ 01</span> 按病种加入讨论
-          </h2>
-          <div className="cm-group-grid">
-            {groups.map((g) => (
-              <Link
-                key={g.id}
-                href={`/community/${g.slug}`}
-                className="cm-group-card"
-              >
-                <div className="cm-group-card__name">{g.name}</div>
-                <div className="cm-group-card__meta">
-                  {g._count.posts > 0 ? (
-                    <>
-                      <strong>{g._count.posts}</strong> 帖
-                    </>
-                  ) : (
-                    "暂无讨论，成为第一个发帖的人"
-                  )}
+          {/* 段一：我加入的分区 */}
+          <section className="cm-v2-section">
+            <h2 className="cm-section-title">
+              <span className="num">/ 01</span> 我加入的分区
+            </h2>
+            {hasJoined ? (
+              <>
+                <div className="cm-chip-row">
+                  {joinedGroups.slice(0, 3).map((g) => (
+                    <Link
+                      key={g.id}
+                      href={`/community/${g.slug}`}
+                      className="cm-chip"
+                    >
+                      {g.name}
+                    </Link>
+                  ))}
                 </div>
-              </Link>
-            ))}
-          </div>
+                {atLimit && (
+                  <p className="cm-v2-hint">
+                    已加入 3 个分区（上限），想加入新分区请先在「我的 · 我的分区」退出一个
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="cm-v2-hint">还没加入任何分区，看看下面的推荐？</p>
+            )}
+          </section>
 
-          {featured.length > 0 ? (
-            <>
+          {/* 段二：推荐加入 */}
+          {recommended.length > 0 && !atLimit && (
+            <section className="cm-v2-section">
               <h2 className="cm-section-title">
-                <span className="num">/ 02</span> 精选 / 官方
+                <span className="num">/ 02</span> 推荐加入
               </h2>
-              <div className="cm-post-list">
-                {featured.map((p) => (
-                  <PostCard key={p.id} post={p} />
+              <div className="cm-rec-grid">
+                {recommended.map(({ group, matchedKeywords }) => {
+                  const reason =
+                    matchedKeywords.length > 0
+                      ? `因为你填了「${matchedKeywords[0]}」相关症状`
+                      : "与你填写的症状相关";
+                  return (
+                    <div key={group.id} className="cm-rec-card">
+                      <div
+                        className="cm-rec-card__cover"
+                        style={{
+                          background: `hsl(${(group.sortOrder * 47 + 200) % 360} 40% 70%)`,
+                        }}
+                      />
+                      <div className="cm-rec-card__body">
+                        <div className="cm-rec-card__name">{group.name}</div>
+                        {group.introduction && (
+                          <div className="cm-rec-card__intro">{group.introduction}</div>
+                        )}
+                        <div className="cm-rec-card__reason">{reason}</div>
+                        <div className="cm-rec-card__foot">
+                          <Link
+                            href={`/community/join/${group.slug}`}
+                            className="btn btn--ink btn--sm"
+                          >
+                            加入
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* 段三：其他可加入分区 */}
+          {others.length > 0 && !atLimit && (
+            <section className="cm-v2-section">
+              <h2 className="cm-section-title">
+                <span className="num">{recommended.length > 0 ? "/ 03" : "/ 02"}</span> 其他可加入分区
+              </h2>
+              <div className="cm-rec-grid">
+                {others.map((group) => (
+                  <div key={group.id} className="cm-rec-card">
+                    <div
+                      className="cm-rec-card__cover"
+                      style={{
+                        background: `hsl(${(group.sortOrder * 37 + 120) % 360} 30% 75%)`,
+                      }}
+                    />
+                    <div className="cm-rec-card__body">
+                      <div className="cm-rec-card__name">{group.name}</div>
+                      {group.introduction && (
+                        <div className="cm-rec-card__intro">{group.introduction}</div>
+                      )}
+                      <div className="cm-rec-card__foot">
+                        <Link
+                          href={`/community/join/${group.slug}`}
+                          className="btn btn--ink btn--sm"
+                        >
+                          加入
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </>
-          ) : null}
+            </section>
+          )}
 
-          <h2 className="cm-section-title">
-            <span className="num">/ 03</span> 最新讨论
-          </h2>
-          {latest.length > 0 ? (
-            <div className="cm-post-list">
-              {latest.map((p) => (
-                <PostCard key={p.id} post={p} />
-              ))}
-            </div>
-          ) : (
+          {/* 空状态：无任何分区 */}
+          {allGroups.length === 0 && (
             <div className="cm-empty">
-              <h3>还没有讨论</h3>
-              <p>成为第一个发帖的人，把你的疑问或经验留下来。</p>
-              <div style={{ marginTop: 14 }}>
-                <Link href="/community/new" className="btn btn--ink">
-                  发布新帖 <span className="arrow">→</span>
-                </Link>
-              </div>
+              <h3>社区正在准备中</h3>
+              <p>分区即将开放，请稍后再来。</p>
             </div>
           )}
         </div>

@@ -11,6 +11,7 @@ const CATEGORIES: { value: string; label: string }[] = [
   { value: "trial", label: "试验配图" },
   { value: "faq", label: "FAQ 配图" },
   { value: "avatar", label: "头像占位" },
+  { value: "step", label: "首页步骤配图（step）" },
 ];
 
 export function MediaUploadForm() {

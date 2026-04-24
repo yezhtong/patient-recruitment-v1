@@ -21,12 +21,24 @@ export default async function ComposePostPage({
   }
 
   const sp = await searchParams;
-  const groups = await prisma.communityGroup.findMany({
-    where: { isEnabled: true },
-    orderBy: { sortOrder: "asc" },
+
+  const memberships = await prisma.userGroupMembership.findMany({
+    where: { userId: session.userId, leftAt: null },
+    include: {
+      group: {
+        select: { slug: true, name: true, isEnabled: true, sortOrder: true },
+      },
+    },
   });
 
-  const defaultGroup = sp.group ?? groups[0]?.slug ?? "";
+  const joinedGroups = memberships
+    .filter((m) => m.group.isEnabled)
+    .sort((a, b) => a.group.sortOrder - b.group.sortOrder)
+    .map((m) => ({ slug: m.group.slug, name: m.group.name }));
+
+  const defaultGroup = sp.group ?? joinedGroups[0]?.slug ?? "";
+
+  const noMembership = joinedGroups.length === 0;
 
   return (
     <SiteShell current="community">
@@ -47,38 +59,49 @@ export default async function ComposePostPage({
             发布新帖 <em style={{ color: "var(--accent)", fontStyle: "italic" }}>/ 分享经验</em>
           </h1>
 
-          <div className="cm-compose-rules">
-            <h2>★ 在发布之前，请确认</h2>
-            <ul>
-              <li>
-                <span className="num">/ 01</span>
-                <span>不要留任何联系方式（手机号、微信号、邮箱、QQ 群号）</span>
-              </li>
-              <li>
-                <span className="num">/ 02</span>
-                <span>不要推荐、售卖或代购药品、保健品、诊疗方案</span>
-              </li>
-              <li>
-                <span className="num">/ 03</span>
-                <span>不要承诺「包入组、代办入组、保证疗效」等内容</span>
-              </li>
-              <li>
-                <span className="num">/ 04</span>
-                <span>涉及个人隐私可以选择「匿名发布」</span>
-              </li>
-            </ul>
-            <p
-              style={{
-                marginTop: 16,
-                color: "rgba(253,250,243,0.7)",
-                fontSize: 13,
-              }}
-            >
-              违反以上内容会被自动拦截或转人工审核。敏感词库会持续更新。
-            </p>
-          </div>
-
-          <ComposeForm groups={groups} defaultGroupSlug={defaultGroup} />
+          {noMembership ? (
+            <div className="cm-no-membership-block">
+              <h2>请先加入一个分区再发帖</h2>
+              <p>你还没有加入任何病种分区。先去社区首页选一个感兴趣的分区加入，才能在该分区发布帖子。</p>
+              <a href="/community" className="btn btn--ink">
+                去社区首页加入分区
+              </a>
+            </div>
+          ) : (
+            <>
+              <div className="cm-compose-rules">
+                <h2>★ 在发布之前，请确认</h2>
+                <ul>
+                  <li>
+                    <span className="num">/ 01</span>
+                    <span>不要留任何联系方式（手机号、微信号、邮箱、QQ 群号）</span>
+                  </li>
+                  <li>
+                    <span className="num">/ 02</span>
+                    <span>不要推荐、售卖或代购药品、保健品、诊疗方案</span>
+                  </li>
+                  <li>
+                    <span className="num">/ 03</span>
+                    <span>不要承诺「包入组、代办入组、保证疗效」等内容</span>
+                  </li>
+                  <li>
+                    <span className="num">/ 04</span>
+                    <span>涉及个人隐私可以选择「匿名发布」</span>
+                  </li>
+                </ul>
+                <p
+                  style={{
+                    marginTop: 16,
+                    color: "rgba(253,250,243,0.7)",
+                    fontSize: 13,
+                  }}
+                >
+                  违反以上内容会被自动拦截或转人工审核。敏感词库会持续更新。
+                </p>
+              </div>
+              <ComposeForm groups={joinedGroups} defaultGroupSlug={defaultGroup} />
+            </>
+          )}
         </div>
       </main>
     </SiteShell>

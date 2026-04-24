@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { anonymousTag, relativeTime } from "@/lib/community-utils";
+import { RoleBadge } from "@/components/RoleBadge";
 
 type PostCardInput = {
   id: string;
@@ -52,6 +53,7 @@ export function PostCard({ post }: { post: PostCardInput }) {
       <p className="cm-post-card__summary">{post.content}</p>
       <div className="cm-post-card__meta">
         <span>{authorLabel}</span>
+        <RoleBadge role={post.authorRole} />
         <span>·</span>
         <span>{relativeTime(post.createdAt)}</span>
         {post._count ? (

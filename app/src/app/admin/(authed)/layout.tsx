@@ -93,6 +93,21 @@ export default async function AdminAuthedLayout({
             <span className="count">{faqCount}</span>
           </Link>
           {session.role === "admin" ? (
+            <Link href="/admin/users">
+              <span>用户管理</span>
+            </Link>
+          ) : null}
+          {session.role === "admin" ? (
+            <Link href="/admin/ai-account">
+              <span>AI 账号</span>
+            </Link>
+          ) : null}
+          {session.role === "admin" ? (
+            <Link href="/admin/llm-logs">
+              <span>LLM 日志</span>
+            </Link>
+          ) : null}
+          {session.role === "admin" ? (
             <Link href="/admin/audit-logs">
               <span>审计日志</span>
             </Link>

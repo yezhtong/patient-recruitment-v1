@@ -57,9 +57,13 @@ export function AuthLoginForm({ next }: { next?: string }) {
         return;
       }
       setInfo(res.isNew ? "已为你创建账号并登录" : "登录成功");
-      const safeNext =
-        next && next.startsWith("/") && !next.startsWith("//") ? next : "/me";
-      router.push(safeNext);
+      let dest: string;
+      if (res.isNew) {
+        dest = "/auth/register/symptoms";
+      } else {
+        dest = next && next.startsWith("/") && !next.startsWith("//") ? next : "/me";
+      }
+      router.push(dest);
       router.refresh();
     });
   }

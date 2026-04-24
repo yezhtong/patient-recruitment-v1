@@ -18,20 +18,93 @@ const STATUS_LABEL: Record<string, string> = {
   hidden: "已隐藏",
 };
 
+const AI_RESULT_LABEL: Record<string, string> = {
+  pass: "pass",
+  reject: "reject",
+  review_needed: "待人审",
+};
+
+const AI_CONFIDENCE_OPTIONS = [
+  { value: "", label: "全部置信度" },
+  { value: "low", label: "低置信度 (<50%)" },
+  { value: "high", label: "高置信度 (≥80%)" },
+];
+
 function fmtDateTime(d: Date) {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+function AiResultChip({ result }: { result: string | null }) {
+  if (!result) {
+    return <span className="chip chip--closed">未审</span>;
+  }
+  const cls =
+    result === "pass"
+      ? "chip--qualified"
+      : result === "reject"
+        ? "chip--rejected"
+        : "chip--contacted";
+  return (
+    <span className={`chip ${cls}`}>{AI_RESULT_LABEL[result] ?? result}</span>
+  );
+}
+
+function ConfidenceBar({ value }: { value: number | null }) {
+  if (value === null) return <span className="muted">—</span>;
+  const pct = Math.round(value * 100);
+  const color =
+    value >= 0.8
+      ? "var(--success-500)"
+      : value >= 0.5
+        ? "var(--warning-500)"
+        : "var(--danger-500)";
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 80 }}>
+      <div
+        style={{
+          flex: 1,
+          height: 6,
+          background: "var(--ink-100)",
+          borderRadius: 999,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            width: `${pct}%`,
+            height: "100%",
+            background: color,
+            borderRadius: 999,
+          }}
+        />
+      </div>
+      <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--ink-600)", flexShrink: 0 }}>
+        {pct}%
+      </span>
+    </div>
+  );
+}
+
 export default async function AdminCommunityPostsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; group?: string; risk?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    group?: string;
+    risk?: string;
+    aiResult?: string;
+    confidence?: string;
+    overridden?: string;
+  }>;
 }) {
   const sp = await searchParams;
   const status = (sp.status ?? "").trim();
   const groupSlug = (sp.group ?? "").trim();
   const riskOnly = sp.risk === "1";
+  const aiResultFilter = (sp.aiResult ?? "").trim();
+  const confidenceFilter = (sp.confidence ?? "").trim();
+  const overriddenOnly = sp.overridden === "1";
 
   const groups = await prisma.communityGroup.findMany({
     select: { id: true, slug: true, name: true },
@@ -41,14 +114,17 @@ export default async function AdminCommunityPostsPage({
     ? groups.find((g) => g.slug === groupSlug)
     : null;
 
-  const where: {
-    reviewStatus?: string;
-    groupId?: string;
-    sensitiveHits?: { some: Record<string, never> };
-  } = {};
+  const where: Record<string, unknown> = {};
   if (status) where.reviewStatus = status;
   if (groupFilter) where.groupId = groupFilter.id;
   if (riskOnly) where.sensitiveHits = { some: {} };
+  if (aiResultFilter) where.aiReviewResult = aiResultFilter;
+  if (overriddenOnly) where.humanOverride = { not: null };
+  if (confidenceFilter === "low") {
+    where.aiReviewConfidence = { lt: 0.5 };
+  } else if (confidenceFilter === "high") {
+    where.aiReviewConfidence = { gte: 0.8 };
+  }
 
   const posts = await prisma.communityPost.findMany({
     where,
@@ -61,6 +137,8 @@ export default async function AdminCommunityPostsPage({
     take: 200,
   });
 
+  const hasFilter = !!(status || groupSlug || riskOnly || aiResultFilter || confidenceFilter || overriddenOnly);
+
   return (
     <>
       <div className="admin-topbar">
@@ -72,7 +150,7 @@ export default async function AdminCommunityPostsPage({
         </div>
         <div className="admin-actions">
           <Link href="/admin/community/sensitive-hits" className="btn-admin">
-            🔔 风险命中统计
+            风险命中统计
           </Link>
         </div>
       </div>
@@ -93,14 +171,31 @@ export default async function AdminCommunityPostsPage({
             </option>
           ))}
         </select>
+        <select name="aiResult" defaultValue={aiResultFilter}>
+          <option value="">全部 AI 结论</option>
+          <option value="pass">AI 通过</option>
+          <option value="reject">AI 拒绝</option>
+          <option value="review_needed">待人审</option>
+        </select>
+        <select name="confidence" defaultValue={confidenceFilter}>
+          {AI_CONFIDENCE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
         <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 14 }}>
           <input type="checkbox" name="risk" value="1" defaultChecked={riskOnly} />
           仅看有风险命中
         </label>
+        <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 14 }}>
+          <input type="checkbox" name="overridden" value="1" defaultChecked={overriddenOnly} />
+          仅看人工覆盖
+        </label>
         <button type="submit" className="btn-admin">
           查询
         </button>
-        {(status || groupSlug || riskOnly) && (
+        {hasFilter && (
           <Link href="/admin/community/posts" className="btn-admin btn-admin--ghost">
             清空
           </Link>
@@ -115,6 +210,9 @@ export default async function AdminCommunityPostsPage({
             <th>分区</th>
             <th>作者</th>
             <th>状态</th>
+            <th>AI 判断</th>
+            <th>AI 置信度</th>
+            <th>AI 理由</th>
             <th>风险</th>
             <th></th>
           </tr>
@@ -152,6 +250,37 @@ export default async function AdminCommunityPostsPage({
                 </span>
               </td>
               <td>
+                <AiResultChip result={p.aiReviewResult} />
+                {p.humanOverride && (
+                  <div style={{ fontSize: 11, color: "var(--warning-700)", marginTop: 3 }}>
+                    已人工覆盖
+                  </div>
+                )}
+              </td>
+              <td>
+                <ConfidenceBar value={p.aiReviewConfidence} />
+              </td>
+              <td style={{ maxWidth: 160 }}>
+                {p.aiReviewReason ? (
+                  <span
+                    title={p.aiReviewReason}
+                    style={{
+                      fontSize: 12,
+                      color: "var(--ink-600)",
+                      display: "block",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      maxWidth: 160,
+                    }}
+                  >
+                    {p.aiReviewReason}
+                  </span>
+                ) : (
+                  <span className="muted">—</span>
+                )}
+              </td>
+              <td>
                 {p._count.sensitiveHits > 0 ? (
                   <span
                     style={{
@@ -160,7 +289,7 @@ export default async function AdminCommunityPostsPage({
                       fontSize: 12,
                     }}
                   >
-                    🔔 {p._count.sensitiveHits} 项
+                    {p._count.sensitiveHits} 项
                   </span>
                 ) : (
                   <span className="muted">—</span>
@@ -179,7 +308,7 @@ export default async function AdminCommunityPostsPage({
           {posts.length === 0 && (
             <tr>
               <td
-                colSpan={7}
+                colSpan={10}
                 style={{ textAlign: "center", padding: "48px 0", color: "var(--gray-500)" }}
               >
                 暂无帖子

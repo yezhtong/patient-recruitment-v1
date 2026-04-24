@@ -5,6 +5,7 @@ import { SiteShell } from "@/components/SiteShell";
 import { prisma } from "@/lib/prisma";
 import { anonymousTag, relativeTime } from "@/lib/community-utils";
 import { getUserSession, isLoggedIn } from "@/lib/user-session";
+import { RoleBadge } from "@/components/RoleBadge";
 import { CommentForm } from "./CommentForm";
 import "../../community.css";
 
@@ -133,6 +134,7 @@ export default async function CommunityPostDetailPage({
                   {isOfficial ? "JT" : authorLabel.slice(-1)}
                 </span>
                 <strong>{authorLabel}</strong>
+                <RoleBadge role={post.authorRole} />
                 <span>·</span>
                 <span>{relativeTime(post.createdAt)}</span>
                 <span>·</span>
@@ -220,6 +222,7 @@ export default async function CommunityPostDetailPage({
                             {cIsOfficial ? "JT" : cLabel.slice(-1)}
                           </span>
                           <strong style={{ color: "var(--ink-900)" }}>{cLabel}</strong>
+                          <RoleBadge role={c.authorRole} />
                           <span>·</span>
                           <span>{relativeTime(c.createdAt)}</span>
                         </div>

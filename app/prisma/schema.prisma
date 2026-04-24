@@ -142,6 +142,14 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  // M8.3 扩展
+  role              String    @default("patient")
+  isSystemAi        Boolean   @default(false)
+  symptomsText      String?
+  aiDiseaseTags     String?
+  symptomsUpdatedAt DateTime?
+  lastMatchedAt     DateTime?
+
   applications    Application[]
   leads           Lead[]   @relation("UserLeads")
   posts           CommunityPost[] @relation("UserPosts")
@@ -149,6 +157,11 @@ model User {
 
   // M8.1 反向关系：一名用户最多一条有效锁
   lock            AccountLock?
+
+  // M8.3 反向关系
+  medicalRecords   UserMedicalRecord[]
+  groupMemberships UserGroupMembership[]
+  matchSessions    MatchAssistantSession[]
 }
 
 // 短信验证码（一次性，10 分钟有效）
@@ -177,7 +190,14 @@ model CommunityGroup {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // M8.3 扩展
+  headerImageUrl              String?
+  recommendedDiseaseKeywords  String?
+  allowAiComment              Boolean @default(true)
+  allowDoctorComment          Boolean @default(true)
+
   posts         CommunityPost[]
+  memberships   UserGroupMembership[]
 
   @@index([isEnabled, sortOrder])
 }
@@ -205,6 +225,15 @@ model CommunityPost {
 
   viewCount       Int      @default(0)
 
+  // M8.3 扩展
+  tags               String?
+  aiReviewedAt       DateTime?
+  aiReviewResult     String?
+  aiReviewConfidence Float?
+  aiReviewReason     String?
+  humanOverride      String?
+  isAiGenerated      Boolean @default(false)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -230,6 +259,14 @@ model CommunityComment {
   reviewStatus  String   @default("approved")
   reviewedAt    DateTime?
   reviewedBy    String?
+
+  // M8.3 扩展
+  aiReviewedAt       DateTime?
+  aiReviewResult     String?
+  aiReviewConfidence Float?
+  aiReviewReason     String?
+  humanOverride      String?
+  isAiGenerated      Boolean @default(false)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -373,7 +410,7 @@ model MediaAsset {
   filename     String   // 存盘文件名（cuid.ext）
   originalName String
   url          String   // 对外 URL  /media/{category}/xxx.ext
-  category     String   // hero / community / trial / faq / avatar
+  category     String   // hero / community / trial / faq / avatar / step
   width        Int?
   height       Int?
   sizeBytes    Int?
@@ -381,6 +418,8 @@ model MediaAsset {
   note         String?
   uploadedBy   String?  // OperatorUser.id
   isEnabled    Boolean  @default(true)
+  overlayLabel String?  // M8.4 新增：hero 轮播左下角徽标（"真实研究中心"）；非 hero 位可空
+  overlayText  String?  // M8.4 新增：hero 轮播左下角正文（"北京协和医院 · 乳腺肿瘤门诊"）；非 hero 位可空
   createdAt    DateTime @default(now())
 
   @@index([category, isEnabled, createdAt])
@@ -458,4 +497,68 @@ model LlmCallLog {
 
   @@index([scenario, createdAt])
   @@index([provider, status, createdAt])
+}
+
+// ========== M8.3 · 账号体系 + 社区重做 ==========
+
+model UserMedicalRecord {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filename     String
+  originalName String
+  url          String
+  mimeType     String
+  sizeBytes    Int
+  note         String?
+  isReviewed   Boolean   @default(false)
+  reviewedAt   DateTime?
+  reviewedBy   String?
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([isReviewed, createdAt])
+  @@index([deletedAt])
+}
+
+model UserGroupMembership {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  groupId             String
+  group               CommunityGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  joinedAt            DateTime  @default(now())
+  leftAt              DateTime?
+  joinSymptoms        String?
+  joinDiseaseTagsJson String?
+
+  @@unique([userId, groupId])
+  @@index([userId, leftAt])
+  @@index([groupId, leftAt])
+}
+
+model MatchAssistantSession {
+  id                    String    @id @default(cuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transcript            String
+  symptomsSnapshot      String?
+  recommendedTrialIds   String?
+  recommendedDepartment String?
+  symptomDirection      String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId, createdAt])
+}
+
+model AiAccountTemplate {
+  id              String    @id @default(cuid())
+  scenario        String    @unique
+  isEnabled       Boolean   @default(true)
+  triggerRule     String
+  contentTemplate String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 }

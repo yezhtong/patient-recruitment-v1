@@ -2,12 +2,17 @@ import Link from "next/link";
 import { SiteShell } from "@/components/SiteShell";
 import { prisma } from "@/lib/prisma";
 import { summarizeCategories } from "@/lib/trials-filter";
+import { getHeroSlides } from "@/lib/media";
+import { HeroCarousel, type HeroSlide } from "./HeroCarousel";
+import { SmartImage } from "@/components/SmartImage";
 import "./styles.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const DEFAULT_HERO_IMAGE =
+  "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=900&h=1100&fit=crop&auto=format&q=80";
 
 export default async function HomePage() {
-  const [featured, allPublic] = await Promise.all([
+  const [featured, allPublic, heroMediaList, stepMediaList, avatarMediaList] = await Promise.all([
     prisma.clinicalTrial.findMany({
       where: { isPublic: true, status: "recruiting" },
       orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
@@ -17,8 +22,53 @@ export default async function HomePage() {
       where: { isPublic: true },
       select: { disease: true },
     }),
+    getHeroSlides(5),
+    prisma.mediaAsset.findMany({
+      where: { category: "step", isEnabled: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    }),
+    prisma.mediaAsset.findMany({
+      where: { category: "avatar", isEnabled: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    }),
   ]);
   const categoryCards = summarizeCategories(allPublic);
+  const fallbackHeroSrc = DEFAULT_HERO_IMAGE;
+  const fallbackHeroAlt = "医生与患者温暖交流的场景";
+  const heroSlides: HeroSlide[] = heroMediaList.map((m) => ({
+    id: m.id,
+    url: m.url,
+    note: m.note,
+    overlayLabel: m.overlayLabel,
+    overlayText: m.overlayText,
+  }));
+
+  const fallbackStepImg = [
+    "https://images.unsplash.com/photo-1580281657527-47f249e8f4df?w=600&h=450&fit=crop&auto=format&q=80",
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=450&fit=crop&auto=format&q=80",
+    "https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&h=450&fit=crop&auto=format&q=80",
+  ];
+  const fallbackStepAlt = ["在手机上填写资料", "专人主动联系沟通", "医生门诊评估"];
+
+  const steps = [
+    { num: "01", title: "你在网上填一份资料", desc: "选一个项目，回答几个简单的问题。已登录用户基础资料会自动带入，大概 2 分钟。" },
+    { num: "02", title: "我们的同事会联系你", desc: "24 小时内会有专人通过电话或微信联系你，和你确认情况，回答你的疑问。" },
+    { num: "03", title: "你去医院见医生", desc: "合适的话，我们会帮你预约离你最近的研究中心。医生会做更详细的评估。" },
+  ];
+
+  const fallbackAvatarImg = [
+    "https://i.pravatar.cc/150?img=47",
+    "https://i.pravatar.cc/150?img=60",
+    "https://i.pravatar.cc/150?img=44",
+  ];
+
+  const stories = [
+    { name: "张女士 · 42 岁", meta: "乳腺癌 · 上海", quote: `"我以为'临床试验'就是当小白鼠，后来发现完全不是这样。"` },
+    { name: "李先生 · 56 岁", meta: "2 型糖尿病 · 北京", quote: `"医生主动给我打电话，把每一步都讲得很清楚，没有催我。"` },
+    { name: "王女士 · 35 岁", meta: "医美 / 法令纹 · 杭州", quote: `"全程没花过一分钱，效果出乎我的预期。后来推荐了我妈妈也来。"` },
+  ];
 
   const orgJsonLd = {
     "@context": "https://schema.org",
@@ -99,19 +149,11 @@ export default async function HomePage() {
               <span className="hero-pill__lbl">位病友本周已开始预筛</span>
             </div>
 
-            <figure className="hero-photo">
-              <img
-                src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=900&h=1100&fit=crop&auto=format&q=80"
-                alt="医生与患者温暖交流的场景"
-                loading="eager"
-                width={900}
-                height={1100}
-              />
-              <div className="hero-photo__overlay">
-                <div className="hero-photo__overlay-label">真实研究中心</div>
-                <div className="hero-photo__overlay-text">北京协和医院 · 乳腺肿瘤门诊</div>
-              </div>
-            </figure>
+            <HeroCarousel
+              slides={heroSlides}
+              fallbackSrc={fallbackHeroSrc}
+              fallbackAlt={fallbackHeroAlt}
+            />
           </div>
         </div>
       </section>
@@ -259,20 +301,26 @@ export default async function HomePage() {
           </div>
 
           <div className="steps">
-            {[
-              { num: "01", title: "你在网上填一份资料", desc: "选一个项目，回答几个简单的问题。已登录用户基础资料会自动带入，大概 2 分钟。", img: "https://images.unsplash.com/photo-1580281657527-47f249e8f4df?w=600&h=450&fit=crop&auto=format&q=80", alt: "在手机上填写资料" },
-              { num: "02", title: "我们的同事会联系你", desc: "24 小时内会有专人通过电话或微信联系你，和你确认情况，回答你的疑问。", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&h=450&fit=crop&auto=format&q=80", alt: "专人主动联系沟通" },
-              { num: "03", title: "你去医院见医生", desc: "合适的话，我们会帮你预约离你最近的研究中心。医生会做更详细的评估。", img: "https://images.unsplash.com/photo-1666214280557-f1b5022eb634?w=600&h=450&fit=crop&auto=format&q=80", alt: "医生门诊评估" },
-            ].map((s) => (
-              <div key={s.num} className="step">
-                <div style={{ aspectRatio: "4/3", borderRadius: "var(--r-lg)", overflow: "hidden", marginBottom: 20, background: "var(--gray-100)" }}>
-                  <img src={s.img} alt={s.alt} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            {steps.map((s, i) => {
+              const imgSrc = stepMediaList[i]?.url ?? fallbackStepImg[i];
+              const imgAlt = stepMediaList[i]?.note ?? fallbackStepAlt[i];
+              return (
+                <div key={s.num} className="step">
+                  <div style={{ aspectRatio: "4/3", borderRadius: "var(--r-lg)", overflow: "hidden", marginBottom: 20, background: "var(--gray-100)" }}>
+                    <SmartImage
+                      src={imgSrc}
+                      fallbackSrc={fallbackStepImg[i]}
+                      alt={imgAlt}
+                      loading="lazy"
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  </div>
+                  <div className="step__num">{s.num}</div>
+                  <h4>{s.title}</h4>
+                  <p>{s.desc}</p>
                 </div>
-                <div className="step__num">{s.num}</div>
-                <h4>{s.title}</h4>
-                <p>{s.desc}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -293,24 +341,27 @@ export default async function HomePage() {
 
         <div className="container container--wide" style={{ padding: 0 }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 1, background: "rgba(255,255,255,.08)", borderTop: "1px solid rgba(255,255,255,.08)", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-            {[
-              { img: "https://i.pravatar.cc/150?img=47", name: "张女士 · 42 岁", meta: "乳腺癌 · 上海", quote: `"我以为'临床试验'就是当小白鼠，后来发现完全不是这样。"` },
-              { img: "https://i.pravatar.cc/150?img=60", name: "李先生 · 56 岁", meta: "2 型糖尿病 · 北京", quote: `"医生主动给我打电话，把每一步都讲得很清楚，没有催我。"` },
-              { img: "https://i.pravatar.cc/150?img=44", name: "王女士 · 35 岁", meta: "医美 / 法令纹 · 杭州", quote: `"全程没花过一分钱，效果出乎我的预期。后来推荐了我妈妈也来。"` },
-            ].map((s) => (
-              <div key={s.name} className="story-card">
-                <div className="story-card__head">
-                  <div className="avatar avatar--lg">
-                    <img src={s.img} alt={`${s.name}头像`} />
+            {stories.map((s, i) => {
+              const avatarSrc = avatarMediaList[i]?.url ?? fallbackAvatarImg[i];
+              return (
+                <div key={s.name} className="story-card">
+                  <div className="story-card__head">
+                    <div className="avatar avatar--lg">
+                      <SmartImage
+                        src={avatarSrc}
+                        fallbackSrc={fallbackAvatarImg[i]}
+                        alt={`${s.name}头像`}
+                      />
+                    </div>
+                    <div className="story-card__who">
+                      <span className="story-card__name">{s.name}</span>
+                      <span className="story-card__meta">{s.meta}</span>
+                    </div>
                   </div>
-                  <div className="story-card__who">
-                    <span className="story-card__name">{s.name}</span>
-                    <span className="story-card__meta">{s.meta}</span>
-                  </div>
+                  <p className="story-card__quote">{s.quote}</p>
                 </div>
-                <p className="story-card__quote">{s.quote}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

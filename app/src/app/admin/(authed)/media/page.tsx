@@ -15,6 +15,7 @@ const CATEGORIES: { key: string; label: string }[] = [
   { key: "trial", label: "试验配图" },
   { key: "faq", label: "FAQ 配图" },
   { key: "avatar", label: "头像占位" },
+  { key: "step", label: "首页步骤" },
 ];
 
 function formatBytes(b: number | null): string {
@@ -183,7 +184,14 @@ export default async function AdminMediaPage({
                 >
                   {asset.url}
                 </code>
-                <MediaCardActions id={asset.id} isEnabled={asset.isEnabled} url={asset.url} />
+                <MediaCardActions
+                  id={asset.id}
+                  isEnabled={asset.isEnabled}
+                  url={asset.url}
+                  category={asset.category}
+                  overlayLabel={asset.overlayLabel}
+                  overlayText={asset.overlayText}
+                />
               </div>
             </div>
           ))}

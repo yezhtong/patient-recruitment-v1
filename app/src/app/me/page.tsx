@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/SiteShell";
 import { prisma } from "@/lib/prisma";
 import { getUserSession, isLoggedIn } from "@/lib/user-session";
 import { userLogout } from "@/lib/actions/user-auth";
+import { MyRecordsSection } from "./MyRecordsSection";
 import "./styles.css";
 
 export const metadata = {
@@ -85,7 +86,7 @@ export default async function MyApplicationsPage({
 
   const { filter = "all" } = await searchParams;
 
-  const [user, allApps] = await Promise.all([
+  const [user, allApps, medicalRecords] = await Promise.all([
     prisma.user.findUnique({ where: { id: session.userId } }),
     prisma.application.findMany({
       where: { userId: session.userId },
@@ -103,6 +104,16 @@ export default async function MyApplicationsPage({
         },
       },
       orderBy: { createdAt: "desc" },
+    }),
+    prisma.userMedicalRecord.findMany({
+      where: { userId: session.userId, deletedAt: null },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        originalName: true,
+        sizeBytes: true,
+        createdAt: true,
+      },
     }),
   ]);
 
@@ -309,6 +320,8 @@ export default async function MyApplicationsPage({
                   已显示全部 {total} 条记录
                 </p>
               ) : null}
+
+              <MyRecordsSection initialRecords={medicalRecords} />
             </section>
           </div>
         </div>

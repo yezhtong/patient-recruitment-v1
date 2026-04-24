@@ -111,6 +111,7 @@ class MockLlmProvider implements LlmProvider {
 
   async chat(input: LlmChatInput): Promise<LlmChatOutput> {
     const lower = input.user.toLowerCase();
+    const systemLower = (input.system ?? "").toLowerCase();
 
     // 启发式：根据关键词决定返回哪份 fixture
     let text: string;
@@ -153,6 +154,14 @@ class MockLlmProvider implements LlmProvider {
         { label: "疑似心血管相关", keyword: "cardiovascular", confidence: 0.75 },
         { label: "一般不适", keyword: "general_discomfort", confidence: 0.6 },
       ]);
+    } else if (systemLower.includes("临床试验推荐助手") || lower.includes("readytorecommend")) {
+      // match_assistant — 首轮问症状
+      text = JSON.stringify({
+        symptomDirection: "提示关注心血管系统",
+        suggestedDepartment: "心内科",
+        followUpQuestions: ["你的血压大概在什么范围？有没有做过相关检查？"],
+        readyToRecommend: false,
+      });
     } else {
       // 通用兜底
       text = "[Mock] 这是 MockLlmProvider 的默认响应。请配置 DEEPSEEK_API_KEY 以启用真实模型。";

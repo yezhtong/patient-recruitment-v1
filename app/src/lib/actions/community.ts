@@ -7,6 +7,8 @@ import { getUserSession } from "@/lib/user-session";
 import { requireAdmin } from "@/lib/admin-session";
 import { scanText, summarizeHits } from "@/lib/sensitive-words";
 import { writeAuditLog } from "@/lib/audit";
+import { reviewContent } from "@/lib/community-review";
+import { triggerFaqIfPostKeyword } from "@/lib/ai-account";
 
 const postTypeEnum = z.enum(["question", "experience"]);
 const createPostSchema = z.object({
@@ -27,6 +29,8 @@ export type CreatePostResult =
   | {
       ok: false;
       error: string;
+      status?: "rejected";
+      reason?: string;
       hits?: Array<{ keyword: string; riskType: string; riskLevel: string }>;
     };
 
@@ -55,39 +59,50 @@ export async function createPost(input: {
     return { ok: false, error: "分区不存在或已关闭" };
   }
 
-  // 敏感词扫描
+  const author = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { role: true },
+  });
+
+  const outcome = await reviewContent({
+    scenario: "post",
+    title: data.title,
+    content: data.content,
+    authorUserId: session.userId,
+  });
+
+  if (outcome.reviewStatus === "rejected") {
+    return {
+      ok: false,
+      error: "内容审核未通过，无法发布。",
+      status: "rejected",
+      reason: outcome.aiReviewReason,
+      hits: outcome.sensitiveHit
+        ? [{ keyword: outcome.sensitiveHit.keyword, riskType: "sensitive", riskLevel: outcome.sensitiveHit.level }]
+        : [],
+    };
+  }
+
+  // 收集敏感词命中（供 DB 记录，AI rejected 的 high 词不会走到这里）
   const hits = [
     ...(await scanText(data.title)),
     ...(await scanText(data.content)),
   ];
-  const summary = summarizeHits(hits);
-
-  if (summary.hasHigh) {
-    return {
-      ok: false,
-      error: "内容包含不允许发布的元素（如联系方式、售药、包入组承诺）。请修改后重新发布。",
-      hits: hits
-        .filter((h) => h.riskLevel === "high")
-        .map((h) => ({
-          keyword: h.keyword,
-          riskType: h.riskType,
-          riskLevel: h.riskLevel,
-        })),
-    };
-  }
-
-  const reviewStatus: "approved" | "pending" = summary.hasMedium ? "pending" : "approved";
 
   const post = await prisma.communityPost.create({
     data: {
       groupId: group.id,
       authorUserId: session.userId,
-      authorRole: "patient",
+      authorRole: author?.role ?? "patient",
       isAnonymous: data.isAnonymous,
       title: data.title,
       content: data.content,
       postType: data.postType,
-      reviewStatus,
+      reviewStatus: outcome.reviewStatus,
+      aiReviewedAt: new Date(),
+      aiReviewResult: outcome.aiReviewResult,
+      aiReviewConfidence: outcome.aiReviewConfidence,
+      aiReviewReason: outcome.aiReviewReason,
       sensitiveHits: {
         create: hits.map((h) => ({
           keyword: h.keyword,
@@ -102,13 +117,15 @@ export async function createPost(input: {
   revalidatePath("/community");
   revalidatePath(`/community/${group.slug}`);
 
+  triggerFaqIfPostKeyword({ postId: post.id }).catch(() => {});
+
   return {
     ok: true,
     postId: post.id,
-    status: reviewStatus,
+    status: outcome.reviewStatus as "approved" | "pending",
     message:
-      reviewStatus === "pending"
-        ? "帖子已提交，包含中风险词，需要运营人工审核（预计 8 小时内）。"
+      outcome.reviewStatus === "pending"
+        ? "帖子已提交，正在审核中（预计 8 小时内）。"
         : "发布成功",
   };
 }
@@ -121,7 +138,7 @@ const createCommentSchema = z.object({
 
 export type CreateCommentResult =
   | { ok: true; commentId: string; status: "approved" | "pending" }
-  | { ok: false; error: string };
+  | { ok: false; error: string; status?: "rejected"; reason?: string };
 
 export async function createComment(input: {
   postId: string;
@@ -141,23 +158,40 @@ export async function createComment(input: {
     return { ok: false, error: "帖子不可用" };
   }
 
-  const hits = await scanText(data.content);
-  const summary = summarizeHits(hits);
-  if (summary.hasHigh) {
+  const author = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { role: true },
+  });
+
+  const outcome = await reviewContent({
+    scenario: "comment",
+    content: data.content,
+    authorUserId: session.userId,
+  });
+
+  if (outcome.reviewStatus === "rejected") {
     return {
       ok: false,
-      error: "评论包含不允许发布的元素，请修改后重试",
+      error: "评论审核未通过，无法发布。",
+      status: "rejected",
+      reason: outcome.aiReviewReason,
     };
   }
 
-  const status: "approved" | "pending" = summary.hasMedium ? "pending" : "approved";
+  const hits = await scanText(data.content);
+
   const comment = await prisma.communityComment.create({
     data: {
       postId: post.id,
       authorUserId: session.userId,
+      authorRole: author?.role ?? "patient",
       isAnonymous: data.isAnonymous,
       content: data.content,
-      reviewStatus: status,
+      reviewStatus: outcome.reviewStatus,
+      aiReviewedAt: new Date(),
+      aiReviewResult: outcome.aiReviewResult,
+      aiReviewConfidence: outcome.aiReviewConfidence,
+      aiReviewReason: outcome.aiReviewReason,
       sensitiveHits: {
         create: hits.map((h) => ({
           keyword: h.keyword,
@@ -169,19 +203,21 @@ export async function createComment(input: {
     },
   });
   revalidatePath(`/community/posts/${post.id}`);
-  return { ok: true, commentId: comment.id, status };
+  return { ok: true, commentId: comment.id, status: outcome.reviewStatus as "approved" | "pending" };
 }
 
 const moderateSchema = z.object({
   postId: z.string(),
   action: z.enum(["approve", "reject", "hide", "feature", "unfeature"]),
   reason: z.string().max(500).optional(),
+  humanOverride: z.string().max(500).optional(),
 });
 
 export async function moderatePost(input: {
   postId: string;
   action: "approve" | "reject" | "hide" | "feature" | "unfeature";
   reason?: string;
+  humanOverride?: string;
 }): Promise<{ ok: boolean; error?: string }> {
   const session = await requireAdmin();
   const parsed = moderateSchema.safeParse(input);
@@ -203,6 +239,7 @@ export async function moderatePost(input: {
       title: true,
       reviewStatus: true,
       isFeatured: true,
+      aiReviewResult: true,
       group: { select: { name: true } },
     },
   });
@@ -214,6 +251,7 @@ export async function moderatePost(input: {
       reviewedAt: new Date(),
       reviewedBy: session.operatorId,
       rejectReason: parsed.data.action === "reject" ? parsed.data.reason ?? null : null,
+      humanOverride: parsed.data.humanOverride ?? null,
     },
   });
   await prisma.communityModerationLog.create({
@@ -221,9 +259,17 @@ export async function moderatePost(input: {
       postId: parsed.data.postId,
       action: parsed.data.action,
       operatorId: session.operatorId,
-      reason: parsed.data.reason,
+      reason: parsed.data.reason ?? parsed.data.humanOverride,
     },
   });
+
+  const aiResult = before?.aiReviewResult ?? null;
+  const humanAction = parsed.data.action;
+  const aiHumanConsistent =
+    aiResult === null
+      ? null
+      : (aiResult === "pass" && humanAction === "approve") ||
+        (aiResult === "reject" && humanAction === "reject");
 
   if (before) {
     await writeAuditLog({
@@ -236,6 +282,9 @@ export async function moderatePost(input: {
         groupName: before.group.name,
         moderationAction: parsed.data.action,
         reason: parsed.data.reason ?? null,
+        humanOverride: parsed.data.humanOverride ?? null,
+        aiReviewResult: aiResult,
+        humanAiConsistent: aiHumanConsistent,
         before: {
           reviewStatus: before.reviewStatus,
           isFeatured: before.isFeatured,
@@ -250,6 +299,64 @@ export async function moderatePost(input: {
 
   revalidatePath("/admin/community/posts");
   revalidatePath(`/admin/community/posts/${parsed.data.postId}`);
+  revalidatePath("/community");
+  return { ok: true };
+}
+
+export async function approveByAi(
+  postId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const session = await requireAdmin();
+
+  const post = await prisma.communityPost.findUnique({
+    where: { id: postId },
+    select: {
+      id: true,
+      title: true,
+      reviewStatus: true,
+      aiReviewResult: true,
+      aiReviewReason: true,
+      group: { select: { name: true } },
+    },
+  });
+  if (!post) return { ok: false, error: "帖子不存在" };
+  if (!post.aiReviewResult) return { ok: false, error: "该帖子尚无 AI 审核结论" };
+
+  const newStatus = post.aiReviewResult === "pass" ? "approved" : "rejected";
+  await prisma.communityPost.update({
+    where: { id: postId },
+    data: {
+      reviewStatus: newStatus,
+      reviewedAt: new Date(),
+      reviewedBy: session.operatorId,
+      rejectReason: post.aiReviewResult === "reject" ? (post.aiReviewReason ?? null) : null,
+      humanOverride: null,
+    },
+  });
+  await prisma.communityModerationLog.create({
+    data: {
+      postId,
+      action: newStatus === "approved" ? "approve" : "reject",
+      operatorId: session.operatorId,
+      reason: "认同 AI 审核结论",
+    },
+  });
+  await writeAuditLog({
+    session,
+    action: "community.post.ai_approve_by_admin",
+    entityType: "community_post",
+    entityId: post.id,
+    summary: `Admin accepted AI decision for post: ${post.title} -> ${newStatus}`,
+    detail: {
+      groupName: post.group.name,
+      aiReviewResult: post.aiReviewResult,
+      humanDecision: newStatus,
+      humanAiConsistent: true,
+    },
+  });
+
+  revalidatePath("/admin/community/posts");
+  revalidatePath(`/admin/community/posts/${postId}`);
   revalidatePath("/community");
   return { ok: true };
 }
