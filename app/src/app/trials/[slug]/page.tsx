@@ -12,6 +12,8 @@ import {
   GUEST_TRIAL_DETAIL_QUOTA,
   shouldLockUserForTrialViews,
 } from "@/lib/rate-limit";
+import { getMediaById, getDiseaseColorClass } from "@/lib/media";
+import { SmartImage } from "@/components/SmartImage";
 import "./styles.css";
 
 export async function generateMetadata({
@@ -182,6 +184,10 @@ export default async function TrialDetailPage({
   const benefitsList = splitLines(trial.benefits);
   const followUpList = splitLines(trial.followUpPlan);
 
+  // M8.5 · T6 · 试验顶图（软删 isEnabled=true，弱关联读取）
+  const coverMedia = await getMediaById(trial.coverMediaId);
+  const colorIndex = getDiseaseColorClass(trial.disease);
+
   const communityGroup = await prisma.communityGroup.findFirst({
     where: { diseaseTag: trial.disease, isEnabled: true },
     select: { slug: true, name: true },
@@ -238,6 +244,31 @@ export default async function TrialDetailPage({
           <span>/</span>
           <strong>当前项目</strong>
         </div>
+
+        {/* M8.5 · T6 · 试验顶图 / 6 色病种色块降级 */}
+        {coverMedia ? (
+          <figure
+            className="trial-cover"
+            role="img"
+            aria-label={`试验配图：${trial.title}`}
+          >
+            <SmartImage
+              src={coverMedia.url}
+              fallbackSrc=""
+              alt=""
+              className="trial-cover__img"
+              loading="eager"
+            />
+          </figure>
+        ) : (
+          <div
+            className={`trial-cover trial-cover--color-${colorIndex}`}
+            role="img"
+            aria-label={`${trial.disease} 病种`}
+          >
+            <span className="trial-cover__disease-name">{trial.disease}</span>
+          </div>
+        )}
 
         <header className="trial-hero">
           <div className="trial-hero__top">

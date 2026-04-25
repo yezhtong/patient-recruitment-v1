@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SiteShell } from "@/components/SiteShell";
 import { prisma } from "@/lib/prisma";
+import { getMediaById } from "@/lib/media";
+import { SmartImage } from "@/components/SmartImage";
 import { PostCard } from "../PostCard";
 import "../community.css";
 
@@ -41,7 +43,8 @@ export default async function CommunityGroupPage({
   });
   if (!group || !group.isEnabled) return notFound();
 
-  const [posts, relatedTrials] = await Promise.all([
+  const [coverMedia, posts, relatedTrials] = await Promise.all([
+    getMediaById(group.coverMediaId),
     prisma.communityPost.findMany({
       where: {
         groupId: group.id,
@@ -75,6 +78,24 @@ export default async function CommunityGroupPage({
             <Link href="/community">社区</Link> <span>/</span>{" "}
             <strong>{group.name}</strong>
           </div>
+
+          {coverMedia ? (
+            <figure
+              className="cm-cover"
+              role="img"
+              aria-label={`${group.name} 病友社区头图`}
+            >
+              <div className="photo-frame photo-frame--wide cm-cover__frame">
+                <SmartImage
+                  src={coverMedia.url}
+                  fallbackSrc="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                  alt=""
+                  className="cm-cover__img"
+                  loading="lazy"
+                />
+              </div>
+            </figure>
+          ) : null}
 
           <section className="cm-hero">
             <span className="eyebrow">★ 病种社区</span>

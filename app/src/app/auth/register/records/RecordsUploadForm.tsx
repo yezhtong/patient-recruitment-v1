@@ -155,10 +155,10 @@ export function RecordsUploadForm({ initialRecords }: { initialRecords: RecordIt
       )}
 
       <div className="rec-cta-group">
-        <Link href="/me" className="btn btn--primary btn--lg">
+        <Link href="/me?recommend=communities" className="btn btn--primary btn--lg">
           完成并进入我的主页 →
         </Link>
-        <Link href="/me" className="rec-skip">
+        <Link href="/me?recommend=communities" className="rec-skip">
           稍后再上传
         </Link>
       </div>

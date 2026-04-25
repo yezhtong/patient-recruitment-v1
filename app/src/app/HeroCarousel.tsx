@@ -12,7 +12,7 @@ export type HeroSlide = {
 
 const FALLBACK_OVERLAY_LABEL = "真实研究中心";
 const FALLBACK_OVERLAY_TEXT = "北京协和医院 · 乳腺肿瘤门诊";
-const AUTOPLAY_INTERVAL = 6000;
+const AUTOPLAY_INTERVAL = 4000;
 const MANUAL_PAUSE_DURATION = 10000;
 
 function useReducedMotion(): boolean {

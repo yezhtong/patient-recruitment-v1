@@ -4,7 +4,10 @@ import { SiteShell } from "@/components/SiteShell";
 import { prisma } from "@/lib/prisma";
 import { getUserSession, isLoggedIn } from "@/lib/user-session";
 import { userLogout } from "@/lib/actions/user-auth";
+import { recommendGroups, type DiseaseTag } from "@/lib/disease-matcher";
 import { MyRecordsSection } from "./MyRecordsSection";
+import type { RecommendedGroup } from "./RecommendModal";
+import { RecommendModalWrapper } from "./RecommendModalWrapper";
 import "./styles.css";
 
 export const metadata = {
@@ -77,14 +80,14 @@ function deriveStages(current: string) {
 export default async function MyApplicationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; recommend?: string }>;
 }) {
   const session = await getUserSession();
   if (!isLoggedIn(session)) {
     redirect("/auth?next=/me");
   }
 
-  const { filter = "all" } = await searchParams;
+  const { filter = "all", recommend } = await searchParams;
 
   const [user, allApps, medicalRecords] = await Promise.all([
     prisma.user.findUnique({ where: { id: session.userId } }),
@@ -116,6 +119,48 @@ export default async function MyApplicationsPage({
       },
     }),
   ]);
+
+  // 推荐分区弹窗：仅当 ?recommend=communities 且 dismissedAt 为 null 时触发
+  let recommendedGroups: RecommendedGroup[] = [];
+  if (recommend === "communities" && user && !user.recommendDismissedAt) {
+    let userTags: DiseaseTag[] = [];
+    if (user.aiDiseaseTags) {
+      try {
+        const parsed: unknown = JSON.parse(user.aiDiseaseTags);
+        if (Array.isArray(parsed)) userTags = parsed as DiseaseTag[];
+      } catch {
+        // malformed json, stay empty
+      }
+    }
+
+    if (userTags.length > 0) {
+      // 查询所有已启用分区（完整对象，因为 recommendGroups 需要 CommunityGroup 类型）
+      const allGroups = await prisma.communityGroup.findMany({
+        where: { isEnabled: true },
+        orderBy: { sortOrder: "asc" },
+      });
+
+      // 排除用户已加入的分区
+      const joinedGroupIds = new Set(
+        (
+          await prisma.userGroupMembership.findMany({
+            where: { userId: session.userId, leftAt: null },
+            select: { groupId: true },
+          })
+        ).map((m) => m.groupId),
+      );
+
+      const notJoinedGroups = allGroups.filter((g) => !joinedGroupIds.has(g.id));
+
+      const results = await recommendGroups(userTags, notJoinedGroups);
+      recommendedGroups = results.slice(0, 3).map((r) => ({
+        id: r.group.id,
+        slug: r.group.slug,
+        name: r.group.name,
+        introduction: r.group.introduction ?? null,
+      }));
+    }
+  }
 
   const total = allApps.length;
   const followingCount = allApps.filter((a) => STAGE_TONE[a.stage] !== "plain").length;
@@ -326,6 +371,12 @@ export default async function MyApplicationsPage({
           </div>
         </div>
       </main>
+
+      {/* 推荐分区弹窗 + 常驻入口：由 server component 预算，传给 client component */}
+      <RecommendModalWrapper
+        recommendedGroups={recommendedGroups}
+        dismissed={!!(user?.recommendDismissedAt)}
+      />
     </SiteShell>
   );
 }

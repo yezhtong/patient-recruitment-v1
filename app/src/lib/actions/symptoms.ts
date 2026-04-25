@@ -2,10 +2,43 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getUserSession, isLoggedIn } from "@/lib/user-session";
 import { analyzeSymptoms, type DiseaseTag } from "@/lib/disease-matcher";
+import { triggerWelcomeIfFirstVisit } from "@/lib/ai-account";
+
+/** M8.5 T8 · fire-and-forget：注册完成后触发 AI 欢迎评论（幂等） */
+async function scheduleWelcome(userId: string): Promise<void> {
+  after(async () => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { welcomeTriggeredAt: true },
+      });
+      if (user?.welcomeTriggeredAt) return; // 幂等：已触发过，跳过
+
+      // 查找第一个允许 AI 评论的社区组
+      const group = await prisma.communityGroup.findFirst({
+        where: { allowAiComment: true },
+        orderBy: { createdAt: "asc" },
+        select: { id: true },
+      });
+      if (!group) return;
+
+      await triggerWelcomeIfFirstVisit({ userId, groupId: group.id });
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: { welcomeTriggeredAt: new Date() },
+      });
+    } catch (err) {
+      console.error("[M8.5 T8] welcome trigger failed:", err);
+      // 不抛，注册流不受影响
+    }
+  });
+}
 
 const symptomsTextSchema = z
   .string()
@@ -82,6 +115,9 @@ export async function saveSymptomsAction(
   revalidatePath("/me");
   revalidatePath("/auth/register/symptoms");
 
+  // M8.5 T8 · fire-and-forget 触发欢迎消息
+  scheduleWelcome(session.userId);
+
   redirect("/auth/register/records");
 }
 
@@ -101,6 +137,9 @@ export async function skipSymptomsAction(): Promise<never> {
         detailJson: null,
       },
     });
+
+    // M8.5 T8 · fire-and-forget 触发欢迎消息（跳过症状路径同样覆盖）
+    scheduleWelcome(session.userId);
   }
   redirect("/auth/register/records");
 }

@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { GroupFormState } from "@/lib/actions/community-groups";
+import { MediaPicker } from "@/components/admin/MediaPicker";
 
 interface Props {
   action: (prev: GroupFormState, fd: FormData) => Promise<GroupFormState>;
@@ -12,6 +13,7 @@ interface Props {
     introduction?: string | null;
     isEnabled?: boolean;
     sortOrder?: number;
+    coverMediaId?: string | null;
   };
   submitLabel: string;
   diseaseOptions?: string[];
@@ -22,6 +24,7 @@ export default function GroupForm({ action, initial, submitLabel, diseaseOptions
   const [state, formAction, pending] = useActionState(action, {} as GroupFormState);
   const initialDiseaseTag = initial?.diseaseTag ?? "";
   const [diseaseTag, setDiseaseTag] = useState(initialDiseaseTag);
+  const [coverMediaId, setCoverMediaId] = useState<string | null>(initial?.coverMediaId ?? null);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     if (
@@ -83,6 +86,19 @@ export default function GroupForm({ action, initial, submitLabel, diseaseOptions
         <div className="field">
           <label htmlFor="introduction">简介</label>
           <textarea id="introduction" name="introduction" defaultValue={initial?.introduction ?? ""} maxLength={500} />
+        </div>
+        {/* 隐藏 input 传 coverMediaId */}
+        <input type="hidden" name="coverMediaId" value={coverMediaId ?? ""} />
+        <div className="field">
+          <label>分区头图（可选）</label>
+          <MediaPicker
+            category="community"
+            value={coverMediaId}
+            onChange={setCoverMediaId}
+          />
+          <span style={{ fontSize: 12, color: "var(--gray-500)", marginTop: 4, display: "block" }}>
+            在患者端分区页顶部展示，建议 21:9 横幅比例
+          </span>
         </div>
         <div className="checkrow">
           <label>

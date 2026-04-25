@@ -67,6 +67,7 @@ export default async function AdminCommunityGroupEditPage({
           introduction: group.introduction,
           isEnabled: group.isEnabled,
           sortOrder: group.sortOrder,
+          coverMediaId: group.coverMediaId ?? null,
         }}
       />
     </>

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { SiteShell } from "@/components/SiteShell";
+import { SmartImage } from "@/components/SmartImage";
 import { prisma } from "@/lib/prisma";
+import { getLatestFaqHero } from "@/lib/media";
 import "./styles.css";
 
 export const metadata: Metadata = {
@@ -38,10 +40,13 @@ const CATEGORY_ORDER = [
 ];
 
 export default async function FaqPage() {
-  const all = await prisma.faqArticle.findMany({
-    where: { isPublished: true },
-    orderBy: [{ category: "asc" }, { order: "asc" }],
-  });
+  const [all, heroMedia] = await Promise.all([
+    prisma.faqArticle.findMany({
+      where: { isPublished: true },
+      orderBy: [{ category: "asc" }, { order: "asc" }],
+    }),
+    getLatestFaqHero(),
+  ]);
 
   const byCategory = new Map<string, typeof all>();
   for (const f of all) {
@@ -89,6 +94,28 @@ export default async function FaqPage() {
             我们把患者在报名前最常问的 {all.length} 个问题整理在这里。读完大部分就能心里有数，剩下的欢迎直接联系运营。
           </p>
         </div>
+
+        {heroMedia && (
+          <figure className="faq-hero" role="img" aria-label="FAQ 页头图">
+            <SmartImage
+              src={heroMedia.url}
+              fallbackSrc="/media/placeholder.jpg"
+              alt=""
+              className="faq-hero__img"
+              loading="eager"
+            />
+            {(heroMedia.overlayLabel || heroMedia.overlayText) && (
+              <div className="faq-hero__overlay" aria-hidden="true">
+                {heroMedia.overlayLabel && (
+                  <span className="faq-hero__label">{heroMedia.overlayLabel}</span>
+                )}
+                {heroMedia.overlayText && (
+                  <p className="faq-hero__text">{heroMedia.overlayText}</p>
+                )}
+              </div>
+            )}
+          </figure>
+        )}
 
         <div
           style={{

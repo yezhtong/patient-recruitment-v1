@@ -19,6 +19,7 @@ const groupSchema = z.object({
   introduction: z.string().trim().max(500).optional().nullable(),
   isEnabled: z.boolean(),
   sortOrder: z.coerce.number().int().min(0).max(9999).default(100),
+  coverMediaId: z.string().trim().max(128).optional().nullable(),
 });
 
 export type GroupFormState = { ok?: boolean; error?: string };
@@ -31,6 +32,7 @@ function readGroupForm(formData: FormData) {
     introduction: formData.get("introduction") || null,
     isEnabled: formData.get("isEnabled") !== "false",
     sortOrder: formData.get("sortOrder") || 100,
+    coverMediaId: formData.get("coverMediaId") || null,
   };
 }
 

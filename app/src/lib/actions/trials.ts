@@ -39,6 +39,7 @@ const trialInputSchema = z.object({
   adVersionDate: z.string().optional().nullable(),
   ethicsApproval: z.string().max(100).optional().nullable(),
   qrcodeUrl: z.string().url().optional().nullable().or(z.literal("").transform(() => null)),
+  coverMediaId: z.string().max(64).optional().nullable().or(z.literal("").transform(() => null)),
 });
 
 export type TrialFormState = { error?: string; ok?: boolean };
@@ -71,6 +72,7 @@ function readTrialForm(formData: FormData) {
     adVersionDate: formData.get("adVersionDate") || null,
     ethicsApproval: formData.get("ethicsApproval") || null,
     qrcodeUrl: formData.get("qrcodeUrl") || null,
+    coverMediaId: formData.get("coverMediaId") || null,
   };
 }
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
+import { MediaPicker } from "@/components/admin/MediaPicker";
 import type { TrialFormState } from "@/lib/actions/trials";
 
 export type TrialFormDefaults = {
@@ -31,6 +32,7 @@ export type TrialFormDefaults = {
   adVersionDate?: Date | null;
   ethicsApproval?: string | null;
   qrcodeUrl?: string | null;
+  coverMediaId?: string | null;
 };
 
 const initialState: TrialFormState = {};
@@ -47,6 +49,9 @@ export function TrialForm({
   extraActions?: React.ReactNode;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [coverMediaId, setCoverMediaId] = useState<string | null>(
+    defaults.coverMediaId ?? null,
+  );
 
   const dateValue = defaults.adVersionDate
     ? new Date(defaults.adVersionDate).toISOString().slice(0, 10)
@@ -124,6 +129,36 @@ export function TrialForm({
             />
             首页推荐
           </label>
+        </div>
+
+        <div className="field">
+          <label>试验顶图（可选）</label>
+          {/* 隐藏 input 把 coverMediaId 写入 FormData */}
+          <input type="hidden" name="coverMediaId" value={coverMediaId ?? ""} />
+          <MediaPicker
+            category="trial"
+            value={coverMediaId}
+            onChange={setCoverMediaId}
+          />
+          <p
+            style={{
+              marginTop: 6,
+              fontSize: 12,
+              color: "var(--gray-500)",
+              fontFamily: "var(--font-sans)",
+              lineHeight: 1.5,
+            }}
+          >
+            仅可从素材库选图，如需上传新图请前往{" "}
+            <a
+              href="/admin/media?category=trial"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "var(--ink-700)" }}
+            >
+              素材库管理
+            </a>
+          </p>
         </div>
       </fieldset>
 

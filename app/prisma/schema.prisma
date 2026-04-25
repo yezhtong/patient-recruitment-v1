@@ -44,6 +44,9 @@ model ClinicalTrial {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  // M8.5 新增：弱关联 MediaAsset.id（不写 @relation 避免级联）
+  coverMediaId    String?
+
   leads           Lead[]
   applications    Application[] @relation("TrialApplications")
   communityPosts  CommunityPost[] @relation("TrialPosts")
@@ -150,6 +153,10 @@ model User {
   symptomsUpdatedAt DateTime?
   lastMatchedAt     DateTime?
 
+  // M8.5 新增
+  welcomeTriggeredAt    DateTime?  // AI 欢迎消息触发幂等标记
+  recommendDismissedAt  DateTime?  // 推荐分区弹窗"稍后再说"标记
+
   applications    Application[]
   leads           Lead[]   @relation("UserLeads")
   posts           CommunityPost[] @relation("UserPosts")
@@ -195,6 +202,9 @@ model CommunityGroup {
   recommendedDiseaseKeywords  String?
   allowAiComment              Boolean @default(true)
   allowDoctorComment          Boolean @default(true)
+
+  // M8.5 新增：弱关联 MediaAsset.id（不写 @relation 避免级联）
+  coverMediaId  String?
 
   posts         CommunityPost[]
   memberships   UserGroupMembership[]
